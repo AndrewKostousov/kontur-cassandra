@@ -16,8 +16,6 @@ namespace CassandraTimeSeries
                 .Builder()
                 .AddContactPoint("localhost")
                 .Build();
-
-            new SeriesDatabase(cluster, "test", "TimeSeries").DropTable();
         }
     }
 }

@@ -50,7 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SeriesDatabase.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="ISeriesDatabase.cs" />
+    <Compile Include="TableExtensions.cs" />
     <Compile Include="Time\DateTimeOffsetExtensions.cs" />
     <Compile Include="ITimeSeries.cs" />
     <Compile Include="Event\Event.cs" />

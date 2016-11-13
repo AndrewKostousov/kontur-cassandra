@@ -22,6 +22,9 @@ namespace CassandraTimeSeries
         {
             var currentSlice = From.RoundDown(SliceDuration);
 
+            if (currentSlice == To)
+                yield return currentSlice;
+
             while (currentSlice < To)
             {
                 yield return currentSlice;

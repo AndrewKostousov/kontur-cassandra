@@ -1,4 +1,5 @@
 ﻿using Cassandra;
+using Cassandra.Data.Linq;
 using Cassandra.Mapping;
 using System;
 using System.Collections.Generic;
@@ -10,43 +11,40 @@ namespace CassandraTimeSeries
 {
     public class TimeSeries : ITimeSeries
     {
-        public SeriesDatabase Database { get; private set; }
-        public TimeSpan SliceDuration {get; private set;}
-
-        public TimeSeries(Cluster cluster, string keyspaceName, string tableName, TimeSpan sliceDuration)
+        public Table<Event> Table { get; private set; }
+        
+        public TimeSeries(Table<Event> table)
         {
-            Database = new SeriesDatabase(cluster, keyspaceName, tableName);
-            SliceDuration = sliceDuration;
+            Table = table;
         }
 
         public void Write(Event ev)
         {
-            ev.SliceId = ev.Timestamp.RoundDown(SliceDuration).Ticks;
-            Database.CreateMapper().Insert(ev);
+            Table.Insert(ev).Execute();
+        }
+        
+        public List<Event> ReadRange(TimeUuid startInclusive, TimeUuid endExclusive, int count)
+        {
+            return new TimeSlices(startInclusive.GetDate(), endExclusive.GetDate(), Event.SliceDutation)
+                .Select(sliceId => sliceId.Ticks)
+                .SelectMany(sliceId => GetRangeFromTable(sliceId, startInclusive, endExclusive, count))
+                .Take(count)
+                //.OrderBy(e => e.Id)
+                .ToList();
         }
 
-        public void ParallelWrite(IEnumerable<Event> events)
+        public List<Event> ReadRange(DateTimeOffset startInclusive, DateTimeOffset endExclusive, int count)
         {
-            var mapper = Database.CreateMapper();
-
-            events.AsParallel().ForAll(e =>
-            {
-                e.SliceId = e.Timestamp.RoundDown(SliceDuration).Ticks;
-                mapper.Insert(e);
-            });
+            return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count);
         }
 
-        //public List<Event> ReadRange(TimeUuid startInclusive, TimeUuid endExclusive, int count)
-        //{
-
-        //}
-
-        public IEnumerable<Event> ReadRange(DateTimeOffset startInclusive, DateTimeOffset endExclusive)
+        private IEnumerable<Event> GetRangeFromTable(long sliceId, TimeUuid start, TimeUuid end, int count)
         {
-            var mapper = Database.CreateMapper();
-
-            return new TimeSlices(startInclusive, endExclusive, SliceDuration).AsParallel()
-                .SelectMany(id => mapper.Fetch<Event>(@"WHERE SliceId = ? AND EventId > minTimeuuid(?) AND EventId < maxTimeuuid(?)", id.Ticks, startInclusive, endExclusive));
+            return Table
+                .Where(e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0)
+                .Take(count)
+                //.OrderBy(e => e.Id)
+                .Execute();
         }
     }
 }
