@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 
-namespace CassandraTimeSeries.Tests
+namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
     public class TimeRoundingTest

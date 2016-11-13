@@ -7,8 +7,8 @@
     <ProjectGuid>{1964432F-63EC-4AB4-A65A-530A887B1B8E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TimeSeries.UnitTesting</RootNamespace>
-    <AssemblyName>TimeSeries.UnitTesting</AssemblyName>
+    <RootNamespace>CassandraTimeSeries.UnitTesting</RootNamespace>
+    <AssemblyName>CassandraTimeSeries.UnitTesting</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeRoundingTest.cs" />
     <Compile Include="TimeSeriesTest.cs" />
+    <Compile Include="TimeSeriesTestBase.cs" />
     <Compile Include="TimeSlicingTest.cs" />
   </ItemGroup>
   <ItemGroup>

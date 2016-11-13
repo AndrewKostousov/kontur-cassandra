@@ -1,11 +1,9 @@
 ﻿using Cassandra;
 using Cassandra.Data.Linq;
-using Cassandra.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace CassandraTimeSeries
 {
@@ -27,23 +25,33 @@ namespace CassandraTimeSeries
         {
             return new TimeSlices(startInclusive.GetDate(), endExclusive.GetDate(), Event.SliceDutation)
                 .Select(sliceId => sliceId.Ticks)
-                .SelectMany(sliceId => GetRangeFromTable(sliceId, startInclusive, endExclusive, count))
+                .SelectMany(sliceId => GetRangeFromTable(startInclusive, endExclusive, sliceId, count))
                 .Take(count)
-                //.OrderBy(e => e.Id)
                 .ToList();
         }
 
         public List<Event> ReadRange(DateTimeOffset startInclusive, DateTimeOffset endExclusive, int count)
         {
-            return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count);
+            if (startInclusive == endExclusive)
+                return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count);
+            else
+                return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MinTimeUuid(), count);
         }
 
-        private IEnumerable<Event> GetRangeFromTable(long sliceId, TimeUuid start, TimeUuid end, int count)
+        private IEnumerable<Event> GetRangeFromTable(
+            TimeUuid start, TimeUuid end,
+            long sliceId, int count)
         {
+            Expression<Func<Event, bool>> IdCondition;
+
+            if (start == end)
+                IdCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) == 0);
+            else
+                IdCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0);
+
             return Table
-                .Where(e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0)
+                .Where(IdCondition)
                 .Take(count)
-                //.OrderBy(e => e.Id)
                 .Execute();
         }
     }

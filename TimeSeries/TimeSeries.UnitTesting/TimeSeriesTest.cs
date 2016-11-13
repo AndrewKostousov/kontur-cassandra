@@ -1,84 +1,10 @@
-﻿using Cassandra;
-using Cassandra.Data.Linq;
+﻿using Cassandra.Data.Linq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace CassandraTimeSeries.DatabaseTest
+namespace CassandraTimeSeries.UnitTesting
 {
-    public class TimeSeriesTestBase
-    {
-        #region *** SetUp ***
-        static Cluster cluster;
-        static ISession session;
-        static SimpleSeriesDatabase database;
-
-        public static TimeSeries Series { get; private set; }
-
-        [OneTimeSetUp]
-        public void StartSession()
-        {
-            cluster = Cluster
-                .Builder()
-                .AddContactPoint("localhost")
-                .Build();
-
-            session = cluster.Connect();
-            database = new SimpleSeriesDatabase(session, "test");
-            Series = new TimeSeries(database.Table);
-        }
-
-        [OneTimeTearDown]
-        public void DisposeSession()
-        {
-            session.Dispose();
-            cluster.Dispose();
-        }
-
-        [SetUp]
-        public void TruncateTable()
-        {
-            Series.Table.Truncate();
-        }
-        #endregion
-
-        #region *** Test Templates ***
-        protected void RunTest(
-            List<Event> eventsToWrite,
-            Func<DateTimeOffset, DateTimeOffset, List<Event>> read)
-        {
-            RunTest(
-                eventsToWrite,
-                read,
-                actual => Assert.AreEqual(eventsToWrite, actual)
-            );
-        }
-
-        protected void RunTest(
-            List<Event> eventsToWrite,
-            Func<DateTimeOffset, DateTimeOffset, List<Event>> read,
-            Action<List<Event>> assert)
-        {
-            var start = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(1);
-
-            eventsToWrite.ForEach(e => Series.Write(e));
-
-            var end = DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1);
-
-            var retrievedEvents = read(start, end);
-            assert(retrievedEvents);
-        }
-        #endregion
-        
-        protected List<Event> CreateEvents(int count)
-        {
-            return Enumerable.Range(0, count)
-                .Select(_ => new Event(DateTimeOffset.UtcNow))
-                .ToList();
-        }
-    }
-
     [TestFixture]
     public class TimeSeriesTest : TimeSeriesTestBase
     {
@@ -192,7 +118,7 @@ namespace CassandraTimeSeries.DatabaseTest
             RunTest(
                 expected,
                 (start, _) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected.Where(x => x.Timestamp != end), actual)
+                actual => Assert.AreEqual(expected.Where(x => x.Timestamp != end).ToList(), actual)
             );
         }
 
@@ -208,7 +134,7 @@ namespace CassandraTimeSeries.DatabaseTest
             RunTest(
                 expected,
                 (s, e) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected.Where(x => x.Id != end), actual)
+                actual => Assert.AreEqual(expected.Where(x => x.Id != end).ToList(), actual)
             );
         }
 
@@ -217,13 +143,15 @@ namespace CassandraTimeSeries.DatabaseTest
         {
             var count = 10;
 
-            var expected = CreateEvents(count);
-            var end = expected.First().Timestamp;
+            var eventsToWrite = CreateEvents(count);
+            var end = eventsToWrite.First().Timestamp;
+            var expected = eventsToWrite.Where(x => x.Timestamp == end).Single();
             var start = end;
 
             RunTest(
-                expected,
-                (s, e) => Series.ReadRange(start, end, count)
+                eventsToWrite,
+                (s, e) => Series.ReadRange(start, end, count),
+                actual => Assert.AreEqual(expected, actual.Single())
             );
         }
 
@@ -232,13 +160,15 @@ namespace CassandraTimeSeries.DatabaseTest
         {
             var count = 10;
 
-            var expected = CreateEvents(count);
-            var end = expected.First().Id;
+            var eventsToWrite = CreateEvents(count);
+            var end = eventsToWrite.First().Id;
+            var expected = eventsToWrite.Where(x => x.Id == end).Single();
             var start = end;
 
             RunTest(
-                expected,
-                (s, e) => Series.ReadRange(start, end, count)
+                eventsToWrite,
+                (s, e) => Series.ReadRange(start, end, count),
+                actual => Assert.AreEqual(expected, actual.Single())
             );
         }
 
@@ -255,6 +185,38 @@ namespace CassandraTimeSeries.DatabaseTest
                 expected,
                 (s, e) => Series.ReadRange(start, end, count),
                 actual => Assert.IsEmpty(actual)
+            );
+        }
+
+        [Test]
+        public void Series_DateTimeOffset_ShouldReadCount()
+        {
+            var countToWrite = 10;
+            var countToRead = 5;
+
+            var expected = CreateEvents(countToWrite);
+
+            RunTest(
+                expected,
+                (start, end) => Series.ReadRange(start, end, countToRead),
+                actual => Assert.AreEqual(expected.Take(countToRead).ToList(), actual)
+            );
+        }
+
+        [Test]
+        public void Series_TimeUuid_ShouldReadCount()
+        {
+            var countToWrite = 10;
+            var countToRead = 5;
+
+            var expected = CreateEvents(countToWrite);
+            var start = expected.Min(x => x.Id);
+            var end = expected.Max(x => x.Id);
+
+            RunTest(
+                expected,
+                (s, e) => Series.ReadRange(start, end, countToRead),
+                actual => Assert.AreEqual(expected.Take(countToRead).ToList(), actual)
             );
         }
     }
