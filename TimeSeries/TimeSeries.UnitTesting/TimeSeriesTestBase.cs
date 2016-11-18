@@ -51,7 +51,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 eventsToWrite,
                 read,
-                actual => Assert.AreEqual(eventsToWrite, actual)
+                actual => CollectionAssert.AreEquivalent(eventsToWrite, actual)
             );
         }
 

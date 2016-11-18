@@ -49,7 +49,35 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [Test]
-        public void Series_ShouldNotReadFromPast()
+        public void Series_DateTimeOffset_ReadShouldBeOrderedByTimeAscending()
+        {
+            var count = 10;
+
+            var eventsToWrite = CreateEvents(count);
+
+            RunTest(
+                eventsToWrite,
+                (start, end) => Series.ReadRange(start, end, count),
+                actual => CollectionAssert.AreEqual(eventsToWrite, actual)
+            );
+        }
+
+        [Test]
+        public void Series_TimeUuid_ReadShouldBeOrderedByTimeAscending()
+        {
+            var count = 10;
+
+            var eventsToWrite = CreateEvents(count);
+
+            RunTest(
+                eventsToWrite,
+                (start, end) => Series.ReadRange(start.MinTimeUuid(), end.MaxTimeUuid(), count),
+                actual => CollectionAssert.AreEqual(eventsToWrite, actual)
+            );
+        }
+
+        [Test]
+        public void Series_DateTimeOffset_ShouldNotReadFromPast()
         {
             var count = 10;
 
@@ -59,12 +87,12 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected.Union(new[] { wrongEvent }).ToList(),
                 (start, end) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected, actual)
+                actual => CollectionAssert.AreEquivalent(expected, actual)
             );
         }
 
         [Test]
-        public void Series_ShouldNotReadFromFuture()
+        public void Series_DateTimeOffset_ShouldNotReadFromFuture()
         {
             var count = 10;
 
@@ -74,7 +102,37 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected.Union(new[] { wrongEvent }).ToList(),
                 (start, end) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected, actual)
+                actual => CollectionAssert.AreEquivalent(expected, actual)
+            );
+        }
+
+        [Test]
+        public void Series_TimeUuid_ShouldNotReadFromPast()
+        {
+            var count = 10;
+
+            var expected = CreateEvents(count);
+            var wrongEvent = new Event(DateTime.Now - TimeSpan.FromHours(1));
+
+            RunTest(
+                expected.Union(new[] { wrongEvent }).ToList(),
+                (start, end) => Series.ReadRange(start.MinTimeUuid(), end.MaxTimeUuid(), count),
+                actual => CollectionAssert.AreEquivalent(expected, actual)
+            );
+        }
+
+        [Test]
+        public void Series_TimeUuid_ShouldNotReadFromFuture()
+        {
+            var count = 10;
+
+            var expected = CreateEvents(count);
+            var wrongEvent = new Event(DateTime.Now + TimeSpan.FromHours(1));
+
+            RunTest(
+                expected.Union(new[] { wrongEvent }).ToList(),
+                (start, end) => Series.ReadRange(start.MinTimeUuid(), end.MaxTimeUuid(), count),
+                actual => CollectionAssert.AreEquivalent(expected, actual)
             );
         }
 
@@ -118,7 +176,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected,
                 (start, _) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected.Where(x => x.Timestamp != end).ToList(), actual)
+                actual => CollectionAssert.AreEquivalent(expected.Where(x => x.Timestamp != end).ToList(), actual)
             );
         }
 
@@ -134,7 +192,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected,
                 (s, e) => Series.ReadRange(start, end, count),
-                actual => Assert.AreEqual(expected.Where(x => x.Id != end).ToList(), actual)
+                actual => CollectionAssert.AreEquivalent(expected.Where(x => x.Id != end).ToList(), actual)
             );
         }
 
@@ -199,7 +257,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected,
                 (start, end) => Series.ReadRange(start, end, countToRead),
-                actual => Assert.AreEqual(expected.Take(countToRead).ToList(), actual)
+                actual => CollectionAssert.AreEquivalent(expected.Take(countToRead).ToList(), actual)
             );
         }
 
@@ -216,7 +274,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected,
                 (s, e) => Series.ReadRange(start, end, countToRead),
-                actual => Assert.AreEqual(expected.Take(countToRead).ToList(), actual)
+                actual => CollectionAssert.AreEquivalent(expected.Take(countToRead).ToList(), actual)
             );
         }
     }
