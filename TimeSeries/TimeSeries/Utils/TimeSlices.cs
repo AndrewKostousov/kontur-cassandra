@@ -3,40 +3,20 @@ using System.Collections.Generic;
 
 namespace CassandraTimeSeries
 {
-    public class TimeSlices : IEnumerable<DateTimeOffset>
+    public static class TimeSlicer
     {
-        public DateTimeOffset From { get; }
-        public DateTimeOffset To { get; }
-        public TimeSpan SliceDuration { get; }
-
-        public TimeSlices(DateTimeOffset from, DateTimeOffset to, TimeSpan sliceDuration)
+        public static IEnumerable<DateTimeOffset> Slice(DateTimeOffset from, DateTimeOffset to, TimeSpan sliceDuration)
         {
-            From = from; To = to;
-            SliceDuration = sliceDuration;
-        }
+            var currentSlice = from.RoundDown(sliceDuration);
 
-        private IEnumerable<DateTimeOffset> Enumerate()
-        {
-            var currentSlice = From.RoundDown(SliceDuration);
-
-            if (currentSlice == To)
+            if (currentSlice == to)
                 yield return currentSlice;
 
-            while (currentSlice < To)
+            while (currentSlice < to)
             {
                 yield return currentSlice;
-                currentSlice += SliceDuration;
+                currentSlice += sliceDuration;
             }
-        }
-
-        public IEnumerator<DateTimeOffset> GetEnumerator()
-        {
-            return Enumerate().GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

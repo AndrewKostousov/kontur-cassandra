@@ -23,42 +23,18 @@ namespace CassandraTimeSeries
 
         public DateTimeOffset Timestamp => Id.GetDate();
 
-        public Event() 
-            : this(DateTimeOffset.UtcNow) { }
-
-        public Event(byte[] payload) 
-            : this(DateTimeOffset.UtcNow, payload) { }
+        public Event() { }
 
         public Event(DateTimeOffset time, byte[] payload=null)
         {
             Id = TimeUuid.NewId(time);
             SliceId = Timestamp.RoundDown(SliceDutation).Ticks;
-            Payload = payload ?? new byte[0];
+            Payload = payload;
         }
 
         public override string ToString()
         {
             return $"Event {Id} at {Timestamp}, payload: {Payload.Length} bytes";
         }
-
-        #region ***GetHashCode and Equals***
-        public override bool Equals(object obj)
-        {
-            var other = obj as Event;
-
-            if (other == null) return false;
-            
-            return Id.Equals(other.Id)
-                && SliceId.Equals(other.SliceId)
-                && Payload.SequenceEqual(other.Payload);
-        }
-
-        public override int GetHashCode()
-        {
-            return (Id.GetHashCode() * 1023)
-                ^ (SliceId.GetHashCode() * 31)
-                ^ Payload.GetHashCode(); 
-        }
-        #endregion
     }
 }

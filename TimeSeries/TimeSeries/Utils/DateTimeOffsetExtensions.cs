@@ -7,6 +7,8 @@ namespace CassandraTimeSeries
     {
         public static DateTimeOffset RoundDown(this DateTimeOffset dtoffset, TimeSpan precise)
         {
+            if(precise.Ticks <= 0)
+                throw new InvalidOperationException($"Precise must be positive: {precise}");
             return new DateTimeOffset(dtoffset.Ticks - dtoffset.Ticks % precise.Ticks, TimeSpan.Zero);
         }
 

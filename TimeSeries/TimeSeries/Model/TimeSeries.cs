@@ -9,49 +9,59 @@ namespace CassandraTimeSeries
 {
     public class TimeSeries : ITimeSeries
     {
-        public Table<Event> Table { get; }
+        private readonly Table<Event> table;
         
         public TimeSeries(Table<Event> table)
         {
-            Table = table;
+            this.table = table;
         }
 
         public void Write(Event ev)
         {
-            Table.Insert(ev).Execute();
+            table.Insert(ev).Execute();
         }
         
-        public List<Event> ReadRange(TimeUuid startInclusive, TimeUuid endExclusive, int count)
+        public List<Event> ReadRange(TimeUuid? startInclusive, TimeUuid? endExclusive, int count)
         {
-            return new TimeSlices(startInclusive.GetDate(), endExclusive.GetDate(), Event.SliceDutation)
+            var start = startInclusive ?? /* TODO: min timeuuid */ TimeUuid.NewId();
+            var end = endExclusive ?? /* TODO: max timeuuid */ TimeUuid.NewId();
+
+            return TimeSlicer.Slice(start.GetDate(), end.GetDate(), Event.SliceDutation)
                 .Select(sliceId => sliceId.Ticks)
                 .SelectMany(sliceId => GetRangeFromTable(startInclusive, endExclusive, sliceId, count))
                 .Take(count)
                 .ToList();
         }
 
-        public List<Event> ReadRange(DateTimeOffset startInclusive, DateTimeOffset endExclusive, int count)
+        public List<Event> ReadRange(DateTimeOffset? startInclusive, DateTimeOffset? endExclusive, int count)
         {
             return startInclusive == endExclusive
-                ? ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count)
-                : ReadRange(startInclusive.MinTimeUuid(), endExclusive.MinTimeUuid(), count);
+                ? ReadRange(startInclusive?.MinTimeUuid(), endExclusive?.MaxTimeUuid(), count)
+                : ReadRange(startInclusive?.MinTimeUuid(), endExclusive?.MinTimeUuid(), count);
         }
 
-        private IEnumerable<Event> GetRangeFromTable(
-            TimeUuid start, TimeUuid end,
-            long sliceId, int count)
+        private IEnumerable<Event> GetRangeFromTable(TimeUuid? start, TimeUuid? end, long sliceId, int count)
         {
-            Expression<Func<Event, bool>> idCondition;
+            var idCondition = GetIdCondition(sliceId, start, end);
 
-            if (start == end)
-                idCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) == 0);
-            else
-                idCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0);
-
-            return Table
+            return table
                 .Where(idCondition)
                 .Take(count)
                 .Execute();
+        }
+
+        private Expression<Func<Event, bool>> GetIdCondition(long sliceId, TimeUuid? start, TimeUuid? end)
+        {
+            if (start == null && end == null)
+                return e => e.SliceId == sliceId;
+            if (end == null)
+                return e => e.SliceId == sliceId && e.Id.CompareTo(start.Value) >= 0;
+            if (start == null)
+                return e => e.SliceId == sliceId && e.Id.CompareTo(end.Value) < 0;
+            if (start == end)
+                return e => e.SliceId == sliceId && e.Id.CompareTo(start.Value) == 0;
+
+            return e => e.SliceId == sliceId && e.Id.CompareTo(start.Value) >= 0 && e.Id.CompareTo(end.Value) < 0;
         }
     }
 }

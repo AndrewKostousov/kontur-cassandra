@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 
 namespace CassandraTimeSeries.UnitTesting
 {
@@ -10,36 +11,27 @@ namespace CassandraTimeSeries.UnitTesting
     {
         #region *** SetUp ***
 
-        private static Cluster cluster;
-        private static ISession session;
-        private static SimpleSeriesDatabase database;
+        private static DatabaseWrapper wrapper;
 
         protected static TimeSeries Series { get; private set; }
 
         [OneTimeSetUp]
         public void StartSession()
         {
-            cluster = Cluster
-                .Builder()
-                .AddContactPoint("localhost")
-                .Build();
-
-            session = cluster.Connect();
-            database = new SimpleSeriesDatabase(session, "test");
-            Series = new TimeSeries(database.Table);
+            wrapper = new DatabaseWrapper("test");
+            Series = new TimeSeries(wrapper.Table);
         }
 
         [OneTimeTearDown]
         public void DisposeSession()
         {
-            session.Dispose();
-            cluster.Dispose();
+            wrapper.Dispose();
         }
 
         [SetUp]
         public void TruncateTable()
         {
-            Series.Table.Truncate();
+            wrapper.Table.Truncate();
         }
         #endregion
 
@@ -51,7 +43,9 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 eventsToWrite,
                 read,
-                actual => CollectionAssert.AreEquivalent(eventsToWrite, actual)
+                actual => actual.ShouldBeEquivalentTo(eventsToWrite)
+                
+                //CollectionAssert.AreEquivalent(eventsToWrite, actual)
             );
         }
 
