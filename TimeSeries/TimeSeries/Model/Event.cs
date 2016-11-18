@@ -47,10 +47,7 @@ namespace CassandraTimeSeries
             var other = obj as Event;
 
             if (other == null) return false;
-
-            var eqId = Id.Equals(other.Id);
-            var eqSl = SliceId.Equals(other.SliceId);
-
+            
             return Id.Equals(other.Id)
                 && SliceId.Equals(other.SliceId)
                 && Payload.SequenceEqual(other.Payload);
