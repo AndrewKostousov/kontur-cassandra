@@ -2,6 +2,9 @@
 using Cassandra.Mapping.Attributes;
 using System;
 using System.Linq;
+using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
+using SKBKontur.Catalogue.Objects;
+using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries
 {
@@ -21,14 +24,21 @@ namespace CassandraTimeSeries
         [Column("payload")]
         public byte[] Payload { get; set; }
 
-        public DateTimeOffset Timestamp => Id.GetDate();
+        public Timestamp Timestamp => new Timestamp(Id.GetDate());
 
         public Event() { }
 
-        public Event(DateTimeOffset time, byte[] payload=null)
+        public Event(Timestamp time, byte[] payload=null)
         {
-            Id = TimeUuid.NewId(time);
-            SliceId = Timestamp.RoundDown(SliceDutation).Ticks;
+            Id = TimeGuid.NewGuid(time).ToTimeUuid();
+            SliceId = time.Floor(SliceDutation).Ticks;
+            Payload = payload;
+        }
+
+        public Event(TimeGuid id, byte[] payload = null)
+        {
+            Id = id.ToTimeUuid();
+            SliceId = new Timestamp(Id.GetDate()).Floor(SliceDutation).Ticks;
             Payload = payload;
         }
 

@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
+using SKBKontur.Catalogue.Objects;
+using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries
 {
@@ -20,37 +23,39 @@ namespace CassandraTimeSeries
         {
             table.Insert(ev).Execute();
         }
-        
-        public List<Event> ReadRange(TimeUuid? startInclusive, TimeUuid? endExclusive, int count)
-        {
-            var start = startInclusive ?? /* TODO: min timeuuid */ TimeUuid.NewId();
-            var end = endExclusive ?? /* TODO: max timeuuid */ TimeUuid.NewId();
 
-            return TimeSlicer.Slice(start.GetDate(), end.GetDate(), Event.SliceDutation)
-                .Select(sliceId => sliceId.Ticks)
-                .SelectMany(sliceId => GetRangeFromTable(startInclusive, endExclusive, sliceId, count))
+        public List<Event> ReadRange(Timestamp startInclusive, Timestamp endExclusive, int count = 1000)
+        {
+            var startGuid = startInclusive?.MinTimeGuid();
+
+            var endGuid = startInclusive == endExclusive 
+                ? endExclusive?.MaxTimeGuid()
+                : endExclusive?.MinTimeGuid();
+            
+            return ReadRange(startGuid, endGuid, count);
+        }
+
+        public List<Event> ReadRange(TimeGuid startInclusive, TimeGuid endExclusive, int count = 1000)
+        {
+            var start = startInclusive ?? TimeGuid.MinValue;
+            var end = endExclusive ?? TimeGuid.MaxValue;
+            
+            return TimeSlicer.Slice(start.GetTimestamp(), end.GetTimestamp(), Event.SliceDutation)
+                .Select(sliceId => GetIdCondition(startInclusive?.ToTimeUuid(), endExclusive?.ToTimeUuid(), sliceId.Ticks))
+                .SelectMany(condition => GetRangeFromTable(condition, count))
                 .Take(count)
                 .ToList();
         }
 
-        public List<Event> ReadRange(DateTimeOffset? startInclusive, DateTimeOffset? endExclusive, int count)
+        private IEnumerable<Event> GetRangeFromTable(Expression<Func<Event, bool>> condition, int count)
         {
-            return startInclusive == endExclusive
-                ? ReadRange(startInclusive?.MinTimeUuid(), endExclusive?.MaxTimeUuid(), count)
-                : ReadRange(startInclusive?.MinTimeUuid(), endExclusive?.MinTimeUuid(), count);
-        }
-
-        private IEnumerable<Event> GetRangeFromTable(TimeUuid? start, TimeUuid? end, long sliceId, int count)
-        {
-            var idCondition = GetIdCondition(sliceId, start, end);
-
             return table
-                .Where(idCondition)
+                .Where(condition)
                 .Take(count)
                 .Execute();
         }
 
-        private Expression<Func<Event, bool>> GetIdCondition(long sliceId, TimeUuid? start, TimeUuid? end)
+        private Expression<Func<Event, bool>> GetIdCondition(TimeUuid? start, TimeUuid? end, long sliceId)
         {
             if (start == null && end == null)
                 return e => e.SliceId == sliceId;

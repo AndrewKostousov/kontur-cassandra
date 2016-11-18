@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Linq;
+using FluentAssertions;
+using SKBKontur.Catalogue.Objects;
 
 namespace CassandraTimeSeries.UnitTesting
 {
@@ -19,91 +21,89 @@ namespace CassandraTimeSeries.UnitTesting
         [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldIncludeStart(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
-            Assert.LessOrEqual(TimeSlicer.Slice(start, end, precise).Min(), start);
+            TimeSlicer.Slice(start, end, precise).Min().Should().BeLessOrEqualTo(start);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldExcludeEnd_IfEndNotEqualToStart(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
-            var lastSlice = TimeSlicer.Slice(start, end, precise).Max();
-            
-            Assert.Less(lastSlice, end);
+            TimeSlicer.Slice(start, end, precise).Max().Should().BeLessThan(end);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldReturnCorrectCount(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
-            var count = (end - start).Ticks / precise.Ticks + (end.Ticks % precise.Ticks == 0 ? 0 : 1); 
+            var count = (end - start).Ticks / precise.Ticks + (end.Ticks % precise.Ticks == 0 ? 0 : 1);
 
-            Assert.AreEqual(count, TimeSlicer.Slice(start, end, precise).Count());
+            TimeSlicer.Slice(start, end, precise).LongCount().Should().Be(count);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldBeOrdered(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
             var slices = TimeSlicer.Slice(start, end, precise).ToArray();
 
-            Assert.AreEqual(slices.OrderBy(x => x), slices);
+            slices.OrderBy(x => x).Should().Equal(slices);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldBeEquallyDistributed(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
             var slices = TimeSlicer.Slice(start, end, precise).ToArray();
 
             for (var i = 0; i < slices.Length - 1; ++i)
-                Assert.AreEqual(precise, slices[i + 1] - slices[i]);
+                (slices[i + 1] - slices[i]).Should().Be(precise);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldBeRounded(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
-            var end = DateTimeOffset.Parse(endTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
+            var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
             foreach (var slice in TimeSlicer.Slice(start, end, precise))
-                Assert.AreEqual(slice, slice.RoundDown(precise));
+                slice.Floor(precise).Should().Be(slice);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldReturnOneSlice_IfStartAndEndAreEqual(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
             var end = start;
             var precise = TimeSpan.FromMinutes(1);
 
-            Assert.AreEqual(1, TimeSlicer.Slice(start, end, precise).Count());
+            TimeSlicer.Slice(start, end, precise).Count().Should().Be(1);
         }
 
         [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldReturnZeroSlices_IfStartIsGreaterThanEnd(string startTime, string endTime)
         {
-            var start = DateTimeOffset.Parse(startTime);
+            var start = new Timestamp(DateTime.Parse(startTime));
             var end = start - TimeSpan.FromMinutes(10);
             var precise = TimeSpan.FromMinutes(1);
 
-            Assert.AreEqual(0, TimeSlicer.Slice(start, end, precise).Count());
+            TimeSlicer.Slice(start, end, precise).Count().Should().Be(0);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CassandraTimeSeries
     public interface ITimeSeries
     {
         void Write(Event ev);
-        List<Event> ReadRange(DateTimeOffset? startInclusive, DateTimeOffset? endExclusive, int count=1000);
-        List<Event> ReadRange(TimeUuid? startInclusive, TimeUuid? endExclusive, int count=1000);
+        List<Event> ReadRange(Timestamp startInclusive, Timestamp endExclusive, int count=1000);
+        List<Event> ReadRange(TimeGuid startInclusive, TimeGuid endExclusive, int count=1000);
     }
 }

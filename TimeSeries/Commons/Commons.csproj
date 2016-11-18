@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SKBKontur.Catalogue</RootNamespace>
+    <AssemblyName>Catalogue.Commons</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\Assemblies\Temp\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\Assemblies\Temp\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GrEmit, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\GrEmit.2.1.7\lib\net40\GrEmit.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Assemblies\json.net\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArgumentAssertions\ThrowIf.cs" />
+    <Compile Include="DateTimeExtensions\DateTimeField.cs" />
+    <Compile Include="DateTimeExtensions\DateTimeMath.cs" />
+    <Compile Include="DateTimeExtensions\DateTimeRoundExtensions.cs" />
+    <Compile Include="FileSystemExtensions\FileInfo.cs" />
+    <Compile Include="FileSystemExtensions\PathExtensions.cs" />
+    <Compile Include="Generics\GenericFuncInvoker.cs" />
+    <Compile Include="Generics\GenericFuncInvokerBase.cs" />
+    <Compile Include="Generics\GenericMethod.cs" />
+    <Compile Include="Generics\GenericMethodInvocationException.cs" />
+    <Compile Include="Linq\ArrayExtensions.cs" />
+    <Compile Include="Linq\CatalogueEnumerable.cs" />
+    <Compile Include="Linq\DistinctExtensions.cs" />
+    <Compile Include="Linq\GroupingExtensions.cs" />
+    <Compile Include="Linq\Lazy.cs" />
+    <Compile Include="Linq\ListExtensions.cs" />
+    <Compile Include="Linq\RandomExtensions.cs" />
+    <Compile Include="Linq\StaticGrouping.cs" />
+    <Compile Include="Linq\ZipExtensions.cs" />
+    <Compile Include="Objects\Bits\BigEndianBitConverter.cs" />
+    <Compile Include="Objects\Bits\BitHelper.cs" />
+    <Compile Include="Objects\Bits\ByteArrayComparer.cs" />
+    <Compile Include="Objects\Bits\EndianBitConverter.cs" />
+    <Compile Include="Objects\Bits\Endianness.cs" />
+    <Compile Include="Objects\Bits\LittleEndianBitConverter.cs" />
+    <Compile Include="Objects\ChainedNullCheckExtensions.cs" />
+    <Compile Include="Objects\Comparing\ReferenceComparer.cs" />
+    <Compile Include="Objects\Conversion\HexConverter.cs" />
+    <Compile Include="Objects\Fio.cs" />
+    <Compile Include="Objects\GuidHelpers.cs" />
+    <Compile Include="Objects\InMemoryCache.cs" />
+    <Compile Include="Objects\InvalidProgramStateException.cs" />
+    <Compile Include="Objects\Json\JsonObjectExtensions.cs" />
+    <Compile Include="Objects\Json\StringTimestampConverter.cs" />
+    <Compile Include="Objects\LruCache.cs" />
+    <Compile Include="Objects\NullableExtensions.cs" />
+    <Compile Include="Objects\ObjectCacheExtensions.cs" />
+    <Compile Include="Objects\Parsing\Exceptions\ParserNotFoundException.cs" />
+    <Compile Include="Objects\Parsing\IObjectParser.cs" />
+    <Compile Include="Objects\Parsing\IObjectParserCollection.cs" />
+    <Compile Include="Objects\Parsing\ObjectParser.cs" />
+    <Compile Include="Objects\Parsing\ObjectParserCollectionNullableWrapper.cs" />
+    <Compile Include="Objects\Parsing\ObjectParserConfiguration.cs" />
+    <Compile Include="Objects\Parsing\ParseHelpers\DateTimeParseHelper.cs" />
+    <Compile Include="Objects\Parsing\ParseHelpers\EnumParseHelper.cs" />
+    <Compile Include="Objects\Parsing\Parsers\EnumTryParseDelegate.cs" />
+    <Compile Include="Objects\Parsing\Parsers\InternalImplementations\EnumParser.cs" />
+    <Compile Include="Objects\Parsing\Parsers\InternalImplementations\ValueParser.cs" />
+    <Compile Include="Objects\Parsing\Parsers\IValueParser.cs" />
+    <Compile Include="Objects\Parsing\Parsers\TryParseDelegate.cs" />
+    <Compile Include="Objects\RandomExtensions.cs" />
+    <Compile Include="Objects\ResultOptions.cs" />
+    <Compile Include="Objects\ShardingHelpers.cs" />
+    <Compile Include="Objects\Sorting\BySortRulesComparer.cs" />
+    <Compile Include="Objects\Sorting\CompareNullComprareDecorator.cs" />
+    <Compile Include="Objects\Sorting\SortMode.cs" />
+    <Compile Include="Objects\Sorting\SortRule.cs" />
+    <Compile Include="Objects\TimeBasedUuid\GuidVersion.cs" />
+    <Compile Include="Objects\TimeBasedUuid\PreciseTimestampGenerator.cs" />
+    <Compile Include="Objects\TimeBasedUuid\TimeGuid.cs" />
+    <Compile Include="Objects\TimeBasedUuid\TimeGuidBitsLayout.cs" />
+    <Compile Include="Objects\TimeBasedUuid\TimeGuidGenerator.cs" />
+    <Compile Include="Objects\TimeSpanExtensions.cs" />
+    <Compile Include="Objects\Timestamp.cs" />
+    <Compile Include="Objects\TimestampExtensions.cs" />
+    <Compile Include="Objects\TripleDesCrypt.cs" />
+    <Compile Include="Objects\ValueExtracting\CustomObjectPropertyValueExtractor.cs" />
+    <Compile Include="Objects\ValueExtracting\IObjectPropertyValueExtractor.cs" />
+    <Compile Include="Objects\ValueExtracting\ObjectValueExtractor.cs" />
+    <Compile Include="Processes\IProcessExecutor.cs" />
+    <Compile Include="Processes\ProcessExecutionException.cs" />
+    <Compile Include="Processes\ProcessExecutor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ranges\DateTimeRange.cs" />
+    <Compile Include="Ranges\DateTimeRangeOptions.cs" />
+    <Compile Include="Ranges\IncomparableRange.cs" />
+    <Compile Include="Ranges\Range.cs" />
+    <Compile Include="Ranges\RangeDoesNotHaveSpecifiedBoundException.cs" />
+    <Compile Include="StatisticsAggregator\EmptyStatisticsAggregator.cs" />
+    <Compile Include="StatisticsAggregator\IStatisticsAggregator.cs" />
+    <Compile Include="StatisticsAggregator\StatisticsAggregator.cs" />
+    <Compile Include="StatisticsAggregator\StatisticsCell.cs" />
+    <Compile Include="StatisticsAggregator\StatisticsCellExtensions.cs" />
+    <Compile Include="StatisticsAggregator\ValueWithInterval.cs" />
+    <Compile Include="Strings\DeterministicGuidFactory.cs" />
+    <Compile Include="Strings\StringExtensions.cs" />
+    <Compile Include="TeamCity\ITeamCityLogger.cs" />
+    <Compile Include="TeamCity\ServiceMessageReplacements.cs" />
+    <Compile Include="TeamCity\TeamCityBuildStatus.cs" />
+    <Compile Include="TeamCity\TeamCityEnvironment.cs" />
+    <Compile Include="TeamCity\TeamCityLogger.cs" />
+    <Compile Include="TeamCity\TeamCityMessageSeverity.cs" />
+    <Compile Include="Threading\ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="Threading\Wrappers\ReaderWriterLockSlimReadWrapper.cs" />
+    <Compile Include="Threading\Wrappers\ReaderWriterLockSlimWriteWrapper.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using SKBKontur.Catalogue.Objects;
+using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries.UnitTesting
 {
@@ -37,8 +39,8 @@ namespace CassandraTimeSeries.UnitTesting
 
         #region *** Test Templates ***
         protected void RunTest(
-            List<Event> eventsToWrite,
-            Func<DateTimeOffset, DateTimeOffset, List<Event>> read)
+            IEnumerable<Event> eventsToWrite,
+            Func<Timestamp, Timestamp, List<Event>> read)
         {
             RunTest(
                 eventsToWrite,
@@ -50,15 +52,16 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         protected void RunTest(
-            List<Event> eventsToWrite,
-            Func<DateTimeOffset, DateTimeOffset, List<Event>> read,
+            IEnumerable<Event> eventsToWrite,
+            Func<Timestamp, Timestamp, List<Event>> read,
             Action<List<Event>> assert)
         {
-            var start = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(1);
+            var start = Timestamp.Now - TimeSpan.FromMinutes(1);
 
-            eventsToWrite.ForEach(e => Series.Write(e));
+            foreach (var e in eventsToWrite)
+                Series.Write(e);
 
-            var end = DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1);
+            var end = Timestamp.Now + TimeSpan.FromMinutes(1);
 
             var retrievedEvents = read(start, end);
             assert(retrievedEvents);
@@ -67,10 +70,10 @@ namespace CassandraTimeSeries.UnitTesting
 
         protected List<Event> CreateEvents(int count)
         {
-            var startTime = DateTimeOffset.UtcNow;
-
+            PreciseTimestampGenerator.Instance.NowTicks();
+            
             return Enumerable.Range(0, count)
-                .Select(i => new Event(startTime + TimeSpan.FromMilliseconds(i), new []{(byte)i}))
+                .Select(i => new Event(Timestamp.Now, new [] {(byte)i}))
                 .ToList();
         }
     }
