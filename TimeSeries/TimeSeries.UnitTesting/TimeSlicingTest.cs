@@ -7,16 +7,16 @@ namespace CassandraTimeSeries.UnitTesting
     [TestFixture]
     public class TimeSlicingTest
     {
-        static object[] TestDataSource = 
+        static readonly object[] testDataSource = 
         {
-            new string[] { "00:00:00 +00:00", "00:11:00 +00:00" },
-            new string[] { "00:00:00 +00:00", "00:11:11 +00:00" },
-            new string[] { "00:00:00 +00:00", "00:00:11 +00:00" },
-            new string[] { "00:00:11 +00:00", "00:00:11 +00:00" },
-            new string[] { "00:00:11 +00:00", "00:11:11 +00:00" },
+            new[] { "00:00:00 +00:00", "00:11:00 +00:00" },
+            new[] { "00:00:00 +00:00", "00:11:11 +00:00" },
+            new[] { "00:00:00 +00:00", "00:00:11 +00:00" },
+            new[] { "00:00:11 +00:00", "00:00:11 +00:00" },
+            new[] { "00:00:11 +00:00", "00:11:11 +00:00" },
         };
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldIncludeStart(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -26,7 +26,7 @@ namespace CassandraTimeSeries.UnitTesting
             Assert.LessOrEqual(new TimeSlices(start, end, precise).Min(), start);
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldExcludeEnd_IfEndNotEqualToStart(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -38,7 +38,7 @@ namespace CassandraTimeSeries.UnitTesting
             Assert.Less(lastSlice, end);
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldReturnCorrectCount(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -50,7 +50,7 @@ namespace CassandraTimeSeries.UnitTesting
             Assert.AreEqual(count, new TimeSlices(start, end, precise).Count());
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slicing_ShouldBeOrdered(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -62,7 +62,7 @@ namespace CassandraTimeSeries.UnitTesting
             Assert.AreEqual(slices.OrderBy(x => x), slices);
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldBeEquallyDistributed(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -75,7 +75,7 @@ namespace CassandraTimeSeries.UnitTesting
                 Assert.AreEqual(precise, slices[i + 1] - slices[i]);
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldBeRounded(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -86,7 +86,7 @@ namespace CassandraTimeSeries.UnitTesting
                 Assert.AreEqual(slice, slice.RoundDown(precise));
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldReturnOneSlice_IfStartAndEndAreEqual(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);
@@ -96,7 +96,7 @@ namespace CassandraTimeSeries.UnitTesting
             Assert.AreEqual(1, new TimeSlices(start, end, precise).Count());
         }
 
-        [TestCaseSource("TestDataSource")]
+        [TestCaseSource(nameof(testDataSource))]
         public void Slices_ShouldReturnZeroSlices_IfStartIsGreaterThanEnd(string startTime, string endTime)
         {
             var start = DateTimeOffset.Parse(startTime);

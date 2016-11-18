@@ -49,7 +49,7 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [Test]
-        public void Series_ShouldNotReadWrongEvents_IfBeforeRange()
+        public void Series_ShouldNotReadFromPast()
         {
             var count = 10;
 
@@ -57,14 +57,14 @@ namespace CassandraTimeSeries.UnitTesting
             var wrongEvent = new Event(DateTime.Now - TimeSpan.FromHours(1));
 
             RunTest(
-                expected.Union(new Event[] { wrongEvent }).ToList(),
+                expected.Union(new[] { wrongEvent }).ToList(),
                 (start, end) => Series.ReadRange(start, end, count),
                 actual => Assert.AreEqual(expected, actual)
             );
         }
 
         [Test]
-        public void Series_ShouldNotReadWrongEvents_IfAfterRange()
+        public void Series_ShouldNotReadFromFuture()
         {
             var count = 10;
 
@@ -72,7 +72,7 @@ namespace CassandraTimeSeries.UnitTesting
             var wrongEvent = new Event(DateTime.Now + TimeSpan.FromHours(1));
 
             RunTest(
-                expected.Union(new Event[] { wrongEvent }).ToList(),
+                expected.Union(new[] { wrongEvent }).ToList(),
                 (start, end) => Series.ReadRange(start, end, count),
                 actual => Assert.AreEqual(expected, actual)
             );
@@ -145,7 +145,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             var eventsToWrite = CreateEvents(count);
             var end = eventsToWrite.First().Timestamp;
-            var expected = eventsToWrite.Where(x => x.Timestamp == end).Single();
+            var expected = eventsToWrite.Single(x => x.Timestamp == end);
             var start = end;
 
             RunTest(
@@ -162,7 +162,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             var eventsToWrite = CreateEvents(count);
             var end = eventsToWrite.First().Id;
-            var expected = eventsToWrite.Where(x => x.Id == end).Single();
+            var expected = eventsToWrite.Single(x => x.Id == end);
             var start = end;
 
             RunTest(
@@ -184,7 +184,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 expected,
                 (s, e) => Series.ReadRange(start, end, count),
-                actual => Assert.IsEmpty(actual)
+                Assert.IsEmpty
             );
         }
 
