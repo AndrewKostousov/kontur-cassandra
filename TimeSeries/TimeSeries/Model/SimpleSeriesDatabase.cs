@@ -24,11 +24,5 @@ namespace CassandraTimeSeries
             Table = new Table<Event>(Session);
             Table.CreateIfNotExists();
         }
-
-        public void Reset()
-        {
-            Table.Drop();
-            Table.Create();
-        }
     }
 }
