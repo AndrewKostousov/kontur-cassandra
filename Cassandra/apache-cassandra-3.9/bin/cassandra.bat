@@ -17,7 +17,7 @@
 @echo off
 if "%OS%" == "Windows_NT" setlocal
 
-set ARG=%1
+set ARG=LEGACY
 set INSTALL="INSTALL"
 set UNINSTALL="UNINSTALL"
 
