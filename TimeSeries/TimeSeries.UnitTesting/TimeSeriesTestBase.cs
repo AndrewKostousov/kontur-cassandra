@@ -9,13 +9,13 @@ using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries.UnitTesting
 {
-    public class TimeSeriesTestBase
+    public abstract class TimeSeriesTestBase
     {
         #region *** SetUp ***
 
         private static DatabaseWrapper wrapper;
 
-        protected static TimeSeries Series { get; private set; }
+        protected static ITimeSeries Series { get; private set; }
 
         [OneTimeSetUp]
         public void StartSession()
