@@ -32,10 +32,9 @@ namespace CassandraTimeSeries
 
         public List<Event> ReadRange(DateTimeOffset startInclusive, DateTimeOffset endExclusive, int count)
         {
-            if (startInclusive == endExclusive)
-                return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count);
-            else
-                return ReadRange(startInclusive.MinTimeUuid(), endExclusive.MinTimeUuid(), count);
+            return startInclusive == endExclusive
+                ? ReadRange(startInclusive.MinTimeUuid(), endExclusive.MaxTimeUuid(), count)
+                : ReadRange(startInclusive.MinTimeUuid(), endExclusive.MinTimeUuid(), count);
         }
 
         private IEnumerable<Event> GetRangeFromTable(
