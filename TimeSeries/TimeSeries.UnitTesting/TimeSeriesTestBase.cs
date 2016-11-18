@@ -76,7 +76,7 @@ namespace CassandraTimeSeries.UnitTesting
             var startTime = DateTimeOffset.UtcNow;
 
             return Enumerable.Range(0, count)
-                .Select(i => new Event(startTime + TimeSpan.FromMilliseconds(i)))
+                .Select(i => new Event(startTime + TimeSpan.FromMilliseconds(i), new []{(byte)i}))
                 .ToList();
         }
     }

@@ -26,14 +26,14 @@ namespace CassandraTimeSeries
         public Event() 
             : this(DateTimeOffset.UtcNow) { }
 
-        public Event(int payloadSize) 
-            : this(DateTimeOffset.UtcNow, payloadSize) { }
+        public Event(byte[] payload) 
+            : this(DateTimeOffset.UtcNow, payload) { }
 
-        public Event(DateTimeOffset time, int payloadSize=0)
+        public Event(DateTimeOffset time, byte[] payload=null)
         {
             Id = TimeUuid.NewId(time);
             SliceId = Timestamp.RoundDown(SliceDutation).Ticks;
-            Payload = new byte[payloadSize];
+            Payload = payload ?? new byte[0];
         }
 
         public override string ToString()
