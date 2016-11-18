@@ -9,7 +9,7 @@ namespace CassandraTimeSeries
 {
     public class TimeSeries : ITimeSeries
     {
-        public Table<Event> Table { get; private set; }
+        public Table<Event> Table { get; }
         
         public TimeSeries(Table<Event> table)
         {
@@ -42,15 +42,15 @@ namespace CassandraTimeSeries
             TimeUuid start, TimeUuid end,
             long sliceId, int count)
         {
-            Expression<Func<Event, bool>> IdCondition;
+            Expression<Func<Event, bool>> idCondition;
 
             if (start == end)
-                IdCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) == 0);
+                idCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) == 0);
             else
-                IdCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0);
+                idCondition = (e => e.SliceId == sliceId && e.Id.CompareTo(start) >= 0 && e.Id.CompareTo(end) < 0);
 
             return Table
-                .Where(IdCondition)
+                .Where(idCondition)
                 .Take(count)
                 .Execute();
         }

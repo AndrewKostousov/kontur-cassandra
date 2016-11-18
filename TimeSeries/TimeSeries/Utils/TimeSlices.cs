@@ -5,9 +5,9 @@ namespace CassandraTimeSeries
 {
     public class TimeSlices : IEnumerable<DateTimeOffset>
     {
-        public DateTimeOffset From { get; private set; }
-        public DateTimeOffset To { get; private set; }
-        public TimeSpan SliceDuration { get; private set; }
+        public DateTimeOffset From { get; }
+        public DateTimeOffset To { get; }
+        public TimeSpan SliceDuration { get; }
 
         public TimeSlices(DateTimeOffset from, DateTimeOffset to, TimeSpan sliceDuration)
         {

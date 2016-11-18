@@ -8,7 +8,7 @@ namespace CassandraTimeSeries
     [Table("time_series")]
     public class Event
     {
-        public static TimeSpan SliceDutation { get { return TimeSpan.FromMinutes(1); } }
+        public static TimeSpan SliceDutation => TimeSpan.FromMinutes(1);
 
         [PartitionKey]
         [Column("slice_id")]
@@ -21,7 +21,7 @@ namespace CassandraTimeSeries
         [Column("payload")]
         public byte[] Payload { get; set; }
 
-        public DateTimeOffset Timestamp { get { return Id.GetDate(); } }
+        public DateTimeOffset Timestamp => Id.GetDate();
 
         public Event() 
             : this(DateTimeOffset.UtcNow) { }
@@ -38,7 +38,7 @@ namespace CassandraTimeSeries
 
         public override string ToString()
         {
-            return String.Format("Event {0} at {1}, payload: {2} bytes", Id, Timestamp, Payload.Length);
+            return $"Event {Id} at {Timestamp}, payload: {Payload.Length} bytes";
         }
 
         #region ***GetHashCode and Equals***

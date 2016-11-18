@@ -9,11 +9,12 @@ namespace CassandraTimeSeries.UnitTesting
     public class TimeSeriesTestBase
     {
         #region *** SetUp ***
-        static Cluster cluster;
-        static ISession session;
-        static SimpleSeriesDatabase database;
 
-        public static TimeSeries Series { get; private set; }
+        private static Cluster cluster;
+        private static ISession session;
+        private static SimpleSeriesDatabase database;
+
+        protected static TimeSeries Series { get; private set; }
 
         [OneTimeSetUp]
         public void StartSession()
