@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Commons;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Utils
 {
     public static class TimeSlicer
     {

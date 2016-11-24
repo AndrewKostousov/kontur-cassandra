@@ -1,10 +1,9 @@
-﻿using Cassandra;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using CassandraTimeSeries.Model;
 using Commons;
 using Commons.TimeBasedUuid;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Interfaces
 {
     public interface ITimeSeries
     {

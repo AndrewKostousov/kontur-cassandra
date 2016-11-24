@@ -1,6 +1,6 @@
 ﻿using Cassandra.Data.Linq;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Utils
 {
     public static class TableExtensions
     {

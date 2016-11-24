@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cassandra;
 using Cassandra.Data.Linq;
-using System.Collections.Generic;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Model
 {
     public class DatabaseWrapper : IDisposable
     {

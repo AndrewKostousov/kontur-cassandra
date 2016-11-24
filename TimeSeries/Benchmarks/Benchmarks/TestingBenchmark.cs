@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Threading;
 using CassandraTimeSeries;
+using CassandraTimeSeries.Model;
+using CassandraTimeSeries.Utils;
 using Commons.TimeBasedUuid;
-using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
 
 namespace Benchmarks.Benchmarks
 {

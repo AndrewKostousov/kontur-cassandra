@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CassandraTimeSeries.Interfaces;
+using CassandraTimeSeries.Model;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 using FluentAssertions;

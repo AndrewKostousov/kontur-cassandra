@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CassandraTimeSeries.Model;
 using Commons;
 using Commons.TimeBasedUuid;
 using FluentAssertions;

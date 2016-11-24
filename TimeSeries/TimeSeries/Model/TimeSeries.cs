@@ -1,14 +1,15 @@
-﻿using Cassandra;
-using Cassandra.Data.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Cassandra;
+using Cassandra.Data.Linq;
+using CassandraTimeSeries.Interfaces;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
-using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Model
 {
     public class TimeSeries : ITimeSeries
     {

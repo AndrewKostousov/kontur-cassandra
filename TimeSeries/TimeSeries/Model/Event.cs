@@ -1,12 +1,11 @@
-﻿using Cassandra;
+﻿using System;
+using Cassandra;
 using Cassandra.Mapping.Attributes;
-using System;
-using System.Linq;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
-using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
 
-namespace CassandraTimeSeries
+namespace CassandraTimeSeries.Model
 {
     [Table("time_series")]
     public class Event

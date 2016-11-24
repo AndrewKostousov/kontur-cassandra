@@ -1,8 +1,7 @@
 ﻿using Cassandra;
-using Commons.TimeBasedUuid;
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.CassandraStorageCore.CqlCore
+namespace Commons.TimeBasedUuid
 {
     public static class TimeGuidToDriverAdaptationExtensions
     {
