@@ -32,10 +32,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrEmit, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\GrEmit.2.1.7\lib\net40\GrEmit.dll</HintPath>
-    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
@@ -44,9 +40,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Assemblies\json.net\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -90,23 +86,9 @@
     <Compile Include="Objects\LruCache.cs" />
     <Compile Include="Objects\NullableExtensions.cs" />
     <Compile Include="Objects\ObjectCacheExtensions.cs" />
-    <Compile Include="Objects\Parsing\Exceptions\ParserNotFoundException.cs" />
-    <Compile Include="Objects\Parsing\IObjectParser.cs" />
-    <Compile Include="Objects\Parsing\IObjectParserCollection.cs" />
-    <Compile Include="Objects\Parsing\ObjectParser.cs" />
-    <Compile Include="Objects\Parsing\ObjectParserCollectionNullableWrapper.cs" />
-    <Compile Include="Objects\Parsing\ObjectParserConfiguration.cs" />
-    <Compile Include="Objects\Parsing\ParseHelpers\DateTimeParseHelper.cs" />
-    <Compile Include="Objects\Parsing\ParseHelpers\EnumParseHelper.cs" />
-    <Compile Include="Objects\Parsing\Parsers\EnumTryParseDelegate.cs" />
-    <Compile Include="Objects\Parsing\Parsers\InternalImplementations\EnumParser.cs" />
-    <Compile Include="Objects\Parsing\Parsers\InternalImplementations\ValueParser.cs" />
-    <Compile Include="Objects\Parsing\Parsers\IValueParser.cs" />
-    <Compile Include="Objects\Parsing\Parsers\TryParseDelegate.cs" />
     <Compile Include="Objects\RandomExtensions.cs" />
     <Compile Include="Objects\ResultOptions.cs" />
     <Compile Include="Objects\ShardingHelpers.cs" />
-    <Compile Include="Objects\Sorting\BySortRulesComparer.cs" />
     <Compile Include="Objects\Sorting\CompareNullComprareDecorator.cs" />
     <Compile Include="Objects\Sorting\SortMode.cs" />
     <Compile Include="Objects\Sorting\SortRule.cs" />
@@ -119,9 +101,6 @@
     <Compile Include="Objects\Timestamp.cs" />
     <Compile Include="Objects\TimestampExtensions.cs" />
     <Compile Include="Objects\TripleDesCrypt.cs" />
-    <Compile Include="Objects\ValueExtracting\CustomObjectPropertyValueExtractor.cs" />
-    <Compile Include="Objects\ValueExtracting\IObjectPropertyValueExtractor.cs" />
-    <Compile Include="Objects\ValueExtracting\ObjectValueExtractor.cs" />
     <Compile Include="Processes\IProcessExecutor.cs" />
     <Compile Include="Processes\ProcessExecutionException.cs" />
     <Compile Include="Processes\ProcessExecutor.cs" />
@@ -148,6 +127,9 @@
     <Compile Include="Threading\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="Threading\Wrappers\ReaderWriterLockSlimReadWrapper.cs" />
     <Compile Include="Threading\Wrappers\ReaderWriterLockSlimWriteWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

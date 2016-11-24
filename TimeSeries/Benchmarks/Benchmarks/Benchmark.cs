@@ -22,8 +22,8 @@ namespace Benchmarks.Benchmarks
             Started?.Invoke();
 
             OnPrepare();
-            
 
+            var sw = Stopwatch.StartNew();
             var millisecondsPerIteration = (double) sw.ElapsedMilliseconds/IterationsCount;
             var iterationTime = TimeSpan.FromMilliseconds(millisecondsPerIteration);
 
@@ -51,7 +51,7 @@ namespace Benchmarks.Benchmarks
 
         private TimeSpan Mean()
         {
-
+            throw new NotImplementedException();
         }
     }
 }
