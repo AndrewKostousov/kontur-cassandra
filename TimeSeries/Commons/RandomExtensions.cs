@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.Objects
+namespace Commons
 {
     public static class RandomExtensions
     {

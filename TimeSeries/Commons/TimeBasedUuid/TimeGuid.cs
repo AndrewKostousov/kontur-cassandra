@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Commons.Bits;
 using JetBrains.Annotations;
 
-using SKBKontur.Catalogue.Objects.Bits;
-
-namespace SKBKontur.Catalogue.Objects.TimeBasedUuid
+namespace Commons.TimeBasedUuid
 {
     public sealed class TimeGuid : IEquatable<TimeGuid>, IComparable<TimeGuid>, IComparable
     {

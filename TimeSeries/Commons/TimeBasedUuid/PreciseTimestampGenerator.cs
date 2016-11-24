@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.Objects.TimeBasedUuid
+namespace Commons.TimeBasedUuid
 {
     public class PreciseTimestampGenerator
     {

@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Commons;
+using Commons.Bits;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.Bits;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.BitsTests
 {

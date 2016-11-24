@@ -1,8 +1,7 @@
 ﻿using System;
-
 using Newtonsoft.Json;
 
-namespace SKBKontur.Catalogue.Objects.Json
+namespace Commons.Json
 {
     public class StringTimestampConverter : JsonConverter
     {

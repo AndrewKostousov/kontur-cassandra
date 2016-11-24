@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using Commons.Bits;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects.Bits;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.BitsTests
 {

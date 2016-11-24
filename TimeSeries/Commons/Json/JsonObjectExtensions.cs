@@ -1,11 +1,9 @@
 ﻿using System.IO;
 using System.Text;
-
 using JetBrains.Annotations;
-
 using Newtonsoft.Json;
 
-namespace SKBKontur.Catalogue.Objects.Json
+namespace Commons.Json
 {
     public static class JsonObjectExtensions
     {

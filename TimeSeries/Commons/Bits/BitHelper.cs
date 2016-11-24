@@ -1,8 +1,7 @@
 ﻿using System;
-
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.Objects.Bits
+namespace Commons.Bits
 {
     public static class BitHelper
     {

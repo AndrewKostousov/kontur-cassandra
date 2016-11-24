@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SKBKontur.Catalogue.Objects
+namespace Commons
 {
     public static class TimeSpanExtensions
     {

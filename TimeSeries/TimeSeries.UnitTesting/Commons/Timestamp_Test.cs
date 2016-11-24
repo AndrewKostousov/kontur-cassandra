@@ -1,7 +1,7 @@
 ﻿using System;
+using Commons;
+using Commons.Json;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.Json;
 
 #pragma warning disable 1718
 // ReSharper disable UnusedVariable

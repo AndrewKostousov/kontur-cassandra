@@ -2,12 +2,12 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Commons;
+using Commons.Bits;
+using Commons.TimeBasedUuid;
 using GroBuf;
 using GroBuf.DataMembersExtracters;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.Bits;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 #pragma warning disable 1718
 

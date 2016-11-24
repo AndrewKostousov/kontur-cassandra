@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Commons;
+using Commons.TimeBasedUuid;
 using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries
 {

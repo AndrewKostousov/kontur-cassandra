@@ -4,7 +4,7 @@
 	Copyright (c) 2004-2008 Jon Skeet and Marc Gravell. All rights reserved.
 */
 
-namespace SKBKontur.Catalogue.Objects.Bits
+namespace Commons.Bits
 {
     /// <summary>
     /// Endianness of a converter

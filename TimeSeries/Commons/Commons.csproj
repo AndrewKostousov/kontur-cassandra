@@ -7,10 +7,11 @@
     <ProjectGuid>{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SKBKontur.Catalogue</RootNamespace>
-    <AssemblyName>Catalogue.Commons</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>Commons</RootNamespace>
+    <AssemblyName>Commons</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,25 +45,25 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Objects\Bits\BigEndianBitConverter.cs" />
-    <Compile Include="Objects\Bits\BitHelper.cs" />
-    <Compile Include="Objects\Bits\ByteArrayComparer.cs" />
-    <Compile Include="Objects\Bits\EndianBitConverter.cs" />
-    <Compile Include="Objects\Bits\Endianness.cs" />
-    <Compile Include="Objects\Bits\LittleEndianBitConverter.cs" />
-    <Compile Include="Objects\GuidHelpers.cs" />
-    <Compile Include="Objects\InvalidProgramStateException.cs" />
-    <Compile Include="Objects\Json\JsonObjectExtensions.cs" />
-    <Compile Include="Objects\Json\StringTimestampConverter.cs" />
-    <Compile Include="Objects\RandomExtensions.cs" />
-    <Compile Include="Objects\TimeBasedUuid\GuidVersion.cs" />
-    <Compile Include="Objects\TimeBasedUuid\PreciseTimestampGenerator.cs" />
-    <Compile Include="Objects\TimeBasedUuid\TimeGuid.cs" />
-    <Compile Include="Objects\TimeBasedUuid\TimeGuidBitsLayout.cs" />
-    <Compile Include="Objects\TimeBasedUuid\TimeGuidGenerator.cs" />
-    <Compile Include="Objects\TimeSpanExtensions.cs" />
-    <Compile Include="Objects\Timestamp.cs" />
-    <Compile Include="Objects\TimestampExtensions.cs" />
+    <Compile Include="Bits\BigEndianBitConverter.cs" />
+    <Compile Include="Bits\BitHelper.cs" />
+    <Compile Include="Bits\ByteArrayComparer.cs" />
+    <Compile Include="Bits\EndianBitConverter.cs" />
+    <Compile Include="Bits\Endianness.cs" />
+    <Compile Include="Bits\LittleEndianBitConverter.cs" />
+    <Compile Include="GuidHelpers.cs" />
+    <Compile Include="InvalidProgramStateException.cs" />
+    <Compile Include="Json\JsonObjectExtensions.cs" />
+    <Compile Include="Json\StringTimestampConverter.cs" />
+    <Compile Include="RandomExtensions.cs" />
+    <Compile Include="TimeBasedUuid\GuidVersion.cs" />
+    <Compile Include="TimeBasedUuid\PreciseTimestampGenerator.cs" />
+    <Compile Include="TimeBasedUuid\TimeGuid.cs" />
+    <Compile Include="TimeBasedUuid\TimeGuidBitsLayout.cs" />
+    <Compile Include="TimeBasedUuid\TimeGuidGenerator.cs" />
+    <Compile Include="TimeSpanExtensions.cs" />
+    <Compile Include="Timestamp.cs" />
+    <Compile Include="TimestampExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

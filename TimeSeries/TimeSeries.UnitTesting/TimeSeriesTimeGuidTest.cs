@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using Commons;
+using Commons.TimeBasedUuid;
 using FluentAssertions;
 using NUnit.Framework;
 using SKBKontur.Catalogue.CassandraStorageCore.CqlCore;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries.UnitTesting
 {

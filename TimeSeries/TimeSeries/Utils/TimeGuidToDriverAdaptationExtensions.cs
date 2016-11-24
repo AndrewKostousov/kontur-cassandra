@@ -1,8 +1,6 @@
 ﻿using Cassandra;
-
+using Commons.TimeBasedUuid;
 using JetBrains.Annotations;
-
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace SKBKontur.Catalogue.CassandraStorageCore.CqlCore
 {

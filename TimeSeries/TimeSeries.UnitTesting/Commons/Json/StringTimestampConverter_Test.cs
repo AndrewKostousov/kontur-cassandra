@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Commons;
+using Commons.Json;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.Json;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.Json
 {

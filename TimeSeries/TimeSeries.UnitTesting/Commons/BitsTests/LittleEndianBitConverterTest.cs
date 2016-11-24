@@ -4,8 +4,8 @@
 	Copyright (c) 2004-2008 Jon Skeet and Marc Gravell. All rights reserved.
 */
 
+using Commons.Bits;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects.Bits;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.BitsTests
 {

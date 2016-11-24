@@ -1,5 +1,5 @@
-﻿using NUnit.Framework;
-using SKBKontur.Catalogue.Objects.Json;
+﻿using Commons.Json;
+using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.Json
 {

@@ -1,4 +1,4 @@
-﻿namespace SKBKontur.Catalogue.Objects.TimeBasedUuid
+﻿namespace Commons.TimeBasedUuid
 {
     public enum GuidVersion
     {

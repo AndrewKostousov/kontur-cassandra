@@ -1,8 +1,7 @@
 using System;
-
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.Objects
+namespace Commons
 {
     public class InvalidProgramStateException : Exception
     {

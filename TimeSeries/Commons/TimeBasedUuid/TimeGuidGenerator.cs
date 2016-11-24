@@ -1,8 +1,7 @@
 ﻿using System;
-
 using JetBrains.Annotations;
 
-namespace SKBKontur.Catalogue.Objects.TimeBasedUuid
+namespace Commons.TimeBasedUuid
 {
     public class TimeGuidGenerator
     {

@@ -1,10 +1,8 @@
 ﻿using System;
-
+using Commons.Bits;
 using JetBrains.Annotations;
 
-using SKBKontur.Catalogue.Objects.Bits;
-
-namespace SKBKontur.Catalogue.Objects.TimeBasedUuid
+namespace Commons.TimeBasedUuid
 {
     // Version 1 UUID layout (https://www.ietf.org/rfc/rfc4122.txt):
     //

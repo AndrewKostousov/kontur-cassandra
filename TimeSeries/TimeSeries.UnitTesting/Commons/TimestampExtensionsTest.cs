@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using Commons;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
 
 namespace CassandraTimeSeries.UnitTesting.Commons
 {

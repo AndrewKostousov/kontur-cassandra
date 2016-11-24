@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Linq;
+using Commons;
 using FluentAssertions;
-using SKBKontur.Catalogue.Objects;
 
 namespace CassandraTimeSeries.UnitTesting
 {

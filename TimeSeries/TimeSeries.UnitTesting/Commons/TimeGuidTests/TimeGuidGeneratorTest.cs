@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
+using Commons;
+using Commons.Bits;
+using Commons.TimeBasedUuid;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.Bits;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
 {

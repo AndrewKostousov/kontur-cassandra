@@ -1,8 +1,8 @@
 ﻿using Cassandra;
 using System;
 using System.Collections.Generic;
-using SKBKontur.Catalogue.Objects;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
+using Commons;
+using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries
 {

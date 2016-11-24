@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Commons.TimeBasedUuid;
 using NUnit.Framework;
-using SKBKontur.Catalogue.Objects.TimeBasedUuid;
 
 namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
 {
