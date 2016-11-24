@@ -1,10 +1,12 @@
-﻿using Cassandra;
+﻿using System.Diagnostics.CodeAnalysis;
+using Cassandra;
 using JetBrains.Annotations;
 
 namespace Commons.TimeBasedUuid
 {
     public static class TimeGuidToDriverAdaptationExtensions
     {
+        [SuppressMessage("ReSharper", "RedundantCast")]
         public static TimeUuid ToTimeUuid([NotNull] this TimeGuid timeGuid)
         {
             // it seems right to make constructor call like new TimeUuid(timeGuid.ToGuid()), but this constructor is private :(,
