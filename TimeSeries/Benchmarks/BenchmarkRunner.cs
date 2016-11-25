@@ -10,7 +10,7 @@ namespace Benchmarks
         {
             var executingAssembly = Assembly.GetExecutingAssembly();
 
-            var benchmarks = new Extractor().Extract<Benchmark>(executingAssembly);
+            var benchmarks = new BenchmarkFinder().GetBenchmarks(executingAssembly);
 
             foreach (var benchmark in benchmarks)
                 RunSingleBenchmark(benchmark);
@@ -18,11 +18,11 @@ namespace Benchmarks
             Console.ReadKey();
         }
 
-        private void RunSingleBenchmark(Benchmark benchmark)
+        private void RunSingleBenchmark(BenchmarksFixture benchmark)
         {
-            benchmark.Started += () => Console.WriteLine($"Running {benchmark.Name}...");
-            benchmark.IterationStarted += i => Console.Write(".");
-            benchmark.Finished += t => Console.WriteLine($" done!\nmean time: {t}\n");
+            benchmark.BenchmarkStarted += b => Console.WriteLine($"Running {b.Name}...");
+            benchmark.IterationStarted += (b, i) => Console.Write(".");
+            benchmark.BenchmarkFinished += (b, r) => Console.WriteLine($" done!\n{r.CreateReport()}\n");
 
             benchmark.Run();
         }

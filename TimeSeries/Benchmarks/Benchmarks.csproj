@@ -45,10 +45,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Benchmarks\BenchmarksFixture.cs" />
+    <Compile Include="Reflection\FromAttribute.cs" />
+    <Compile Include="Reflection\AttributeMethodMapper.cs" />
+    <Compile Include="Reflection\Attributes.cs" />
     <Compile Include="BenchmarkRunner.cs" />
+    <Compile Include="BenchmarkingResult.cs" />
     <Compile Include="Benchmarks\TestingBenchmark.cs" />
-    <Compile Include="Benchmarks\BenchmarkFinder.cs" />
+    <Compile Include="Reflection\BenchmarkFinder.cs" />
     <Compile Include="Benchmarks\Benchmark.cs" />
+    <Compile Include="IBenchmarkingResult.cs" />
+    <Compile Include="Reflection\InfoAttributePair.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,22 +1,19 @@
-﻿using System.Linq;
-using System.Threading;
-using CassandraTimeSeries;
+﻿using System;
+using System.Linq;
 using CassandraTimeSeries.Model;
-using CassandraTimeSeries.Utils;
 using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
-    public class ReadBenchmark : Benchmark
+    [BenchmarkClass]
+    public class DatabaseBenchmark
     {
-        protected override int IterationsCount => 100;
-        public override string Name => "TimeSeries - Read By TimeGuid";
-
         private TimeSeries series;
         private TimeGuid start;
         private TimeGuid end;
 
-        protected override void OnPrepare()
+        [BenchmarkClassSetUp]
+        public void SetUp()
         {
             var database = new DatabaseWrapper("test");
             series = new TimeSeries(database.Table);
@@ -30,45 +27,57 @@ namespace Benchmarks.Benchmarks
 
             events.ForEach(e => series.Write(e));
         }
+        
+        [BenchmarkMethod]
+        public void TimeSeries_Write()
+        {
+            series.Write(new Event(TimeGuid.NowGuid()));
+        }
 
-        protected override void OnRun()
+        [BenchmarkMethod]
+        public void TimeSeries_Read()
         {
             series.ReadRange(start, end, 1);
         }
     }
 
-    public class WriteBenchmark : Benchmark
+    [BenchmarkClass]
+    public class TestingBenchmark
     {
-        protected override int IterationsCount => 100;
-        public override string Name => "TimeSeries - Write";
-
-        private TimeSeries series;
-
-        protected override void OnPrepare()
+        [BenchmarkClassSetUp]
+        public void ClassSetUp()
         {
-            var database = new DatabaseWrapper("test");
-            series = new TimeSeries(database.Table);
+            Console.WriteLine($"{nameof(ClassSetUp)}");
         }
 
-        protected override void OnRun()
+        [BenchmarkSetUp]
+        public void SetUp()
         {
-            series.Write(new Event(TimeGuid.NowGuid()));
-        }
-    }
-
-    public class TestingBenchmark : Benchmark
-    {
-        protected override int IterationsCount => 100;
-        public override string Name => "Testing benchmark";
-
-        protected override void OnPrepare()
-        {
-
+            Console.WriteLine($"{nameof(SetUp)}");
         }
 
-        protected override void OnRun()
+        [BenchmarkMethod(1)]
+        public void First()
         {
-            Thread.Sleep(2);
+            Console.WriteLine($"{nameof(First)}");
+        }
+
+        [BenchmarkMethod(1)]
+        public void Second()
+        {
+            Console.WriteLine($"{nameof(Second)}");
+        }
+
+        [BenchmarkTearDown]
+        public void TearDown()
+        {
+            Console.WriteLine($"{nameof(TearDown)}");
+        }
+
+        [BenchmarkClassTearDown]
+        public void ClassTearDown()
+        {
+            Console.WriteLine($"{nameof(ClassTearDown)}");
         }
     }
 }

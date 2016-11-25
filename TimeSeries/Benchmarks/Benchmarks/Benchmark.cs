@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Commons;
 
 namespace Benchmarks.Benchmarks
 {
-    public abstract class Benchmark
+    public class Benchmark
     {
-        protected abstract int IterationsCount { get; }
-        public abstract string Name { get; }
+        protected int IterationsCount { get; }
+        public string Name { get; }
 
-        protected abstract void OnPrepare();
-        protected abstract void OnRun();
+        private Action OnRun;
 
-        public event Action Started;
+        public Benchmark(string name, int iterationsCount, Action onRun)
+        {
+            OnRun = onRun;
+            IterationsCount = iterationsCount;
+            Name = name;
+        }
+        
         public event Action<int> IterationStarted;
         public event Action<int> IterationFinished;
-        public event Action<TimeSpan> Finished;
 
-        public TimeSpan Run()
+        public IBenchmarkingResult Run()
         {
-            Started?.Invoke();
-
-            OnPrepare();
-
-            var sw = Stopwatch.StartNew();
-            var millisecondsPerIteration = (double) sw.ElapsedMilliseconds/IterationsCount;
-            var iterationTime = TimeSpan.FromMilliseconds(millisecondsPerIteration);
-
-            Finished?.Invoke(iterationTime);
-            return iterationTime;
+            var timeSpent = TimeSpan.FromTicks((long)MeasureTimes().Average(t => t.Ticks));
+            return new BenchmarkingResult(timeSpent);
         }
 
         private IEnumerable<TimeSpan> MeasureTimes()
@@ -47,11 +45,6 @@ namespace Benchmarks.Benchmarks
 
                 IterationFinished?.Invoke(i);
             }
-        }
-
-        private TimeSpan Mean()
-        {
-            throw new NotImplementedException();
         }
     }
 }
