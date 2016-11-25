@@ -20,7 +20,10 @@ namespace Benchmarks.Benchmarks
 
         [From(typeof(BenchmarkMethodAttribute))]
         public IEnumerable<Benchmark> Benchmarks { get; } = new List<Benchmark>();
-        
+
+        [From(typeof(BenchmarkResultAttribute))]
+        public List<Func<IBenchmarkingResult>> AdditionalResults { get; } = new List<Func<IBenchmarkingResult>>();
+
         public event Action<Benchmark> BenchmarkStarted;
         public event Action<Benchmark, int> IterationStarted;
         public event Action<Benchmark, int> IterationFinished;
@@ -44,7 +47,12 @@ namespace Benchmarks.Benchmarks
         {
             Setup?.Invoke();
             BenchmarkStarted?.Invoke(benchmark);
+
             var result = benchmark.Run();
+
+            foreach (var getResult in AdditionalResults)
+                result.AddResult(getResult());
+
             BenchmarkFinished?.Invoke(benchmark, result);
             Teardown?.Invoke();
             return result;

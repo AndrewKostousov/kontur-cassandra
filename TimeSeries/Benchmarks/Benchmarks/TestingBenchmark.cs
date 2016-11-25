@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CassandraTimeSeries.Model;
 using Commons.TimeBasedUuid;
@@ -78,6 +79,13 @@ namespace Benchmarks.Benchmarks
         public void ClassTearDown()
         {
             Console.WriteLine($"{nameof(ClassTearDown)}");
+        }
+
+        [BenchmarkResult]
+        public IBenchmarkingResult Result()
+        {
+            Console.WriteLine($"{nameof(Result)}");
+            return new BenchmarkingResult(TimeSpan.FromSeconds(42));
         }
     }
 }

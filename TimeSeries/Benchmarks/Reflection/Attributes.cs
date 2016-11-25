@@ -6,17 +6,6 @@ using Benchmarks.Benchmarks;
 
 namespace Benchmarks
 {
-    abstract class BindingAttribute : Attribute
-    {
-        protected static readonly object[] noArgs = new object[0];
-
-        public virtual void Bind(object source, MethodInfo method, 
-            object target, PropertyInfo property)
-        {
-            property.SetValue(target, new Action(() => method.Invoke(source, noArgs)));
-        }
-    }
-
     class BenchmarkClassAttribute : BindingAttribute
     {
     }
@@ -46,8 +35,7 @@ namespace Benchmarks
             this.executionsCount = executionsCount;
         }
 
-        public override void Bind(object source, MethodInfo method,
-            object target, PropertyInfo property)
+        public override void Bind(object source, MethodInfo method, object target, PropertyInfo property)
         {
             (property.GetValue(target) as List<Benchmark>)?
                 .Add(new Benchmark(method.Name, executionsCount, 
@@ -55,8 +43,12 @@ namespace Benchmarks
         }
     }
 
-    class BenchmarkResultProviderAttribute : BindingAttribute
+    class BenchmarkResultAttribute : BindingAttribute
     {
-        
+        public override void Bind(object source, MethodInfo method, object target, PropertyInfo property)
+        {
+            (property.GetValue(target) as List<Func<IBenchmarkingResult>>)?
+                .Add((Func<IBenchmarkingResult>)CreateFunc(source, method));
+        }
     }
 }

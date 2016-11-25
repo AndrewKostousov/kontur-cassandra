@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarks\BenchmarksFixture.cs" />
+    <Compile Include="Reflection\BindingAttribute.cs" />
     <Compile Include="Reflection\FromAttribute.cs" />
     <Compile Include="Reflection\AttributeMethodMapper.cs" />
     <Compile Include="Reflection\Attributes.cs" />

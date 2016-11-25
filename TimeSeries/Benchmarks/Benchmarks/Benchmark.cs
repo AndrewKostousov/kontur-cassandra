@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Commons;
 
 namespace Benchmarks.Benchmarks
 {
@@ -23,7 +22,7 @@ namespace Benchmarks.Benchmarks
         public event Action<int> IterationStarted;
         public event Action<int> IterationFinished;
 
-        public IBenchmarkingResult Run()
+        public BenchmarkingResult Run()
         {
             var timeSpent = TimeSpan.FromTicks((long)MeasureTimes().Average(t => t.Ticks));
             return new BenchmarkingResult(timeSpent);
