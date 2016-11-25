@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Benchmarks.Reflection;
 
 namespace Benchmarks.Benchmarks
 {
     class BenchmarksFixture
     {
+        public string Name { get; }
+
         [From(typeof(BenchmarkClassSetUpAttribute))]
         public Action ClassSetup { get; set; }
 
@@ -27,6 +30,11 @@ namespace Benchmarks.Benchmarks
         public event Action<Benchmark, int> IterationStarted;
         public event Action<Benchmark, int> IterationFinished;
         public event Action<Benchmark, IBenchmarkingResult> BenchmarkFinished;
+
+        public BenchmarksFixture(string name)
+        {
+            Name = name;
+        }
 
         public List<IBenchmarkingResult> Run()
         {

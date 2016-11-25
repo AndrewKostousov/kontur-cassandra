@@ -46,12 +46,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarks\BenchmarksFixture.cs" />
+    <Compile Include="Benchmarks\SimpleDatabaseBenchmark.cs" />
+    <Compile Include="Results\DatabaseBenchmarkingResult.cs" />
     <Compile Include="Reflection\BindingAttribute.cs" />
     <Compile Include="Reflection\FromAttribute.cs" />
     <Compile Include="Reflection\AttributeMethodMapper.cs" />
     <Compile Include="Reflection\Attributes.cs" />
-    <Compile Include="ConsoleBenchmarkRunner.cs" />
-    <Compile Include="BenchmarkingResult.cs" />
+    <Compile Include="Runners\ConsoleBenchmarkRunner.cs" />
+    <Compile Include="Results\BenchmarkingResult.cs" />
     <Compile Include="Benchmarks\TestingBenchmark.cs" />
     <Compile Include="Reflection\BenchmarkFinder.cs" />
     <Compile Include="Benchmarks\Benchmark.cs" />

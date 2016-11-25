@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Benchmarks.Benchmarks
+namespace Benchmarks.Reflection
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     class FromAttribute : Attribute

@@ -4,14 +4,12 @@ using System.Reflection;
 using Benchmarks.Benchmarks;
 using Commons;
 
-namespace Benchmarks
+namespace Benchmarks.Reflection
 {
-    class AttributeMethodMapper<TTarget>
-        where TTarget : new()
+    class AttributeMethodMapper
     {
-        public TTarget CreateInstance(object source)
+        public TTarget ApplyMapping<TTarget>(TTarget instance, object source)
         {
-            var instance = Activator.CreateInstance<TTarget>();
             var markedProperties = typeof(TTarget).GetProperties()
                 .SelectMany(x => x.GetCustomAttributes<FromAttribute>().Select(a => InfoAttributePair.Create(x, a)));
 
@@ -21,7 +19,8 @@ namespace Benchmarks
             return instance;
         }
 
-        private void BindMethodToProperty(object source, TTarget instance, PropertyInfo property, FromAttribute attribute)
+        private void BindMethodToProperty<TTarget>(object source, TTarget instance, 
+            PropertyInfo property, FromAttribute attribute)
         {
             var markedMethods = source.GetType().GetMethods()
                 .Select(x => InfoAttributePair.Create(x, x.GetCustomAttribute(attribute.Attribute)))

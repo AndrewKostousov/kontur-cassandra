@@ -1,6 +1,6 @@
 using System;
 
-namespace Benchmarks
+namespace Benchmarks.Reflection
 {
     static class InfoAttributePair
     {

@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Benchmarks
+namespace Benchmarks.Reflection
 {
     [AttributeUsage(AttributeTargets.Method)]
     abstract class BindingAttribute : Attribute

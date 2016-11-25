@@ -6,17 +6,17 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using Benchmarks.Benchmarks;
 
-namespace Benchmarks
+namespace Benchmarks.Reflection
 {
     class BenchmarkFinder
     {
         public IEnumerable<BenchmarksFixture> GetBenchmarks(Assembly assembly)
         {
-            var factory = new AttributeMethodMapper<BenchmarksFixture>();
+            var factory = new AttributeMethodMapper();
 
             return GetTypesWith<BenchmarkClassAttribute>(assembly)
                 .Select(Activator.CreateInstance)
-                .Select(x => factory.CreateInstance(x));
+                .Select(x => factory.ApplyMapping(new BenchmarksFixture(x.GetType().Name), x));
         }
 
         IEnumerable<Type> GetTypesWith<TAttribute>(Assembly assembly)

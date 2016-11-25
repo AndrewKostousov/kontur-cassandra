@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Benchmarks.Benchmarks;
 
-namespace Benchmarks
+namespace Benchmarks.Reflection
 {
     [AttributeUsage(AttributeTargets.Class)]
     class BenchmarkClassAttribute : Attribute
