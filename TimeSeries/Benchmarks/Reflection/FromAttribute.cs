@@ -2,6 +2,7 @@
 
 namespace Benchmarks.Benchmarks
 {
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     class FromAttribute : Attribute
     {
         public Type Attribute { get; }

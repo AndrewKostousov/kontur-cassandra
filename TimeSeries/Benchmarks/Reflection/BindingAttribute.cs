@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace Benchmarks
 {
+    [AttributeUsage(AttributeTargets.Method)]
     abstract class BindingAttribute : Attribute
     {
         protected static readonly object[] noArgs = new object[0];

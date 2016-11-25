@@ -1,27 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Benchmarks.Benchmarks;
 
 namespace Benchmarks
 {
-    class BenchmarkClassAttribute : BindingAttribute
+    [AttributeUsage(AttributeTargets.Class)]
+    class BenchmarkClassAttribute : Attribute
     {
     }
 
     class BenchmarkSetUpAttribute : BindingAttribute
     {
     }
-
+    
     class BenchmarkTearDownAttribute : BindingAttribute
     {
     }
-
+    
     class BenchmarkClassSetUpAttribute : BindingAttribute
     {
     }
-
+    
     class BenchmarkClassTearDownAttribute : BindingAttribute
     {
     }
@@ -29,26 +31,32 @@ namespace Benchmarks
     class BenchmarkMethodAttribute : BindingAttribute
     {
         private readonly int executionsCount;
+        private readonly string resultMethodName;
 
-        public BenchmarkMethodAttribute(int executionsCount=100)
+        public BenchmarkMethodAttribute(int executionsCount=100, string result=null)
         {
             this.executionsCount = executionsCount;
+            this.resultMethodName = result;
         }
 
         public override void Bind(object source, MethodInfo method, object target, PropertyInfo property)
         {
-            (property.GetValue(target) as List<Benchmark>)?
-                .Add(new Benchmark(method.Name, executionsCount, 
-                () => method.Invoke(source, noArgs)));
-        }
-    }
+            Benchmark benchmark;
 
-    class BenchmarkResultAttribute : BindingAttribute
-    {
-        public override void Bind(object source, MethodInfo method, object target, PropertyInfo property)
-        {
-            (property.GetValue(target) as List<Func<IBenchmarkingResult>>)?
-                .Add((Func<IBenchmarkingResult>)CreateFunc(source, method));
+            if (resultMethodName != null)
+            {
+                var resultMethod = source.GetType().GetMethods()
+                    .Single(m => m.Name == resultMethodName);
+
+                benchmark = new Benchmark(method.Name, executionsCount, () => method.Invoke(source, noArgs),
+                    (Func<IBenchmarkingResult>)CreateFunc(source, resultMethod));
+            }
+            else
+            {
+                benchmark = new Benchmark(method.Name, executionsCount, () => method.Invoke(source, noArgs));
+            }
+
+            (property.GetValue(target) as List<Benchmark>)?.Add(benchmark);
         }
     }
 }

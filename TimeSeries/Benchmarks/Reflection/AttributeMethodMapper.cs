@@ -13,8 +13,7 @@ namespace Benchmarks
         {
             var instance = Activator.CreateInstance<TTarget>();
             var markedProperties = typeof(TTarget).GetProperties()
-                .Select(x => InfoAttributePair.Create(x, x.GetCustomAttribute<FromAttribute>()))
-                .Where(x => x.Attribute != null);
+                .SelectMany(x => x.GetCustomAttributes<FromAttribute>().Select(a => InfoAttributePair.Create(x, a)));
 
             foreach (var property in markedProperties)
                 BindMethodToProperty(source, instance, property.Info, property.Attribute);

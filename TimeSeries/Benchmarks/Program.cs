@@ -9,7 +9,7 @@ namespace Benchmarks
     {
         static void Main(string[] args)
         {
-            new BenchmarkRunner().RunAll();
+            new ConsoleBenchmarkRunner().RunAll();
         }
     }
 }

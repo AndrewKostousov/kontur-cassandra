@@ -4,7 +4,7 @@ using Benchmarks.Benchmarks;
 
 namespace Benchmarks
 {
-    class BenchmarkRunner
+    class ConsoleBenchmarkRunner
     {
         public void RunAll()
         {
@@ -20,7 +20,7 @@ namespace Benchmarks
 
         private void RunSingleBenchmark(BenchmarksFixture benchmark)
         {
-            benchmark.BenchmarkStarted += b => Console.WriteLine($"Running {b.Name}...");
+            benchmark.BenchmarkStarted += b => Console.WriteLine($"Running: {b.Name}");
             benchmark.IterationStarted += (b, i) => Console.Write(".");
             benchmark.BenchmarkFinished += (b, r) => Console.WriteLine($" done!\n{r.CreateReport()}\n");
 

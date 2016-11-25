@@ -17,11 +17,10 @@ namespace Benchmarks.Benchmarks
 
         [From(typeof(BenchmarkTearDownAttribute))]
         public Action Teardown { get; set; }
-
+        
         [From(typeof(BenchmarkMethodAttribute))]
         public IEnumerable<Benchmark> Benchmarks { get; } = new List<Benchmark>();
-
-        [From(typeof(BenchmarkResultAttribute))]
+        
         public List<Func<IBenchmarkingResult>> AdditionalResults { get; } = new List<Func<IBenchmarkingResult>>();
 
         public event Action<Benchmark> BenchmarkStarted;
@@ -45,23 +44,26 @@ namespace Benchmarks.Benchmarks
 
         private IBenchmarkingResult RunSingleBenchmark(Benchmark benchmark)
         {
-            Setup?.Invoke();
             BenchmarkStarted?.Invoke(benchmark);
 
-            var result = benchmark.Run();
-
-            foreach (var getResult in AdditionalResults)
-                result.AddResult(getResult());
+            var result = benchmark.Run().Aggregate((r1, r2) => r1.Update(r2));
 
             BenchmarkFinished?.Invoke(benchmark, result);
-            Teardown?.Invoke();
             return result;
         }
 
         private Benchmark ConnectGlobalHandlers(Benchmark benchmark)
         {
-            benchmark.IterationStarted += i => IterationStarted?.Invoke(benchmark, i);
-            benchmark.IterationFinished += i => IterationFinished?.Invoke(benchmark, i);
+            benchmark.IterationStarted += i => {
+                Setup?.Invoke();
+                IterationStarted?.Invoke(benchmark, i); 
+            };
+
+            benchmark.IterationFinished += i =>
+            {
+                Teardown?.Invoke();
+                IterationFinished?.Invoke(benchmark, i);
+            };
 
             return benchmark;
         }

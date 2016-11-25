@@ -19,34 +19,47 @@ namespace Benchmarks.Benchmarks
         {
             return $"Misswrites count: {misswritesCount}";
         }
+
+        public IBenchmarkingResult Update(IBenchmarkingResult newResult)
+        {
+            var otherResult = newResult as DatabaseBenchmarkingResult;
+            if (otherResult == null)
+                return this;
+
+            var averageMisswrites = (misswritesCount + otherResult.misswritesCount)/2;
+            return new DatabaseBenchmarkingResult(averageMisswrites);
+        }
     }
 
     public class BenchmarkingResult : IBenchmarkingResult
     {
         public TimeSpan AverageExecutionTime { get; }
-        public List<IBenchmarkingResult> AdditionalResults { get; }
+        public IBenchmarkingResult AdditionalResult { get; }
 
-        public BenchmarkingResult(TimeSpan averageExecutionTime)
+        public BenchmarkingResult(TimeSpan averageExecutionTime, IBenchmarkingResult additionalResult=null)
         {
             AverageExecutionTime = averageExecutionTime;
-            AdditionalResults = new List<IBenchmarkingResult>();
+            AdditionalResult = additionalResult;
         }
-
-        public void AddResult(IBenchmarkingResult additionalResult)
-        {
-            AdditionalResults.Add(additionalResult);
-        }
-
+        
         public string CreateReport()
         {
             var thisResult = $"Average execution time: {AverageExecutionTime}\n";
 
-            var stringBuilder = new StringBuilder(thisResult);
+            if (AdditionalResult != null)
+                thisResult += AdditionalResult.CreateReport();
 
-            foreach (var additionalResult in AdditionalResults)
-                stringBuilder.Append($"{additionalResult.CreateReport()}");
+            return thisResult;
+        }
 
-            return stringBuilder.ToString();
+        public IBenchmarkingResult Update(IBenchmarkingResult newResult)
+        {
+            var otherResult = newResult as BenchmarkingResult;
+            if (otherResult == null)
+                return this;
+
+            var averageTime = TimeSpan.FromTicks((AverageExecutionTime.Ticks + otherResult.AverageExecutionTime.Ticks)/2);
+            return new BenchmarkingResult(averageTime, otherResult.AdditionalResult?.Update(AdditionalResult));
         }
     }
 }
