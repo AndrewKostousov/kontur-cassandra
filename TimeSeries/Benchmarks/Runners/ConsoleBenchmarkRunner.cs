@@ -22,7 +22,7 @@ namespace Benchmarks
 
         private void RunSingleBenchmark(BenchmarksFixture fixture)
         {
-            Console.WriteLine($"Running fixture: {fixture.Name}\n");
+            Console.WriteLine($"Preparing fixture: {fixture.Name}\n");
 
             fixture.BenchmarkStarted += b => Console.WriteLine($"Running benchmark: {b.Name}");
             fixture.IterationStarted += (b, i) => Console.Write(".");
