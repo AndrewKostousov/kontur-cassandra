@@ -11,7 +11,7 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public abstract class TimeSeriesBenchmark
     {
-        private DatabaseWrapper database;
+        internal DatabaseWrapper Database;
         internal TimeSeries Series;
         internal ReadersWritersPool Pool;
 
@@ -21,15 +21,15 @@ namespace Benchmarks.Benchmarks
         [BenchmarkClassSetUp]
         public void ClassSetUp()
         {
-            database = new DatabaseWrapper("test");
-            Series = new TimeSeries(database.Table);
+            Database = new DatabaseWrapper("test");
+            Series = new TimeSeries(Database.Table);
             Series.Write(new Event(TimeGuid.NowGuid()));
         }
         
         [BenchmarkClassTearDown]
         public void ClassTearDown()
         {
-            database.Dispose();
+            Database.Dispose();
         }
         
         [BenchmarkMethod(executionsCount:5, result:nameof(Result))]

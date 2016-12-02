@@ -6,11 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using CassandraTimeSeries.Model;
 using Commons;
+using Metrics;
+using Metrics.Core;
 
 namespace Benchmarks.ReadWrite
 {
     class BenchmarkEventWriter : EventWriter
     {
+        public Timer LatencyTimer = Metric.Timer("Write Latency", Unit.Calls);
+        public Counter EventsCounter = Metric.Counter("Events Written", Unit.Events);
+
         public TimeSpan AverageLatency => Latency.Average();
         public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
@@ -24,7 +29,10 @@ namespace Benchmarks.ReadWrite
         {
             var sw = Stopwatch.StartNew();
 
-            base.WriteNext();
+            using (LatencyTimer.NewContext())
+                base.WriteNext();
+
+            EventsCounter.Increment();
 
             Latency.Add(sw.Elapsed);
             TotalEventsWritten++;

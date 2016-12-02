@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Benchmarks.ReadWrite;
 using Commons;
+using Metrics;
+using Metrics.MetricData;
+using Metrics.Reporters;
 
 namespace Benchmarks.Results
 {
@@ -27,13 +31,24 @@ namespace Benchmarks.Results
                 .Select(x => x.AverageLatency)
                 .Average();
 
-            var totalReadsCount = readers.Sum(x => x.TotalReadsCount);
-            var totalWritesCount = writers.Sum(x => x.TotalEventsWritten);
+            var totalReadTime = readers.Select(x => x.TotalTime).Average();
+            var totalWriteTime = writers.Select(x => x.TotalTime).Average();
 
+            var totalReadsCount = readers.Sum(x => x.TotalReadsCount);
+            var totalEventsRead = readers.Sum(x => x.TotalEventsRead);
+            var totalEventsWritten = writers.Sum(x => x.TotalEventsWritten);
+
+            var readThroughput = totalEventsRead / totalReadTime.TotalSeconds;
+            var writeThroughput = totalEventsWritten / totalWriteTime.TotalSeconds;
+            
             return $"Average read latency: {averageReadLatency}\n" +
                    $"Average write latency: {averageWriteLatency}\n" +
                    $"Total reads count: {totalReadsCount}\n" +
-                   $"Total writes count: {totalWritesCount}\n";
+                   $"Total events read: {totalEventsRead}\n" +
+                   $"Total events read by single thread: {string.Join(", ", readers.Select(x => x.TotalEventsRead))}\n" +
+                   $"Total events written: {totalEventsWritten}\n" + 
+                   $"Read throughput: {readThroughput} events per second\n" +
+                   $"Write throughput: {writeThroughput} events per second";
         }
         
         public IBenchmarkingResult Update(IBenchmarkingResult otherResult)
