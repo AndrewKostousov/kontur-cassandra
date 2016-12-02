@@ -28,23 +28,23 @@ namespace Benchmarks.Results
         public string CreateReport()
         {
             var thisResult = $"Average execution time: {AverageExecutionTime}\n" +
-                             $"Total execution time: {TotalExecutionTime}\n";
+                             $"Total execution time: {TotalExecutionTime}";
 
             if (AdditionalResult != null)
-                thisResult += AdditionalResult.CreateReport();
+                thisResult += "\n" + AdditionalResult.CreateReport();
 
             return thisResult;
         }
 
-        public IBenchmarkingResult Update(IBenchmarkingResult newResult)
+        public IBenchmarkingResult Update(IBenchmarkingResult otherResult)
         {
-            var otherResult = newResult as BenchmarkingResult;
-            if (otherResult == null)
+            var other = otherResult as BenchmarkingResult;
+            if (other == null)
                 return this;
 
-            var averageTime = TimeSpan.FromTicks((AverageExecutionTime.Ticks + otherResult.AverageExecutionTime.Ticks)/2);
-            var totalTime = TotalExecutionTime + otherResult.TotalExecutionTime;
-            return new BenchmarkingResult(totalTime, averageTime, otherResult.AdditionalResult?.Update(AdditionalResult));
+            var averageTime = TimeSpan.FromTicks((AverageExecutionTime.Ticks + other.AverageExecutionTime.Ticks)/2);
+            var totalTime = TotalExecutionTime + other.TotalExecutionTime;
+            return new BenchmarkingResult(totalTime, averageTime, other.AdditionalResult?.Update(AdditionalResult));
         }
     }
 }

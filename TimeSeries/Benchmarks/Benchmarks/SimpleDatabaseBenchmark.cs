@@ -8,7 +8,7 @@ using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
-    [BenchmarkClass]
+    //[BenchmarkClass]
     public class SimpleDatabaseBenchmark
     {
         private DatabaseWrapper database;
@@ -43,26 +43,17 @@ namespace Benchmarks.Benchmarks
             database.Table.Truncate();
         }
 
-        [BenchmarkMethod(result:nameof(GetDatabaseStats))]
+        [BenchmarkMethod]
         public void TimeSeries_Write()
         {
             foreach (var e in eventsToWrite)
                 series.Write(e);
         }
 
-        [BenchmarkMethod(result:nameof(GetDatabaseStats))]
+        [BenchmarkMethod]
         public void TimeSeries_Read()
         {
             series.ReadRange(start, end, 1);
-        }
-
-        public IBenchmarkingResult GetDatabaseStats()
-        {
-            var eventsWritten = series.ReadRange(start, end);
-            var misswrites = new HashSet<Event>(eventsToWrite);
-            misswrites.ExceptWith(eventsWritten);
-
-            return new DatabaseBenchmarkingResult(misswrites.Count);
         }
     }
 }
