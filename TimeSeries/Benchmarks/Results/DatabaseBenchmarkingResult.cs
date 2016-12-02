@@ -70,7 +70,7 @@ namespace Benchmarks.Results
             var readsByThread = string.Join(", ", readers.Select(x => x.TotalEventsRead));
             var throughputPerThread = readers.Select(x => x.TotalEventsRead / x.TotalTime.TotalSeconds).Sum();
 
-            return $"Average read latency: {averageReadLatency}\n" +
+            return $"Average read latency: {averageReadLatency.TotalMilliseconds} ms\n" +
                    $"Average read throughput: {readThroughput} ev/s\n" +
                    $"Read throughput per thread: {throughputPerThread} ev/s\n" +
                    $"Reads count: {totalReadsCount}\n" +
