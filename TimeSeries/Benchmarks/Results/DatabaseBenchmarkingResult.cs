@@ -48,9 +48,11 @@ namespace Benchmarks.Results
             var averageWriteTime = writers.Select(x => x.TotalTime).Average();
             var writeThroughput = totalEventsWritten / averageWriteTime.TotalSeconds;
             var writesByThread = string.Join(", ", writers.Select(x => x.TotalEventsWritten));
+            var throughputPerThread = writers.Select(x => x.TotalEventsWritten/x.TotalTime.TotalSeconds).Sum();
 
             return $"Average write latency: {averageWriteLatency.TotalMilliseconds} ms\n" +
                    $"Average write throughput: {writeThroughput} ev/s\n" +
+                   $"Write throughput per thread: {throughputPerThread} ev/s\n" +
                    $"Events written: {totalEventsWritten}\n" +
                    $"Events written by single thread: {writesByThread}";
         }
@@ -66,9 +68,11 @@ namespace Benchmarks.Results
             var totalReadsCount = readers.Sum(x => x.TotalReadsCount);
             var readThroughput = totalEventsRead / totalReadTime.TotalSeconds;
             var readsByThread = string.Join(", ", readers.Select(x => x.TotalEventsRead));
+            var throughputPerThread = readers.Select(x => x.TotalEventsRead / x.TotalTime.TotalSeconds).Sum();
 
             return $"Average read latency: {averageReadLatency}\n" +
                    $"Average read throughput: {readThroughput} ev/s\n" +
+                   $"Read throughput per thread: {throughputPerThread} ev/s\n" +
                    $"Reads count: {totalReadsCount}\n" +
                    $"Events read: {totalEventsRead}\n" +
                    $"Events read by single thread: {readsByThread}";
