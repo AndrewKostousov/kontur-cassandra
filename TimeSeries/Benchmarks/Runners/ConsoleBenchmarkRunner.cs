@@ -25,8 +25,7 @@ namespace Benchmarks
             Console.WriteLine($"Preparing fixture: {fixture.Name}\n");
 
             fixture.BenchmarkStarted += b => Console.WriteLine($"Running benchmark: {b.Name}");
-            fixture.IterationStarted += (b, i) => Console.Write(".");
-            fixture.BenchmarkFinished += (b, r) => Console.WriteLine($" done!\n{r.CreateReport()}\n");
+            fixture.BenchmarkFinished += (b, r) => Console.WriteLine($"done!\n\n{r.CreateReport()}\n");
 
             fixture.Run();
         }

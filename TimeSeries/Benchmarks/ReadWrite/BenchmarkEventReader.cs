@@ -38,7 +38,7 @@ namespace Benchmarks.ReadWrite
 
             Latency.Add(sw.Elapsed);
             TotalReadsCount++;
-            TotalEventsRead += events.Count;
+            TotalEventsRead += events.Count - 1;
 
             return events;
         }

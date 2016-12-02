@@ -41,14 +41,24 @@ namespace Benchmarks.Results
             var readThroughput = totalEventsRead / totalReadTime.TotalSeconds;
             var writeThroughput = totalEventsWritten / totalWriteTime.TotalSeconds;
             
-            return $"Average read latency: {averageReadLatency}\n" +
-                   $"Average write latency: {averageWriteLatency}\n" +
-                   $"Total reads count: {totalReadsCount}\n" +
-                   $"Total events read: {totalEventsRead}\n" +
-                   $"Total events read by single thread: {string.Join(", ", readers.Select(x => x.TotalEventsRead))}\n" +
-                   $"Total events written: {totalEventsWritten}\n" + 
-                   $"Read throughput: {readThroughput} events per second\n" +
-                   $"Write throughput: {writeThroughput} events per second";
+            var statistics = "\n";
+
+            if (totalEventsRead != 0)
+                statistics +=
+                    $"Average read latency: {averageReadLatency}\n" +
+                    $"Total reads count: {totalReadsCount}\n" +
+                    $"Total events read: {totalEventsRead}\n" +
+                    $"Total events read by single thread: {string.Join(", ", readers.Select(x => x.TotalEventsRead))}\n" +
+                    $"Read throughput: {readThroughput} events per second";
+
+            if (totalEventsWritten != 0)
+                statistics += "\n\n" +
+                    $"Average write latency: {averageWriteLatency}\n" +
+                    $"Total events written: {totalEventsWritten}\n" +
+                    $"Total events written by single thread: {string.Join(", ", writers.Select(x => x.TotalEventsWritten))}\n" +
+                    $"Write throughput: {writeThroughput} events per second";
+
+            return statistics;
         }
         
         public IBenchmarkingResult Update(IBenchmarkingResult otherResult)

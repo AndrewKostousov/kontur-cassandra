@@ -33,7 +33,7 @@ namespace Benchmarks.Reflection
         private readonly int executionsCount;
         private readonly string resultMethodName;
 
-        public BenchmarkMethodAttribute(int executionsCount=100, string result=null)
+        public BenchmarkMethodAttribute(int executionsCount=1, string result=null)
         {
             this.executionsCount = executionsCount;
             this.resultMethodName = result;
