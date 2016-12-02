@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CassandraTimeSeries.Model;
+using Commons;
 
 namespace Benchmarks.ReadWrite
 {
     class BenchmarkEventWriter : EventWriter
     {
-        public TimeSpan AverageLatency => TimeSpan.FromTicks((long)Latency.Average(x => x.Ticks));
+        public TimeSpan AverageLatency => Latency.Average();
+        public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
         public int TotalEventsWritten { get; private set; }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Benchmarks.ReadWrite;
+using Commons;
 
 namespace Benchmarks.Results
 {
@@ -18,18 +19,15 @@ namespace Benchmarks.Results
 
         public string CreateReport()
         {
-            var averageReadLatency = TimeSpan.FromTicks((long)readers
+            var averageReadLatency = readers
                 .Select(x => x.AverageLatency)
-                .DefaultIfEmpty(TimeSpan.Zero)
-                .Average(x => x.Ticks));
+                .Average();
+
+            var averageWriteLatency = writers
+                .Select(x => x.AverageLatency)
+                .Average();
 
             var totalReadsCount = readers.Sum(x => x.TotalReadsCount);
-
-            var averageWriteLatency = TimeSpan.FromTicks((long)writers
-                .Select(x => x.AverageLatency)
-                .DefaultIfEmpty(TimeSpan.Zero)
-                .Average(x => x.Ticks));
-
             var totalWritesCount = writers.Sum(x => x.TotalEventsWritten);
 
             return $"Average read latency: {averageReadLatency}\n" +
@@ -37,7 +35,7 @@ namespace Benchmarks.Results
                    $"Total reads count: {totalReadsCount}\n" +
                    $"Total writes count: {totalWritesCount}\n";
         }
-
+        
         public IBenchmarkingResult Update(IBenchmarkingResult otherResult)
         {
             var other = otherResult as DatabaseBenchmarkingResult;

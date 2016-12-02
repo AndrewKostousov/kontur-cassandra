@@ -64,6 +64,7 @@
     <Compile Include="Bits\EndianBitConverter.cs" />
     <Compile Include="Bits\Endianness.cs" />
     <Compile Include="Bits\LittleEndianBitConverter.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="GuidHelpers.cs" />
     <Compile Include="InvalidProgramStateException.cs" />
     <Compile Include="Json\JsonObjectExtensions.cs" />
