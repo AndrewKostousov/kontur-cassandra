@@ -19,7 +19,7 @@ namespace Benchmarks.ReadWrite
         public TimeSpan AverageLatency => Latency.Average();
         public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
-        public int TotalEventsWritten { get; private set; }
+        public int TotalEventsWritten => Latency.Count;
 
 
         public BenchmarkEventWriter(TimeSeries series, WriterSettings settings) 
@@ -32,10 +32,9 @@ namespace Benchmarks.ReadWrite
             using (LatencyTimer.NewContext())
                 base.WriteNext();
 
-            EventsCounter.Increment();
-
             Latency.Add(sw.Elapsed);
-            TotalEventsWritten++;
+
+            EventsCounter.Increment();
         }
     }
 }
