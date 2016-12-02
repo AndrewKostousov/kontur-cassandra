@@ -13,9 +13,6 @@ namespace Benchmarks.ReadWrite
 {
     class BenchmarkEventWriter : EventWriter
     {
-        public Timer LatencyTimer = Metric.Timer("Write Latency", Unit.Calls);
-        public Counter EventsCounter = Metric.Counter("Events Written", Unit.Events);
-
         public TimeSpan AverageLatency => Latency.Average();
         public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
@@ -28,13 +25,8 @@ namespace Benchmarks.ReadWrite
         public override void WriteNext()
         {
             var sw = Stopwatch.StartNew();
-
-            using (LatencyTimer.NewContext())
-                base.WriteNext();
-
+            base.WriteNext();
             Latency.Add(sw.Elapsed);
-
-            EventsCounter.Increment();
         }
     }
 }
