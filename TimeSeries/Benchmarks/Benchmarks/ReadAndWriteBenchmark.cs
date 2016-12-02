@@ -25,6 +25,7 @@ namespace Benchmarks.Benchmarks
         {
             base.SetUp();
 
+            // TODO: generated data should (?) be a little more sparse
             for(var i = 0; i < 10000; ++i)
                 Series.Write(new Event(TimeGuid.NowGuid()));
         }
