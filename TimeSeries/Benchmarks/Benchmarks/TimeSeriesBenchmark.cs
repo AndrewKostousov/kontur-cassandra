@@ -15,8 +15,8 @@ namespace Benchmarks.Benchmarks
         internal TimeSeries Series;
         internal ReadersWritersPool Pool;
 
-        internal IEnumerable<BenchmarkEventReader> Readers;
-        internal IEnumerable<BenchmarkEventWriter> Writers;
+        internal List<BenchmarkEventReader> Readers;
+        internal List<BenchmarkEventWriter> Writers;
 
         [BenchmarkClassSetUp]
         public void ClassSetUp()
@@ -32,11 +32,11 @@ namespace Benchmarks.Benchmarks
             database.Dispose();
         }
         
-        [BenchmarkMethod(executionsCount:1, result:nameof(Result))]
-        public void Latency_Check()
+        [BenchmarkMethod(executionsCount:5, result:nameof(Result))]
+        public void Benchmark()
         {
             Pool.Start();
-            Thread.Sleep(10000);
+            Thread.Sleep(2000);
             Pool.Stop();
         }
 

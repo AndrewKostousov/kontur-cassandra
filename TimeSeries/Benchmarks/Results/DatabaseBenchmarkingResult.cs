@@ -20,12 +20,14 @@ namespace Benchmarks.Results
         {
             var averageReadLatency = TimeSpan.FromTicks((long)readers
                 .Select(x => x.AverageLatency)
+                .DefaultIfEmpty(TimeSpan.Zero)
                 .Average(x => x.Ticks));
 
             var totalReadsCount = readers.Sum(x => x.TotalReadsCount);
 
             var averageWriteLatency = TimeSpan.FromTicks((long)writers
                 .Select(x => x.AverageLatency)
+                .DefaultIfEmpty(TimeSpan.Zero)
                 .Average(x => x.Ticks));
 
             var totalWritesCount = writers.Sum(x => x.TotalEventsWritten);
