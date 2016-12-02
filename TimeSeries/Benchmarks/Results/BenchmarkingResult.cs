@@ -27,8 +27,7 @@ namespace Benchmarks.Results
         
         public string CreateReport()
         {
-            var thisResult = $"Average execution time: {AverageExecutionTime}\n" +
-                             $"Total execution time: {TotalExecutionTime}";
+            var thisResult = $"Benchmark execution time: {TotalExecutionTime}";
 
             if (AdditionalResult != null)
                 thisResult += "\n" + AdditionalResult.CreateReport();

@@ -45,14 +45,14 @@ namespace Benchmarks.Results
                 .Average();
 
             var totalEventsWritten = writers.Sum(x => x.TotalEventsWritten);
-            var totalWriteTime = writers.Select(x => x.TotalTime).Average();
-            var writeThroughput = totalEventsWritten / totalWriteTime.TotalSeconds;
+            var averageWriteTime = writers.Select(x => x.TotalTime).Average();
+            var writeThroughput = totalEventsWritten / averageWriteTime.TotalSeconds;
             var writesByThread = string.Join(", ", writers.Select(x => x.TotalEventsWritten));
 
-            return $"Average write latency: {averageWriteLatency}\n" +
-                   $"Total events written: {totalEventsWritten}\n" +
-                   $"Total events written by single thread: {writesByThread}\n" +
-                   $"Write throughput: {writeThroughput} events per second";
+            return $"Average write latency: {averageWriteLatency.TotalMilliseconds} ms\n" +
+                   $"Average write throughput: {writeThroughput} ev/s\n" +
+                   $"Events written: {totalEventsWritten}\n" +
+                   $"Events written by single thread: {writesByThread}";
         }
 
         private string GetReadStatistics()
@@ -68,10 +68,10 @@ namespace Benchmarks.Results
             var readsByThread = string.Join(", ", readers.Select(x => x.TotalEventsRead));
 
             return $"Average read latency: {averageReadLatency}\n" +
-                   $"Total reads count: {totalReadsCount}\n" +
-                   $"Total events read: {totalEventsRead}\n" +
-                   $"Total events read by single thread: {readsByThread}\n" +
-                   $"Read throughput: {readThroughput} events per second";
+                   $"Average read throughput: {readThroughput} ev/s\n" +
+                   $"Reads count: {totalReadsCount}\n" +
+                   $"Events read: {totalEventsRead}\n" +
+                   $"Events read by single thread: {readsByThread}";
         }
 
         public IBenchmarkingResult Update(IBenchmarkingResult otherResult)

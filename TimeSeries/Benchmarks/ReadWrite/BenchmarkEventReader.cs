@@ -19,8 +19,9 @@ namespace Benchmarks.ReadWrite
         public TimeSpan AverageLatency => Latency.Average();
         public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
+        public List<int> ReadsLength { get; } = new List<int>();
         public int TotalReadsCount => Latency.Count;
-        public int TotalEventsRead { get; private set; }
+        public int TotalEventsRead => ReadsLength.Sum();
 
         public BenchmarkEventReader(TimeSeries series, ReaderSettings settings) 
             : base(series, settings) { }
@@ -37,7 +38,7 @@ namespace Benchmarks.ReadWrite
             EventsCounter.Increment(events.Count);
 
             Latency.Add(sw.Elapsed);
-            TotalEventsRead += events.Count - 1;
+            ReadsLength.Add(events.Count - 1);
 
             return events;
         }
