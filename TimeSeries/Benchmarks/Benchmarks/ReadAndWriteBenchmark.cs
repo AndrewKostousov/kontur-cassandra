@@ -11,6 +11,7 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public class ReadAndWriteBenchmark : TimeSeriesBenchmark
     {
+        // TODO: readers are not fast enough to read all written events
         public ReadAndWriteBenchmark() : base(readersCount:4, writersCount:4) { }
     }
 
