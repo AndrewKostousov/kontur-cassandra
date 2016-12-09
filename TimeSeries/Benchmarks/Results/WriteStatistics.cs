@@ -17,9 +17,7 @@ namespace Benchmarks.Results
                    $"Average write throughput: {TotalThroughput} ev/s\n\n" +
 
                    $"Total writes count: {TotalOperationsCount}\n" +
-                   $"Average writes by single thread: {AverageOperationsPerThread}\n" +
-                   $"95% of threads made less than {Operations95ThPercentile} writes\n" +
-                   $"98% of threads made less than {Operations98ThPercentile} writes\n\n";
+                   $"Average writes by single thread: {AverageOperationsPerThread}\n\n";
         }
     }
 }

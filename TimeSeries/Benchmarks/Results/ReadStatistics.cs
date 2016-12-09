@@ -48,9 +48,7 @@ namespace Benchmarks.Results
                    $"Average read throughput: {TotalReadThroughput} ev/s\n\n" +
 
                    $"Total reads count: {TotalOperationsCount}\n" +
-                   $"Average reads by single thread: {AverageOperationsPerThread}\n" +
-                   $"95% of threads made less than {Operations95ThPercentile} reads\n" +
-                   $"98% of threads made less than {Operations98ThPercentile} reads\n\n" +
+                   $"Average reads by single thread: {AverageOperationsPerThread}\n\n" +
 
                    $"Total events read: {TotalEventsRead}\n" +
                    $"Average reads length: {AverageReadsLength} events\n" +
@@ -58,8 +56,8 @@ namespace Benchmarks.Results
                    $"98% of reads were shorter than {Reads98ThPercentile} events\n\n" +
 
                    $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\n" +
-                   $"95% of events were read after {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
-                   $"98% of events were read after {Percentile98ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n\n";
+                   $"95% of events were read earlier than {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
+                   $"98% of events were read earlier than {Percentile98ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n\n";
         }
     }
 }
