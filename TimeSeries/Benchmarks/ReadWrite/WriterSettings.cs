@@ -2,6 +2,6 @@
 {
     class WriterSettings
     {
-        public int MillisecondsSleep { get; set; } = 100;
+        public int MillisecondsSleep { get; set; } = 0;
     }
 }

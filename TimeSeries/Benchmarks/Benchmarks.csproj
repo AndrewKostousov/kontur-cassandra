@@ -55,8 +55,10 @@
     <Compile Include="Benchmarks\TimeSeriesBenchmark.cs" />
     <Compile Include="ReadWrite\BenchmarkEventReader.cs" />
     <Compile Include="ReadWrite\BenchmarkEventWriter.cs" />
+    <Compile Include="ReadWrite\BenchmarkWorkerExtensions.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />
     <Compile Include="ReadWrite\EventWriter.cs" />
+    <Compile Include="ReadWrite\IBenchmarkWorker.cs" />
     <Compile Include="ReadWrite\ReaderSettings.cs" />
     <Compile Include="ReadWrite\WorkersPool.cs" />
     <Compile Include="ReadWrite\ReadersWritersPool.cs" />
@@ -65,6 +67,9 @@
     <Compile Include="Reflection\FromAttribute.cs" />
     <Compile Include="Reflection\AttributeMethodMapper.cs" />
     <Compile Include="Reflection\Attributes.cs" />
+    <Compile Include="Results\ReadStatistics.cs" />
+    <Compile Include="Results\WorkerStatistics.cs" />
+    <Compile Include="Results\WriteStatistics.cs" />
     <Compile Include="Runners\ConsoleBenchmarkRunner.cs" />
     <Compile Include="Results\BenchmarkingResult.cs" />
     <Compile Include="Benchmarks\TestingBenchmark.cs" />

@@ -5,31 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CassandraTimeSeries.Model;
-using Commons;
 using Metrics;
 
 namespace Benchmarks.ReadWrite
 {
-    interface IBenchmarkWorker
-    {
-        List<TimeSpan> Latency { get; }
-    }
-
-    static class BenchmarkWorkerExtensions
-    {
-        public static TimeSpan AverageLatency(this IBenchmarkWorker worker) =>
-            worker.Latency.Average();
-
-        public static TimeSpan OperationalTime(this IBenchmarkWorker worker) => 
-            worker.Latency.Sum();
-
-        public static int TotalOperationsCount(this IBenchmarkWorker worker) => 
-            worker.Latency.Count;
-
-        public static double AverageThroughput(this IBenchmarkWorker worker) =>
-            worker.TotalOperationsCount()/worker.OperationalTime().TotalSeconds;
-    }
-
     class BenchmarkEventReader : EventReader, IBenchmarkWorker
     {
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();

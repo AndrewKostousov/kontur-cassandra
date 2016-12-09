@@ -3,6 +3,6 @@
     class ReaderSettings
     {
         public int EventsToRead { get; set; } = 100;
-        public int MillisecondsSleep { get; set; } = 1000;
+        public int MillisecondsSleep { get; set; } = 0;
     }
 }

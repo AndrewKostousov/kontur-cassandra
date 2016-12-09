@@ -31,8 +31,8 @@ namespace Benchmarks.Benchmarks
             this.readersCount = readersCount;
             this.writersCount = writersCount;
 
-            readerSettings = new ReaderSettings { MillisecondsSleep = 0 };
-            writerSettings = new WriterSettings { MillisecondsSleep = 0 };
+            readerSettings = new ReaderSettings();
+            writerSettings = new WriterSettings();
         }
 
         [BenchmarkSetUp]
