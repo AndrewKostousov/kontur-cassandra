@@ -26,7 +26,9 @@ namespace Benchmarks.Results
 
         public string CreateReport()
         {
-            return $"Average read latency: {AverageLatency.TotalMilliseconds} ms\n" +
+            return $"Readers count: {WorkersCount}\n\n" +
+                   $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
+                   $"Average single read latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
                    $"95% of reads were faster than: {Latency95ThPercentile.TotalMilliseconds} ms\n" +
                    $"98% of reads were faster than: {Latency98ThPercentile.TotalMilliseconds} ms\n" +
                    $"Average read throughput: {TotalReadThroughput} ev/s\n\n" +

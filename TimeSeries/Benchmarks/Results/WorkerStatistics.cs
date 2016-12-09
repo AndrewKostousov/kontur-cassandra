@@ -8,10 +8,12 @@ namespace Benchmarks.Results
 {
     abstract class WorkerStatistics
     {
-        public TimeSpan AverageLatency { get; }
+        public TimeSpan AverageOperationLatency { get; }
+        public TimeSpan AverageTotalLatency { get; }
         public TimeSpan Latency95ThPercentile { get; }
         public TimeSpan Latency98ThPercentile { get; }
 
+        public int WorkersCount { get; }
         public int TotalOperationsCount { get; }
         public double AverageOperationsPerThread { get; }
         public int Operations95ThPercentile { get; }
@@ -22,7 +24,9 @@ namespace Benchmarks.Results
         {
             if (workers.Count == 0) return;
 
-            AverageLatency = workers.SelectMany(x => x.Latency).Average();
+            WorkersCount = workers.Count;
+            AverageOperationLatency = workers.SelectMany(x => x.Latency).Average();
+            AverageTotalLatency = workers.Select(x => x.Latency.Sum()).Average();
             Latency95ThPercentile = workers.SelectMany(x => x.Latency).Percentile(95);
             Latency98ThPercentile = workers.SelectMany(x => x.Latency).Percentile(98);
 

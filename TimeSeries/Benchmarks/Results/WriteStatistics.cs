@@ -9,7 +9,9 @@ namespace Benchmarks.Results
 
         public string CreateReport()
         {
-            return $"Average write latency: {AverageLatency.TotalMilliseconds} ms\n" +
+            return $"Writers count: {WorkersCount}\n\n" +
+                   $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
+                   $"Average single write latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
                    $"95% of writes were faster than: {Latency95ThPercentile.TotalMilliseconds} ms\n" +
                    $"98% of writes were faster than: {Latency98ThPercentile.TotalMilliseconds} ms\n" +
                    $"Average write throughput: {TotalThroughput} ev/s\n\n" +
