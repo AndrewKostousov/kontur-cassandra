@@ -23,14 +23,11 @@ namespace Benchmarks.Benchmarks
         private readonly ReaderSettings readerSettings;
         private readonly WriterSettings writerSettings;
 
-        private readonly int readersCount;
-        private readonly int writersCount;
+        protected abstract int ReadersCount { get; }
+        protected abstract int WritersCount { get; }
 
-        protected TimeSeriesBenchmark(int readersCount, int writersCount)
+        protected TimeSeriesBenchmark()
         {
-            this.readersCount = readersCount;
-            this.writersCount = writersCount;
-
             readerSettings = new ReaderSettings();
             writerSettings = new WriterSettings();
         }
@@ -38,11 +35,11 @@ namespace Benchmarks.Benchmarks
         [BenchmarkSetUp]
         public virtual void SetUp()
         {
-            readers = Enumerable.Range(0, readersCount)
+            readers = Enumerable.Range(0, ReadersCount)
                 .Select(_ => new BenchmarkEventReader(Series, readerSettings))
                 .ToList();
 
-            writers = Enumerable.Range(0, writersCount)
+            writers = Enumerable.Range(0, WritersCount)
                 .Select(_ => new BenchmarkEventWriter(Series, writerSettings))
                 .ToList();
 

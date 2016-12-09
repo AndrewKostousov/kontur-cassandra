@@ -11,13 +11,15 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public class ReadAndWriteBenchmark : TimeSeriesBenchmark
     {
-        public ReadAndWriteBenchmark() : base(readersCount:4, writersCount:4) { }
+        protected override int ReadersCount => 4;
+        protected override int WritersCount => 4;
     }
 
     [BenchmarkClass]
     public class ReadOnlyBenchmark : TimeSeriesBenchmark
     {
-        public ReadOnlyBenchmark() : base(readersCount: 4, writersCount: 0) { }
+        protected override int ReadersCount => 4;
+        protected override int WritersCount => 0;
 
         [BenchmarkSetUp]
         public override void SetUp()
@@ -32,6 +34,7 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public class WriteOnlyBenchmark : TimeSeriesBenchmark
     {
-        public WriteOnlyBenchmark() : base(readersCount: 0, writersCount: 4) { }
+        protected override int ReadersCount => 0;
+        protected override int WritersCount => 4;
     }
 }
