@@ -47,7 +47,7 @@ namespace CassandraTimeSeries.UnitTesting
             RunTest(
                 eventsToWrite,
                 read,
-                actual => actual.ShouldBeEquivalentTo(eventsToWrite)
+                actual => actual.ShouldBeEquivalentTo(eventsToWrite, o => o.WithStrictOrderingFor(x => x))
                 
                 //CollectionAssert.AreEquivalent(eventsToWrite, actual)
             );
