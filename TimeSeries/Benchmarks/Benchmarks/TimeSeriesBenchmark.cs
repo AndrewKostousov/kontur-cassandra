@@ -26,6 +26,8 @@ namespace Benchmarks.Benchmarks
         protected abstract int ReadersCount { get; }
         protected abstract int WritersCount { get; }
 
+        protected int CurrentIteration { get; private set; }
+
         protected TimeSeriesBenchmark()
         {
             readerSettings = new ReaderSettings();
@@ -69,6 +71,8 @@ namespace Benchmarks.Benchmarks
             pool.Start();
             Thread.Sleep(10000);
             pool.Stop();
+
+            CurrentIteration++;
         }
 
         public IBenchmarkingResult Result()
