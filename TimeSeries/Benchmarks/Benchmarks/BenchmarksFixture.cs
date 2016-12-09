@@ -27,6 +27,8 @@ namespace Benchmarks.Benchmarks
         public List<Func<IBenchmarkingResult>> AdditionalResults { get; } = new List<Func<IBenchmarkingResult>>();
 
         public event Action<Benchmark> BenchmarkStarted;
+        public event Action<Benchmark> BenchmarkSetupStarted;
+        public event Action<Benchmark> BenchmarkTeardownStarted;
         public event Action<Benchmark, int> IterationStarted;
         public event Action<Benchmark, int> IterationFinished;
         public event Action<Benchmark, IBenchmarkingResult> BenchmarkFinished;
@@ -63,12 +65,14 @@ namespace Benchmarks.Benchmarks
         private Benchmark ConnectGlobalHandlers(Benchmark benchmark)
         {
             benchmark.IterationStarted += i => {
+                BenchmarkSetupStarted?.Invoke(benchmark);
                 Setup?.Invoke();
                 IterationStarted?.Invoke(benchmark, i); 
             };
 
             benchmark.IterationFinished += i =>
             {
+                BenchmarkTeardownStarted?.Invoke(benchmark);
                 Teardown?.Invoke();
                 IterationFinished?.Invoke(benchmark, i);
             };

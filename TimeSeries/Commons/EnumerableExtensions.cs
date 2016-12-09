@@ -17,5 +17,12 @@ namespace Commons
         {
             return TimeSpan.FromTicks(source.Sum(x => x.Ticks));
         }
+
+        public static T Percentile<T>(this IEnumerable<T> source, int percentile)
+            where T : IComparable<T>
+        {
+            var ordered =  source.OrderBy(x => x).ToList();
+            return ordered[(int)(percentile*ordered.Count/100.0)];
+        }
     }
 }

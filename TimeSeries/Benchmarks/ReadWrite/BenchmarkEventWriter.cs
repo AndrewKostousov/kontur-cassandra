@@ -11,13 +11,9 @@ using Metrics.Core;
 
 namespace Benchmarks.ReadWrite
 {
-    class BenchmarkEventWriter : EventWriter
+    class BenchmarkEventWriter : EventWriter, IBenchmarkWorker
     {
-        public TimeSpan AverageLatency => Latency.Average();
-        public TimeSpan TotalTime => Latency.Sum();
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
-        public int TotalEventsWritten => Latency.Count;
-
 
         public BenchmarkEventWriter(TimeSeries series, WriterSettings settings) 
             : base(series, settings) { }

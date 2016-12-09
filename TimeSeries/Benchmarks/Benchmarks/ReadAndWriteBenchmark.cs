@@ -11,7 +11,6 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public class ReadAndWriteBenchmark : TimeSeriesBenchmark
     {
-        // TODO: readers are not fast enough to read all written events
         public ReadAndWriteBenchmark() : base(readersCount:4, writersCount:4) { }
     }
 
@@ -25,8 +24,7 @@ namespace Benchmarks.Benchmarks
         {
             base.SetUp();
 
-            // TODO: generated data should (?) be a little more sparse
-            for(var i = 0; i < 10000; ++i)
+            for(var i = 0; i < 50000; ++i)
                 Series.Write(new Event(TimeGuid.NowGuid()));
         }
     }

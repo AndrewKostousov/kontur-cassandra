@@ -10,13 +10,32 @@ using Metrics;
 
 namespace Benchmarks.ReadWrite
 {
-    class BenchmarkEventReader : EventReader
+    interface IBenchmarkWorker
     {
-        public TimeSpan AverageLatency => Latency.Average();
-        public TimeSpan TotalTime => Latency.Sum();
+        List<TimeSpan> Latency { get; }
+    }
+
+    static class BenchmarkWorkerExtensions
+    {
+        public static TimeSpan AverageLatency(this IBenchmarkWorker worker) =>
+            worker.Latency.Average();
+
+        public static TimeSpan OperationalTime(this IBenchmarkWorker worker) => 
+            worker.Latency.Sum();
+
+        public static int TotalOperationsCount(this IBenchmarkWorker worker) => 
+            worker.Latency.Count;
+
+        public static double AverageThroughput(this IBenchmarkWorker worker) =>
+            worker.TotalOperationsCount()/worker.OperationalTime().TotalSeconds;
+    }
+
+    class BenchmarkEventReader : EventReader, IBenchmarkWorker
+    {
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
         public List<int> ReadsLength { get; } = new List<int>();
-        public int TotalReadsCount => Latency.Count;
+        public double AverageReadThroughput => ReadsLength.Sum()/this.OperationalTime().TotalSeconds;
+
         public int TotalEventsRead => ReadsLength.Sum();
 
         public BenchmarkEventReader(TimeSeries series, ReaderSettings settings) 
