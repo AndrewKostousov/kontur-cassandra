@@ -16,8 +16,8 @@ namespace Benchmarks.Results
         public double TotalReadThroughput { get; }
         
         public TimeSpan AverageLatencyBetweenWriteAndRead { get; }
-        public TimeSpan Percentile95thBetweenWriteAndRead { get; }
-        public TimeSpan Percentile98thBetweenWriteAndRead { get; }
+        public TimeSpan Percentile95ThBetweenWriteAndRead { get; }
+        public TimeSpan Percentile98ThBetweenWriteAndRead { get; }
 
         public ReadStatistics(List<BenchmarkEventReader> readers) : base(readers)
         {
@@ -34,8 +34,8 @@ namespace Benchmarks.Results
                 .ToList();
 
             AverageLatencyBetweenWriteAndRead = latencyBetweenWriteAndRead.Average();
-            Percentile95thBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(95);
-            Percentile98thBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(98);
+            Percentile95ThBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(95);
+            Percentile98ThBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(98);
         }
 
         public string CreateReport()
@@ -58,8 +58,8 @@ namespace Benchmarks.Results
                    $"98% of reads were shorter than: {Reads98ThPercentile} events\n\n" +
 
                    $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\n" +
-                   $"95% of events were read after {Percentile95thBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
-                   $"98% of events were read after {Percentile98thBetweenWriteAndRead.TotalMilliseconds} ms since they had been written";
+                   $"95% of events were read after {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
+                   $"98% of events were read after {Percentile98ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written";
         }
     }
 }
