@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Metrics;
-using Metrics.MetricData;
-using Metrics.Reporters;
+﻿using System.Reflection;
+using Benchmarks.Reflection;
+using Benchmarks.Runners;
 
 namespace Benchmarks
 {
@@ -15,7 +8,8 @@ namespace Benchmarks
     {
         static void Main(string[] args)
         {
-            new ConsoleBenchmarkRunner().RunAll(Assembly.GetExecutingAssembly());
+            var benchmarks = new BenchmarkFinder().GetBenchmarks(Assembly.GetExecutingAssembly());
+            new ConsoleBenchmarkRunner().RunAll(benchmarks);
         }
     }
 }

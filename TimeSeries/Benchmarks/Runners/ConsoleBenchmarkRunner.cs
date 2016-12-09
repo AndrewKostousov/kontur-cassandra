@@ -1,21 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Benchmarks.Benchmarks;
 using Benchmarks.Reflection;
 
-namespace Benchmarks
+namespace Benchmarks.Runners
 {
-    class ConsoleBenchmarkRunner
+    class ConsoleBenchmarkRunner : IBenchmarkRunner
     {
         readonly string separator = "\n".PadLeft(100, '=') + "\n";
 
-        public void RunAll(Assembly assembly)
+        public void RunAll(IEnumerable<BenchmarksFixture> benchmarks)
         {
-            Console.WriteLine($"Retrieving benchmarks from <{assembly.FullName}>\n");
-
-            var benchmarkFixtures = new BenchmarkFinder().GetBenchmarks(assembly);
-
-            foreach (var fixture in benchmarkFixtures)
+            foreach (var fixture in benchmarks)
                 RunSingleBenchmark(fixture);
 
             Console.WriteLine(separator + "All benchmarks done! Press any key to exit.");
