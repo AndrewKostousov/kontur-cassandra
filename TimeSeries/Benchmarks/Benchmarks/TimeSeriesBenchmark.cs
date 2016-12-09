@@ -69,7 +69,7 @@ namespace Benchmarks.Benchmarks
         public void TimeSeries()
         {
             pool.Start();
-            Thread.Sleep(10000);
+            Thread.Sleep(5*1000);
             pool.Stop();
 
             CurrentIteration++;

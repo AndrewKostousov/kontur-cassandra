@@ -20,7 +20,7 @@ namespace Benchmarks.Benchmarks
     {
         protected override int ReadersCount => 4;
         protected override int WritersCount => 0;
-        protected readonly int PreloadedEventsCount = 50000;
+        protected readonly int PreloadedEventsCount = 25000;
 
         [BenchmarkSetUp]
         public override void SetUp()
