@@ -12,14 +12,14 @@ namespace Benchmarks.Results
             return $"Writers count: {WorkersCount}\n\n" +
                    $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
                    $"Average single write latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
-                   $"95% of writes were faster than: {Latency95ThPercentile.TotalMilliseconds} ms\n" +
-                   $"98% of writes were faster than: {Latency98ThPercentile.TotalMilliseconds} ms\n" +
+                   $"95% of writes were faster than {Latency95ThPercentile.TotalMilliseconds} ms\n" +
+                   $"98% of writes were faster than {Latency98ThPercentile.TotalMilliseconds} ms\n" +
                    $"Average write throughput: {TotalThroughput} ev/s\n\n" +
 
                    $"Total writes count: {TotalOperationsCount}\n" +
                    $"Average writes by single thread: {AverageOperationsPerThread}\n" +
-                   $"95% of threads made less than: {Operations95ThPercentile} writes\n" +
-                   $"98% of threads made less than: {Operations98ThPercentile} writes\n\n";
+                   $"95% of threads made less than {Operations95ThPercentile} writes\n" +
+                   $"98% of threads made less than {Operations98ThPercentile} writes\n\n";
         }
     }
 }

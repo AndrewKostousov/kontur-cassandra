@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -30,11 +31,16 @@ namespace Benchmarks.Results
         {
             var statistics = new StringBuilder();
 
-            foreach (var readStatistic in ReadStatistics.Where(s => s.WorkersCount != 0))
-                statistics.Append("Read statistics:\n\n" + readStatistic.CreateReport());
+            foreach (var statistic in ReadStatistics.Zip(WriteStatistics, Tuple.Create))
+            {
+                var readStatistic = statistic.Item1;
+                var writeStatistic = statistic.Item2;
 
-            foreach (var writeStatistic in WriteStatistics.Where(s => s.WorkersCount != 0))
-                statistics.Append("Write statistics:\n\n" + writeStatistic.CreateReport());
+                if (readStatistic.WorkersCount != 0)
+                    statistics.Append("Read statistics:\n\n" + readStatistic.CreateReport());
+                if (writeStatistic.WorkersCount != 0)
+                    statistics.Append("Write statistics:\n\n" + writeStatistic.CreateReport());
+            }
 
             return statistics.ToString();
         }

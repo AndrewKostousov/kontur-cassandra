@@ -43,19 +43,19 @@ namespace Benchmarks.Results
             return $"Readers count: {WorkersCount}\n\n" +
                    $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
                    $"Average single read latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
-                   $"95% of reads were faster than: {Latency95ThPercentile.TotalMilliseconds} ms\n" +
-                   $"98% of reads were faster than: {Latency98ThPercentile.TotalMilliseconds} ms\n" +
+                   $"95% of reads were faster than {Latency95ThPercentile.TotalMilliseconds} ms\n" +
+                   $"98% of reads were faster than {Latency98ThPercentile.TotalMilliseconds} ms\n" +
                    $"Average read throughput: {TotalReadThroughput} ev/s\n\n" +
 
                    $"Total reads count: {TotalOperationsCount}\n" +
                    $"Average reads by single thread: {AverageOperationsPerThread}\n" +
-                   $"95% of threads made less than: {Operations95ThPercentile} reads\n" +
-                   $"98% of threads made less than: {Operations98ThPercentile} reads\n\n" +
+                   $"95% of threads made less than {Operations95ThPercentile} reads\n" +
+                   $"98% of threads made less than {Operations98ThPercentile} reads\n\n" +
 
                    $"Total events read: {TotalEventsRead}\n" +
                    $"Average reads length: {AverageReadsLength} events\n" +
-                   $"95% of reads were shorter than: {Reads95ThPercentile} events\n" +
-                   $"98% of reads were shorter than: {Reads98ThPercentile} events\n\n" +
+                   $"95% of reads were shorter than {Reads95ThPercentile} events\n" +
+                   $"98% of reads were shorter than {Reads98ThPercentile} events\n\n" +
 
                    $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\n" +
                    $"95% of events were read after {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
