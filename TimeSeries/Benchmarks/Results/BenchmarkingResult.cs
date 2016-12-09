@@ -27,10 +27,10 @@ namespace Benchmarks.Results
         
         public string CreateReport()
         {
-            var thisResult = $"Benchmark execution time: {TotalExecutionTime}";
+            var thisResult = $"Benchmark execution time: {TotalExecutionTime}\n\n";
 
             if (AdditionalResult != null)
-                thisResult += "\n" + AdditionalResult.CreateReport();
+                thisResult += AdditionalResult.CreateReport();
 
             return thisResult;
         }

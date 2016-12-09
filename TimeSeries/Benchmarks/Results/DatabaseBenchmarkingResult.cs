@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Benchmarks.ReadWrite;
 using Metrics;
@@ -27,19 +28,15 @@ namespace Benchmarks.Results
 
         public string CreateReport()
         {
-            var totalEventsRead = ReadStatistics.First().TotalEventsRead;
-            var totalEventsWritten = WriteStatistics.First().TotalOperationsCount;
+            var statistics = new StringBuilder();
 
-            var statistics = "\n";
+            foreach (var readStatistic in ReadStatistics.Where(s => s.WorkersCount != 0))
+                statistics.Append("Read statistics:\n\n" + readStatistic.CreateReport());
 
-            if (totalEventsRead != 0)
-                statistics += "Read statistics:\n\n" + ReadStatistics.First().CreateReport();
-            if (totalEventsWritten != 0 && totalEventsRead != 0)
-                statistics += "\n\n";
-            if (totalEventsWritten != 0)
-                statistics += "Write statistics:\n\n" + WriteStatistics.First().CreateReport();
+            foreach (var writeStatistic in WriteStatistics.Where(s => s.WorkersCount != 0))
+                statistics.Append("Write statistics:\n\n" + writeStatistic.CreateReport());
 
-            return statistics;
+            return statistics.ToString();
         }
 
         public IBenchmarkingResult Update(IBenchmarkingResult otherResult)

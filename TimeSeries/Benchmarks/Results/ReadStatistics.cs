@@ -59,7 +59,7 @@ namespace Benchmarks.Results
 
                    $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\n" +
                    $"95% of events were read after {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
-                   $"98% of events were read after {Percentile98ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written";
+                   $"98% of events were read after {Percentile98ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n\n";
         }
     }
 }

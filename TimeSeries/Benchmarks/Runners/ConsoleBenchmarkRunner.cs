@@ -25,7 +25,7 @@ namespace Benchmarks.Runners
 
             fixture.BenchmarkSetupStarted += b => Console.Write(separator + $"Setting up: {b.Name} ... ");
             fixture.IterationStarted += (b, i) => Console.Write($"Done!\nRunning benchmark: {b.Name} ... ");
-            fixture.BenchmarkFinished += (b, r) => Console.WriteLine($"Done!\n\n{r.CreateReport()}\n");
+            fixture.BenchmarkFinished += (b, r) => Console.WriteLine($"Done!\n\n{r.CreateReport()}");
 
             fixture.Run();
         }
