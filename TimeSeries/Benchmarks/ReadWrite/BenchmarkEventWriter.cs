@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cassandra;
 using CassandraTimeSeries.Model;
 using Commons;
+using Commons.TimeBasedUuid;
 using Metrics;
 using Metrics.Core;
 
@@ -18,11 +20,12 @@ namespace Benchmarks.ReadWrite
         public BenchmarkEventWriter(TimeSeries series, WriterSettings settings) 
             : base(series, settings) { }
 
-        public override void WriteNext()
+        public override Event WriteNext()
         {
             var sw = Stopwatch.StartNew();
-            base.WriteNext();
+            var eventWritten = base.WriteNext();
             Latency.Add(sw.Elapsed);
+            return eventWritten;
         }
     }
 }

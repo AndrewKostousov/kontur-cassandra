@@ -16,10 +16,12 @@ namespace Benchmarks.ReadWrite
             this.series = series;
         }
 
-        public virtual void WriteNext()
+        public virtual Event WriteNext()
         {
-            series.Write(new Event(Timestamp.Now));
+            var @event = new Event(Timestamp.Now);
+            series.Write(@event);
             Thread.Sleep(Settings.MillisecondsSleep);
+            return @event;
         }
     }
 }
