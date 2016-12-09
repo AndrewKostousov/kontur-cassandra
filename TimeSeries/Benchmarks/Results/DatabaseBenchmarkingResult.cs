@@ -10,34 +10,34 @@ namespace Benchmarks.Results
 {
     class DatabaseBenchmarkingResult : IBenchmarkingResult
     {
-        private readonly IEnumerable<BenchmarkEventReader> readers;
-        private readonly IEnumerable<BenchmarkEventWriter> writers;
-
-        public ReadStatistics ReadStatistics { get; }
-        public WriteStatistics WriteStatistics { get; }
+        public List<ReadStatistics> ReadStatistics { get; }
+        public List<WriteStatistics> WriteStatistics { get; }
 
         public DatabaseBenchmarkingResult(List<BenchmarkEventReader> readers, List<BenchmarkEventWriter> writers)
         {
-            this.readers = readers;
-            this.writers = writers;
-            
-            ReadStatistics = new ReadStatistics(readers);
-            WriteStatistics = new WriteStatistics(writers);
+            ReadStatistics = new List<ReadStatistics> {new ReadStatistics(readers)};
+            WriteStatistics = new List<WriteStatistics> {new WriteStatistics(writers)};
+        }
+
+        private DatabaseBenchmarkingResult(List<ReadStatistics> reads, List<WriteStatistics> writes)
+        {
+            ReadStatistics = reads;
+            WriteStatistics = writes;
         }
 
         public string CreateReport()
         {
-            var totalEventsRead = readers.Sum(x => x.TotalOperationsCount());
-            var totalEventsWritten = writers.Sum(x => x.TotalOperationsCount());
+            var totalEventsRead = ReadStatistics.First().TotalEventsRead;
+            var totalEventsWritten = WriteStatistics.First().TotalOperationsCount;
 
             var statistics = "\n";
 
             if (totalEventsRead != 0)
-                statistics += "Read statistics:\n\n" + ReadStatistics.CreateReport();
+                statistics += "Read statistics:\n\n" + ReadStatistics.First().CreateReport();
             if (totalEventsWritten != 0 && totalEventsRead != 0)
                 statistics += "\n\n";
             if (totalEventsWritten != 0)
-                statistics += "Write statistics:\n\n" + WriteStatistics.CreateReport();
+                statistics += "Write statistics:\n\n" + WriteStatistics.First().CreateReport();
 
             return statistics;
         }
@@ -49,8 +49,8 @@ namespace Benchmarks.Results
                 return this;
             
             return new DatabaseBenchmarkingResult(
-                readers.Union(other.readers).ToList(), 
-                writers.Union(other.writers).ToList());
+                ReadStatistics.Union(other.ReadStatistics).ToList(), 
+                WriteStatistics.Union(other.WriteStatistics).ToList());
         }
     }
 }

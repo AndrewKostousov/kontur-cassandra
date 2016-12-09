@@ -10,7 +10,7 @@ namespace Benchmarks.Results
         public int Reads95ThPercentile { get; }
         public int Reads98ThPercentile { get; }
         public double AverageReadsLength { get; }
-        public double TotalEventsRead { get; }
+        public int TotalEventsRead { get; }
         public double TotalReadThroughput { get; }
 
         public ReadStatistics(List<BenchmarkEventReader> readers) : base(readers)
