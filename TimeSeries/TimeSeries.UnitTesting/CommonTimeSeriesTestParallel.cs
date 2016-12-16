@@ -18,25 +18,25 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [Test]
-        public void ReadAndWrite_InParallel_OneReaderOneWriter()
+        public void ReadAndWrite_InParallel_SingleReader_SingleWriter()
         {
             DoTestParallel(readersCount: 1, writersCount: 1);
         }
 
         [Test]
-        public void ReadAndWrite_InParallel_OneReaderManyWriters()
+        public void ReadAndWrite_InParallel_SingleReader_ManyWriters()
         {
             DoTestParallel(readersCount: 1, writersCount: 4);
         }
 
         [Test]
-        public void ReadAndWrite_InParallel_ManyReadersOneWriter()
+        public void ReadAndWrite_InParallel_ManyReaders_SingleWriter()
         {
             DoTestParallel(readersCount: 4, writersCount: 1);
         }
 
         [Test]
-        public void ReadAndWrite_InParallel_ManyReadersManyWriters()
+        public void ReadAndWrite_InParallel_ManyReaders_ManyWriters()
         {
             DoTestParallel(readersCount: 4, writersCount: 4);
         }
