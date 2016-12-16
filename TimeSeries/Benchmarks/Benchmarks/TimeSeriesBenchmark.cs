@@ -48,7 +48,7 @@ namespace Benchmarks.Benchmarks
             pool = new ReadersWritersPool(readers, writers);
 
             database.Table.Truncate();
-            Series.Write(new Event(TimeGuid.NowGuid()));
+            //Series.Write(new Event(TimeGuid.NowGuid()));
         }
 
         [BenchmarkClassSetUp]
@@ -56,7 +56,7 @@ namespace Benchmarks.Benchmarks
         {
             database = new DatabaseWrapper("test");
             Series = new TimeSeries(database.Table);
-            Series.Write(new Event(TimeGuid.NowGuid()));
+            //Series.Write(new Event(TimeGuid.NowGuid()));
         }
         
         [BenchmarkClassTearDown]

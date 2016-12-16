@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cassandra;
 using Cassandra.Data.Linq;
+using CassandraTimeSeries.Utils;
 
 namespace CassandraTimeSeries.Model
 {

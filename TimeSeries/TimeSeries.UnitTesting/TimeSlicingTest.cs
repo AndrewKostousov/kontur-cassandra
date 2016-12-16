@@ -30,13 +30,14 @@ namespace CassandraTimeSeries.UnitTesting
         [Test]
         public void UpperBound_IsEqual_To_LowerBound()
         {
-            TimeSlicer.Slice(t1, t1, sliceDuration).Should().Equal(firstSliceStart);
+            TimeSlicer.Slice(t1, t1, sliceDuration).Should().BeEmpty();
         }
 
         [Test]
         public void Generic()
         {
-            TimeSlicer.Slice(t1, t1+sliceDuration.Multiply(2), sliceDuration).Should().Equal(firstSliceStart, secondSliceStart, firstSliceStart+ sliceDuration.Multiply(2));
+            TimeSlicer.Slice(t1, t1+sliceDuration.Multiply(2), sliceDuration).Should()
+                .Equal(firstSliceStart, secondSliceStart, firstSliceStart+ sliceDuration.Multiply(2));
         }
 
         static readonly object[] testDataSource = 
@@ -44,7 +45,6 @@ namespace CassandraTimeSeries.UnitTesting
             new[] { "00:00:00 +00:00", "00:11:00 +00:00" },
             new[] { "00:00:00 +00:00", "00:11:11 +00:00" },
             new[] { "00:00:00 +00:00", "00:00:11 +00:00" },
-            new[] { "00:00:11 +00:00", "00:00:11 +00:00" },
             new[] { "00:00:11 +00:00", "00:11:11 +00:00" },
         };
 
@@ -54,7 +54,7 @@ namespace CassandraTimeSeries.UnitTesting
         private Timestamp t1;
 
         [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldIncludeStart(string startTime, string endTime)
+        public void Slicing_ShouldExcludeStart(string startTime, string endTime)
         {
             var start = new Timestamp(DateTime.Parse(startTime));
             var end = new Timestamp(DateTimeOffset.Parse(endTime));
@@ -64,13 +64,13 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldExcludeEnd_IfEndNotEqualToStart(string startTime, string endTime)
+        public void Slicing_ShouldIncludeEnd_IfEndNotEqualToStart(string startTime, string endTime)
         {
             var start = new Timestamp(DateTime.Parse(startTime));
             var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
-            TimeSlicer.Slice(start, end, precise).Max().Should().BeLessThan(end);
+            TimeSlicer.Slice(start, end, precise).Max().Should().BeLessOrEqualTo(end);
         }
 
         [TestCaseSource(nameof(testDataSource))]
@@ -80,7 +80,7 @@ namespace CassandraTimeSeries.UnitTesting
             var end = new Timestamp(DateTimeOffset.Parse(endTime));
             var precise = TimeSpan.FromMinutes(1);
 
-            var count = (end - start).Ticks / precise.Ticks + (end.Ticks % precise.Ticks == 0 ? 0 : 1);
+            var count = (end - start).Ticks/precise.Ticks + (end == start ? 0 : 1);
 
             TimeSlicer.Slice(start, end, precise).LongCount().Should().Be(count);
         }
@@ -122,13 +122,13 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [TestCaseSource(nameof(testDataSource))]
-        public void Slices_ShouldReturnOneSlice_IfStartAndEndAreEqual(string startTime, string endTime)
+        public void Slices_ShouldReturnZeroSlices_IfStartAndEndAreEqual(string startTime, string endTime)
         {
             var start = new Timestamp(DateTime.Parse(startTime));
             var end = start;
             var precise = TimeSpan.FromMinutes(1);
 
-            TimeSlicer.Slice(start, end, precise).Count().Should().Be(1);
+            TimeSlicer.Slice(start, end, precise).Count().Should().Be(0);
         }
 
         [TestCaseSource(nameof(testDataSource))]

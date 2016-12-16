@@ -75,7 +75,7 @@ namespace CassandraTimeSeries.UnitTesting
             PreciseTimestampGenerator.Instance.NowTicks();
             
             return Enumerable.Range(0, count)
-                .Select(i => new Event(Timestamp.Now, new [] {(byte)i}))
+                .Select(i => new Event(TimeGuid.NowGuid(), new EventProto()))
                 .ToList();
         }
     }

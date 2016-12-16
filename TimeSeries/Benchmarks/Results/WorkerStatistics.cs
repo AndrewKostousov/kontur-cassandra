@@ -11,13 +11,11 @@ namespace Benchmarks.Results
         public TimeSpan AverageOperationLatency { get; }
         public TimeSpan AverageTotalLatency { get; }
         public TimeSpan Latency95ThPercentile { get; }
-        public TimeSpan Latency98ThPercentile { get; }
+        public TimeSpan Latency99ThPercentile { get; }
 
         public int WorkersCount { get; }
         public int TotalOperationsCount { get; }
         public double AverageOperationsPerThread { get; }
-        public int Operations95ThPercentile { get; }
-        public int Operations98ThPercentile { get; }
         public double TotalThroughput { get; }
 
         public WorkerStatistics(IReadOnlyList<IBenchmarkWorker> workers)
@@ -28,12 +26,10 @@ namespace Benchmarks.Results
             AverageOperationLatency = workers.SelectMany(x => x.Latency).Average();
             AverageTotalLatency = workers.Select(x => x.Latency.Sum()).Average();
             Latency95ThPercentile = workers.SelectMany(x => x.Latency).Percentile(95);
-            Latency98ThPercentile = workers.SelectMany(x => x.Latency).Percentile(98);
+            Latency99ThPercentile = workers.SelectMany(x => x.Latency).Percentile(99);
 
             TotalOperationsCount = workers.Sum(x => x.TotalOperationsCount());
             AverageOperationsPerThread = workers.Select(x => x.TotalOperationsCount()).Average();
-            Operations95ThPercentile = workers.Select(x => x.TotalOperationsCount()).Percentile(95);
-            Operations98ThPercentile = workers.Select(x => x.TotalOperationsCount()).Percentile(98);
             TotalThroughput = workers.Select(x => x.AverageThroughput()).Sum();
         }
     }

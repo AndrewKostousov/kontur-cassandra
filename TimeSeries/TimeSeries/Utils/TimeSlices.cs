@@ -15,7 +15,7 @@ namespace CassandraTimeSeries.Utils
             if (currentSlice == to)
                 yield return currentSlice;
 
-            while (currentSlice < to)
+            while (currentSlice <= to)
             {
                 yield return currentSlice;
                 currentSlice += sliceDuration;

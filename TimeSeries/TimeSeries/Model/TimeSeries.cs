@@ -21,13 +21,12 @@ namespace CassandraTimeSeries.Model
             this.table = table;
         }
 
-        public TimeGuid Write(EventProto ev)
+        public Event Write(EventProto ev)
         {
-            var nowGuid = TimeGuid.NowGuid();
-            var eventToWrite = new Event(nowGuid, ev);
+            var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
             table.Insert(eventToWrite).Execute();
 
-            return nowGuid;
+            return eventToWrite;
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)
@@ -44,19 +43,31 @@ namespace CassandraTimeSeries.Model
             var end = endInclusive?.ToTimeUuid();
 
             if (!start.HasValue && !end.HasValue)
-                return table.Take(count).Execute().ToList();
+                return table.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
 
             if (!start.HasValue)
-                return table.Where(e => e.Id.CompareTo(end.Value) <= 0).Take(count).Execute().ToList();
+                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
 
             if (!end.HasValue)
-                return table.Where(e => e.Id.CompareTo(start.Value) > 0).Take(count).Execute().ToList();
+                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
+
+            var slices = TimeSlicer
+                .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.SliceDutation)
+                .Select(s => s.Ticks);
             
-            return TimeSlicer.Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.SliceDutation)
-                .SelectMany(sliceId => table
-                    .Where(e => e.SliceId == sliceId.Ticks && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
-                    .Take(count)
-                    .Execute())
+            return table.Where(e => slices.Contains(e.SliceId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
+                .Take(count)
+                .Execute()
+                .ToList();
+        }
+
+        private List<Event> GetFromTableAndSort(int count, Expression<Func<Event, bool>> query)
+        {
+            return table
+                .AllowFiltering()
+                .Where(query)
+                .Execute()
+                .OrderBy(x => x.Id)
                 .Take(count)
                 .ToList();
         }

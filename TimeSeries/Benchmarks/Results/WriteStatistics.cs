@@ -13,7 +13,7 @@ namespace Benchmarks.Results
                    $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
                    $"Average single write latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
                    $"95% of writes were faster than {Latency95ThPercentile.TotalMilliseconds} ms\n" +
-                   $"98% of writes were faster than {Latency98ThPercentile.TotalMilliseconds} ms\n" +
+                   $"98% of writes were faster than {Latency99ThPercentile.TotalMilliseconds} ms\n" +
                    $"Average write throughput: {TotalThroughput} ev/s\n\n" +
 
                    $"Total writes count: {TotalOperationsCount}\n" +

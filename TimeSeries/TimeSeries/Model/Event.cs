@@ -1,5 +1,6 @@
 ﻿using System;
 using Cassandra;
+using Cassandra.Mapping;
 using Cassandra.Mapping.Attributes;
 using CassandraTimeSeries.Utils;
 using Commons;
@@ -21,6 +22,7 @@ namespace CassandraTimeSeries.Model
         public TimeUuid Id { get; set; }
         
         public Timestamp Timestamp => new Timestamp(Id.GetDate());
+        public TimeGuid TimeGuid => Id.ToTimeGuid();
 
         public Event() { }
 

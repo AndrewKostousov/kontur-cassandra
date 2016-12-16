@@ -2,6 +2,7 @@
 using System.Threading;
 using CassandraTimeSeries.Model;
 using Commons;
+using Commons.TimeBasedUuid;
 
 namespace Benchmarks.ReadWrite
 {
@@ -18,8 +19,7 @@ namespace Benchmarks.ReadWrite
 
         public virtual Event WriteNext()
         {
-            var @event = new Event(Timestamp.Now);
-            series.Write(@event);
+            var @event = series.Write(new EventProto());
             Thread.Sleep(Settings.MillisecondsSleep);
             return @event;
         }

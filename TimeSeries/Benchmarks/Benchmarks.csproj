@@ -51,7 +51,6 @@
   <ItemGroup>
     <Compile Include="Benchmarks\BenchmarksFixture.cs" />
     <Compile Include="Benchmarks\ReadAndWriteBenchmark.cs" />
-    <Compile Include="Benchmarks\SimpleDatabaseBenchmark.cs" />
     <Compile Include="Benchmarks\TimeSeriesBenchmark.cs" />
     <Compile Include="ReadWrite\BenchmarkEventReader.cs" />
     <Compile Include="ReadWrite\BenchmarkEventWriter.cs" />

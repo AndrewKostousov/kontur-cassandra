@@ -8,5 +8,10 @@ namespace Commons
         {
             return TimeSpan.FromTicks(timeSpan.Ticks * factor);
         }
+
+        public static TimeSpan Divide(this TimeSpan timeSpan, int divisor)
+        {
+            return TimeSpan.FromTicks(timeSpan.Ticks/divisor);
+        }
     }
 }

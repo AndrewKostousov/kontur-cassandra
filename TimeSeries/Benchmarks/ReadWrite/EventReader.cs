@@ -35,8 +35,12 @@ namespace Benchmarks.ReadWrite
             var events = series.ReadRange(lastEvent.Id.ToTimeGuid(), 
                 TimeGuid.MinForTimestamp(lastEvent.Timestamp + Event.SliceDutation), Settings.EventsToRead);
 
-            var maxId = events.Max(x => x.Id);
-            lastEvent = events.First(x => x.Id == maxId);
+            if (events.Count != 0)
+            {
+                var maxId = events.Max(x => x.Id);
+                lastEvent = events.First(x => x.Id == maxId);
+            }
+
             Thread.Sleep(Settings.MillisecondsSleep);
             return events;
         }

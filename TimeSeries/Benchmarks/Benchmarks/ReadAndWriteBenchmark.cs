@@ -28,7 +28,7 @@ namespace Benchmarks.Benchmarks
             base.SetUp();
 
             for(var i = 0; i < PreloadedEventsCount; ++i)
-                Series.Write(new Event(TimeGuid.NowGuid()));
+                Series.Write(new EventProto());
         }
     }
 
