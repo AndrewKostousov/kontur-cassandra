@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class TimeSeriesTest : TestsRefactored
+    public class TimeSeriesTest : TimeSeriesTestBase
     {
         protected override ITimeSeries TimeSeriesFactory(DatabaseWrapper wrapper)
         {
@@ -23,7 +23,7 @@ namespace CassandraTimeSeries.UnitTesting
     }
 
     [TestFixture]
-    public abstract class TestsRefactored
+    public abstract class TimeSeriesTestBase
     {
         protected DatabaseWrapper wrapper;
         protected ITimeSeries series;
