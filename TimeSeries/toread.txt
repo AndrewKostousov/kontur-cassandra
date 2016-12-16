@@ -1,3 +1,0 @@
-https://github.com/josephlewis42/ForcTime
-https://github.com/influxdata/influxdb-comparisons
-https://www.influxdata.com/influxdb-vs-cassandra-benchmark-time-series-metrics/
