@@ -12,9 +12,6 @@ namespace CassandraTimeSeries.Utils
 
             var currentSlice = from.Floor(sliceDuration);
 
-            if (currentSlice == to)
-                yield return currentSlice;
-
             while (currentSlice <= to)
             {
                 yield return currentSlice;

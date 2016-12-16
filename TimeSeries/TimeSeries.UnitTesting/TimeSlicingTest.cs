@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Linq;
 using CassandraTimeSeries.Utils;
 using Commons;
 using FluentAssertions;
@@ -10,21 +9,37 @@ namespace CassandraTimeSeries.UnitTesting
     [TestFixture]
     public class TimeSlicingTest
     {
+        private TimeSpan sliceDuration;
+        private Timestamp firstSliceStart;
+        private Timestamp secondSliceStart;
+        private Timestamp t1;
+        private Timestamp t0;
+        private Timestamp t2;
+
         [SetUp]
         public void SetUp()
         {
-            t1 = Timestamp.Now;
             sliceDuration = TimeSpan.FromMinutes(1);
+
+            t1 = Timestamp.Now;
+            t0 = t1 - sliceDuration;
+            t2 = t1 + sliceDuration;
+
             firstSliceStart = t1.Floor(sliceDuration);
             secondSliceStart = firstSliceStart + sliceDuration;
         }
 
         [Test]
+        public void Generic()
+        {
+            TimeSlicer.Slice(t1, t1 + sliceDuration.Multiply(2), sliceDuration).Should()
+                .Equal(firstSliceStart, secondSliceStart, firstSliceStart + sliceDuration.Multiply(2));
+        }
+
+        [Test]
         public void UpperBound_IsLess_Than_LowerBound()
         {
-            var t1 = Timestamp.Now;
-            var t2 = t1 - sliceDuration;
-            TimeSlicer.Slice(t1, t2, sliceDuration).Should().BeEmpty();
+            TimeSlicer.Slice(t1, t0, sliceDuration).Should().BeEmpty();
         }
 
         [Test]
@@ -34,111 +49,21 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [Test]
-        public void Generic()
+        public void UpperBound_IsEqual_To_LowerBound_And_SliceBorder()
         {
-            TimeSlicer.Slice(t1, t1+sliceDuration.Multiply(2), sliceDuration).Should()
-                .Equal(firstSliceStart, secondSliceStart, firstSliceStart+ sliceDuration.Multiply(2));
+            TimeSlicer.Slice(firstSliceStart, firstSliceStart, sliceDuration).Should().BeEmpty();
         }
 
-        static readonly object[] testDataSource = 
+        [Test]
+        public void UpperBound_IsEqual_To_SliceBorder()
         {
-            new[] { "00:00:00 +00:00", "00:11:00 +00:00" },
-            new[] { "00:00:00 +00:00", "00:11:11 +00:00" },
-            new[] { "00:00:00 +00:00", "00:00:11 +00:00" },
-            new[] { "00:00:11 +00:00", "00:11:11 +00:00" },
-        };
-
-        private TimeSpan sliceDuration;
-        private Timestamp firstSliceStart;
-        private Timestamp secondSliceStart;
-        private Timestamp t1;
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldExcludeStart(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            TimeSlicer.Slice(start, end, precise).Min().Should().BeLessOrEqualTo(start);
+            TimeSlicer.Slice(t1, secondSliceStart, sliceDuration).ShouldBeExactly(firstSliceStart, secondSliceStart);
         }
 
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldIncludeEnd_IfEndNotEqualToStart(string startTime, string endTime)
+        [Test]
+        public void LowerBound_IsEqual_To_SliceBorder()
         {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            TimeSlicer.Slice(start, end, precise).Max().Should().BeLessOrEqualTo(end);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldReturnCorrectCount(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            var count = (end - start).Ticks/precise.Ticks + (end == start ? 0 : 1);
-
-            TimeSlicer.Slice(start, end, precise).LongCount().Should().Be(count);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slicing_ShouldBeOrdered(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            var slices = TimeSlicer.Slice(start, end, precise).ToArray();
-
-            slices.OrderBy(x => x).Should().Equal(slices);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slices_ShouldBeEquallyDistributed(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            var slices = TimeSlicer.Slice(start, end, precise).ToArray();
-
-            for (var i = 0; i < slices.Length - 1; ++i)
-                (slices[i + 1] - slices[i]).Should().Be(precise);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slices_ShouldBeRounded(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = new Timestamp(DateTimeOffset.Parse(endTime));
-            var precise = TimeSpan.FromMinutes(1);
-
-            foreach (var slice in TimeSlicer.Slice(start, end, precise))
-                slice.Floor(precise).Should().Be(slice);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slices_ShouldReturnZeroSlices_IfStartAndEndAreEqual(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = start;
-            var precise = TimeSpan.FromMinutes(1);
-
-            TimeSlicer.Slice(start, end, precise).Count().Should().Be(0);
-        }
-
-        [TestCaseSource(nameof(testDataSource))]
-        public void Slices_ShouldReturnZeroSlices_IfStartIsGreaterThanEnd(string startTime, string endTime)
-        {
-            var start = new Timestamp(DateTime.Parse(startTime));
-            var end = start - TimeSpan.FromMinutes(10);
-            var precise = TimeSpan.FromMinutes(1);
-
-            TimeSlicer.Slice(start, end, precise).Count().Should().Be(0);
+            TimeSlicer.Slice(firstSliceStart, t2, sliceDuration).ShouldBeExactly(firstSliceStart, secondSliceStart);
         }
     }
 }
