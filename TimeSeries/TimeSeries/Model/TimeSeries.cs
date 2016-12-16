@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using Cassandra;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
@@ -20,9 +21,13 @@ namespace CassandraTimeSeries.Model
             this.table = table;
         }
 
-        public void Write(Event ev)
+        public TimeGuid Write(EventProto ev)
         {
-            table.Insert(ev).Execute();
+            var nowGuid = TimeGuid.NowGuid();
+            var eventToWrite = new Event(nowGuid, ev);
+            table.Insert(eventToWrite).Execute();
+
+            return nowGuid;
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)

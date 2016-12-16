@@ -8,7 +8,7 @@ using Commons.TimeBasedUuid;
 namespace CassandraTimeSeries.Model
 {
     [Table("time_series")]
-    public class Event
+    public class Event : EventProto
     {
         public static TimeSpan SliceDutation => TimeSpan.FromMinutes(1);
 
@@ -20,30 +20,21 @@ namespace CassandraTimeSeries.Model
         [Column("event_id")]
         public TimeUuid Id { get; set; }
         
-        [Column("payload")]
-        public byte[] Payload { get; set; }
-
         public Timestamp Timestamp => new Timestamp(Id.GetDate());
 
         public Event() { }
 
-        public Event(Timestamp time, byte[] payload=null)
-        {
-            Id = TimeGuid.NewGuid(time).ToTimeUuid();
-            SliceId = time.Floor(SliceDutation).Ticks;
-            Payload = payload;
-        }
-
-        public Event(TimeGuid id, byte[] payload = null)
+        public Event(TimeGuid id, EventProto proto)
         {
             Id = id.ToTimeUuid();
             SliceId = new Timestamp(Id.GetDate()).Floor(SliceDutation).Ticks;
-            Payload = payload;
+            Payload = proto.Payload;
+            UserId = proto.UserId;
         }
 
         public override string ToString()
         {
-            return $"Event {Id} at {Timestamp}, payload: {Payload.Length} bytes";
+            return $"Event {Id} at {Timestamp}, user_id: {UserId}";
         }
     }
 }
