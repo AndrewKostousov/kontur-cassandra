@@ -1,8 +1,6 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Benchmarks.Results;
 
 namespace Benchmarks.Benchmarks

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
-using Commons;
-using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
 {

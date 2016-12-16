@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
-using CassandraTimeSeries.Model;
+﻿using CassandraTimeSeries.Model;
 using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting

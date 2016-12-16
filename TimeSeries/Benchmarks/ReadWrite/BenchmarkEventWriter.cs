@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cassandra;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
-using Commons;
-using Commons.TimeBasedUuid;
-using Metrics;
-using Metrics.Core;
 
 namespace Benchmarks.ReadWrite
 {

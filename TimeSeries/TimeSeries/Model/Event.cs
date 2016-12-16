@@ -1,8 +1,6 @@
 ﻿using System;
 using Cassandra;
-using Cassandra.Mapping;
 using Cassandra.Mapping.Attributes;
-using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 

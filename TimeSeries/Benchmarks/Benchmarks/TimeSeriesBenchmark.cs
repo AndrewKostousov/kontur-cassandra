@@ -7,7 +7,6 @@ using Benchmarks.Results;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using CassandraTimeSeries.Utils;
-using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {

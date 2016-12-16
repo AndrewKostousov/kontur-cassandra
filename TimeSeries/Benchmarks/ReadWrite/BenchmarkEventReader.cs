@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cassandra;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using Commons;
-using Metrics;
 
 namespace Benchmarks.ReadWrite
 {
