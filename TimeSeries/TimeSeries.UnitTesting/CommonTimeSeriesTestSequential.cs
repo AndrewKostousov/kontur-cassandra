@@ -116,6 +116,18 @@ namespace CassandraTimeSeries.UnitTesting
         }
 
         [Test]
+        public void Read_ByTimestamp_StartEqualsToEnd_AndLieOnSliceBorder()
+        {
+            Series.ReadRange(t30, t30).Should().BeEmpty();
+        }
+
+        [Test]
+        public void Read_ByTimeGuid_StartEqualsToEnd_AndLieOnSliceBorder()
+        {
+            Series.ReadRange(e30.TimeGuid, e30.TimeGuid).Should().BeEmpty();
+        }
+
+        [Test]
         public void Read_ByTimestamp_LastElementOnSliceBorder()
         {
             Series.ReadRange(t21, t30).ShouldBeExactly(e30);
