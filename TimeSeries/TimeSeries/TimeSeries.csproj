@@ -60,6 +60,12 @@
   <ItemGroup>
     <Compile Include="Model\DatabaseWrapper.cs" />
     <Compile Include="Model\EventProto.cs" />
+    <Compile Include="ReadWrite\EventReader.cs" />
+    <Compile Include="ReadWrite\EventWriter.cs" />
+    <Compile Include="ReadWrite\ReaderSettings.cs" />
+    <Compile Include="ReadWrite\ReadersWritersPool.cs" />
+    <Compile Include="ReadWrite\WorkersPool.cs" />
+    <Compile Include="ReadWrite\WriterSettings.cs" />
     <Compile Include="Utils\TableExtensions.cs" />
     <Compile Include="Interfaces\ITimeSeries.cs" />
     <Compile Include="Model\Event.cs" />

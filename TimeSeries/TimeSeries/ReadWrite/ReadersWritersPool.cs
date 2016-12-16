@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Benchmarks.ReadWrite
+namespace CassandraTimeSeries.ReadWrite
 {
-    class ReadersWritersPool
+    public class ReadersWritersPool
     {
         private readonly WorkersPool readersPool;
         private readonly WorkersPool writersPool;

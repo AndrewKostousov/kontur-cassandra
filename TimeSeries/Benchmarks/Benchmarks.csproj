@@ -55,12 +55,7 @@
     <Compile Include="ReadWrite\BenchmarkEventReader.cs" />
     <Compile Include="ReadWrite\BenchmarkEventWriter.cs" />
     <Compile Include="ReadWrite\BenchmarkWorkerExtensions.cs" />
-    <Compile Include="ReadWrite\EventReader.cs" />
-    <Compile Include="ReadWrite\EventWriter.cs" />
     <Compile Include="ReadWrite\IBenchmarkWorker.cs" />
-    <Compile Include="ReadWrite\ReaderSettings.cs" />
-    <Compile Include="ReadWrite\WorkersPool.cs" />
-    <Compile Include="ReadWrite\ReadersWritersPool.cs" />
     <Compile Include="Results\DatabaseBenchmarkingResult.cs" />
     <Compile Include="Reflection\BindingAttribute.cs" />
     <Compile Include="Reflection\FromAttribute.cs" />
@@ -78,7 +73,6 @@
     <Compile Include="Reflection\InfoAttributePair.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReadWrite\WriterSettings.cs" />
     <Compile Include="Runners\IBenchmarkRunner.cs" />
   </ItemGroup>
   <ItemGroup>

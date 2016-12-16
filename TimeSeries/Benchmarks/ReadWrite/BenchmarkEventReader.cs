@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cassandra;
 using CassandraTimeSeries.Model;
+using CassandraTimeSeries.ReadWrite;
 using Commons;
 using Metrics;
 
@@ -30,9 +31,9 @@ namespace Benchmarks.ReadWrite
             var currentTime = Timestamp.Now;
 
             Latency.Add(sw.Elapsed);
-            ReadsLength.Add(events.Count - 1);
+            ReadsLength.Add(events.Count);
             
-            foreach (var ev in events.Skip(1))
+            foreach (var ev in events)
                 Timing.Add(ev.Id, currentTime);
 
             return events;

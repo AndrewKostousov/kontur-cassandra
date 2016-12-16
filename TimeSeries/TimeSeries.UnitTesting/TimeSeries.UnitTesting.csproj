@@ -80,8 +80,11 @@
     <Compile Include="Commons\TimestampExtensionsTest.cs" />
     <Compile Include="Commons\Timestamp_Test.cs" />
     <Compile Include="FluentAssertionsExt.cs" />
+    <Compile Include="CommonTimeSeriesTestParallel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeSeriesTest.cs" />
+    <Compile Include="TimeSeriesTestBase.cs" />
+    <Compile Include="CommonTimeSeriesTestSequential.cs" />
     <Compile Include="TimeSlicingTest.cs" />
   </ItemGroup>
   <ItemGroup>

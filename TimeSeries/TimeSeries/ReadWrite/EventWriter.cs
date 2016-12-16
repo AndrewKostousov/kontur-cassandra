@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using Commons;
 using Commons.TimeBasedUuid;
 
-namespace Benchmarks.ReadWrite
+namespace CassandraTimeSeries.ReadWrite
 {
-    class EventWriter
+    public class EventWriter
     {
         public WriterSettings Settings { get; }
-        private TimeSeries series;
+        private ITimeSeries series;
 
-        public EventWriter(TimeSeries series, WriterSettings settings)
+        public EventWriter(ITimeSeries series, WriterSettings settings)
         {
             Settings = settings;
             this.series = series;

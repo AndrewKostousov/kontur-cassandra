@@ -3,31 +3,31 @@ using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Model;
 using System.Collections.Generic;
+using CassandraTimeSeries.Interfaces;
 using Commons;
 using Commons.TimeBasedUuid;
 
-namespace Benchmarks.ReadWrite
+namespace CassandraTimeSeries.ReadWrite
 {
-    class EventReader
+    public class EventReader
     {
         public ReaderSettings Settings { get; }
 
-        private TimeSeries series;
+        private ITimeSeries series;
         private Event lastEvent;
 
-        public EventReader(TimeSeries series, ReaderSettings settings)
+        public EventReader(ITimeSeries series, ReaderSettings settings)
         {
             Settings = settings;
             this.series = series;
         }
 
-        public virtual void ReadFirst()
+        public virtual Event ReadFirst()
         {
             while (lastEvent == null)
-            {
-                var now = Timestamp.Now;
-                lastEvent = series.ReadRange(now - Event.SliceDutation, now + Event.SliceDutation, 1).FirstOrDefault();
-            }
+                lastEvent = series.ReadRange((TimeGuid) null, null, 1).FirstOrDefault();
+
+            return lastEvent;
         }
 
         public virtual List<Event> ReadNext()
