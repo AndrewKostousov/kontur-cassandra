@@ -11,19 +11,19 @@ namespace CassandraTimeSeries.UnitTesting
         private Timestamp t00;
         private Timestamp t01;
         private Timestamp t02;
+        private Timestamp t03;
         private Timestamp t10;
+        private Timestamp t11;
         private Timestamp t20;
         private Timestamp t21;
         private Timestamp t30;
         private Event e00;
         private Event e01;
         private Event e02;
+        private Event e03;
         private Event e11;
         private Event e21;
         private Event e30;
-        private Timestamp t03;
-        private Event e03;
-        private Timestamp t11;
 
         /*
          *     e00  e01  e02  e03          e11              e21      e30
