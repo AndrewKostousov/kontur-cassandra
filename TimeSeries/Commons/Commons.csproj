@@ -43,6 +43,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.7.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a">
+      <HintPath>..\packages\log4net.2.0.7\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="LZ4, Version=1.0.10.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
       <HintPath>..\packages\lz4net.1.0.10.93\lib\net4-client\LZ4.dll</HintPath>
       <Private>True</Private>
@@ -53,9 +56,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bits\BigEndianBitConverter.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="InvalidProgramStateException.cs" />
     <Compile Include="Json\JsonObjectExtensions.cs" />
     <Compile Include="Json\StringTimestampConverter.cs" />
+    <Compile Include="Logging\Log.cs" />
     <Compile Include="RandomExtensions.cs" />
     <Compile Include="TimeBasedUuid\GuidVersion.cs" />
     <Compile Include="TimeBasedUuid\PreciseTimestampGenerator.cs" />

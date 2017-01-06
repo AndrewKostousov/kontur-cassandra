@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons", "Commons\Commons.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{D0C68823-373D-4314-B79F-A366EBF21111}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdiTimeline", "EdiTimeline\EdiTimeline.csproj", "{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D0C68823-373D-4314-B79F-A366EBF21111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0C68823-373D-4314-B79F-A366EBF21111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0C68823-373D-4314-B79F-A366EBF21111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
