@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Commons;
 using Commons.Json;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.Json
+namespace Commons.Tests.Json
 {
     [TestFixture]
     public class StringTimestampConverterTest

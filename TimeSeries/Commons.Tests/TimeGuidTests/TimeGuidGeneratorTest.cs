@@ -4,12 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
-using Commons;
 using Commons.Bits;
 using Commons.TimeBasedUuid;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
+namespace Commons.Tests.TimeGuidTests
 {
     [TestFixture]
     public class TimeGuidGeneratorTest

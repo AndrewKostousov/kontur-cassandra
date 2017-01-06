@@ -5,7 +5,7 @@ using System.Linq;
 using Commons.TimeBasedUuid;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
+namespace Commons.Tests.TimeGuidTests
 {
     [TestFixture]
     public class PreciseTimestampGeneratorTest

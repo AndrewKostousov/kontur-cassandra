@@ -1,7 +1,7 @@
 ﻿using Commons.Json;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.Json
+namespace Commons.Tests.Json
 {
     [TestFixture]
     public class JsonConvertTest

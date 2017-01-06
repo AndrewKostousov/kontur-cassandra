@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Commons;
 using Commons.Bits;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.BitsTests
+namespace Commons.Tests.BitsTests
 {
     [TestFixture]
     public class BitHelperTest

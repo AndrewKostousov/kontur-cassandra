@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Commons;
 using Commons.TimeBasedUuid;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
+namespace Commons.Tests.TimeGuidTests
 {
     [TestFixture]
     public class TimeGuidBitsLayoutTest

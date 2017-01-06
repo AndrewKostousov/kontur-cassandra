@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using Commons;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons
+namespace Commons.Tests
 {
     [TestFixture]
     public class TimestampExtensionsTest

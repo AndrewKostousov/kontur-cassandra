@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Commons;
 using Commons.Bits;
 using Commons.TimeBasedUuid;
 using GroBuf;
@@ -11,7 +10,7 @@ using NUnit.Framework;
 
 #pragma warning disable 1718
 
-namespace CassandraTimeSeries.UnitTesting.Commons.TimeGuidTests
+namespace Commons.Tests.TimeGuidTests
 {
     [TestFixture]
     [SuppressMessage("ReSharper", "EqualExpressionComparison")]

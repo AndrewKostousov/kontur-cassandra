@@ -7,7 +7,7 @@
 using Commons.Bits;
 using NUnit.Framework;
 
-namespace CassandraTimeSeries.UnitTesting.Commons.BitsTests
+namespace Commons.Tests.BitsTests
 {
     [TestFixture]
     public class LittleEndianBitConverterTest

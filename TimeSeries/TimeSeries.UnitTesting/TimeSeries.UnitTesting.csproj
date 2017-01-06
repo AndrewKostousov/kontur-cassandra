@@ -45,16 +45,8 @@
       <HintPath>..\packages\FluentAssertions.4.17.0\lib\net45\FluentAssertions.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="GroBuf, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GroBuf.1.2.0\lib\net40\GroBuf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -68,17 +60,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commons\BitsTests\BitHelperTest.cs" />
-    <Compile Include="Commons\BitsTests\ByteArrayComparerTest.cs" />
-    <Compile Include="Commons\BitsTests\LittleEndianBitConverterTest.cs" />
-    <Compile Include="Commons\Json\JsonConvert_Test.cs" />
-    <Compile Include="Commons\Json\StringTimestampConverter_Test.cs" />
-    <Compile Include="Commons\TimeGuidTests\PreciseTimestampGeneratorTest.cs" />
-    <Compile Include="Commons\TimeGuidTests\TimeGuidBitsLayoutTest.cs" />
-    <Compile Include="Commons\TimeGuidTests\TimeGuidGeneratorTest.cs" />
-    <Compile Include="Commons\TimeGuidTests\TimeGuidTest.cs" />
-    <Compile Include="Commons\TimestampExtensionsTest.cs" />
-    <Compile Include="Commons\Timestamp_Test.cs" />
     <Compile Include="FluentAssertionsExt.cs" />
     <Compile Include="CommonTimeSeriesTestParallel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

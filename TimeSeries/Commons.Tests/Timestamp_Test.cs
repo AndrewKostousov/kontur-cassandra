@@ -1,5 +1,4 @@
 ﻿using System;
-using Commons;
 using Commons.Json;
 using NUnit.Framework;
 
@@ -7,7 +6,7 @@ using NUnit.Framework;
 // ReSharper disable UnusedVariable
 // ReSharper disable EqualExpressionComparison
 
-namespace CassandraTimeSeries.UnitTesting.Commons
+namespace Commons.Tests
 {
     [TestFixture]
     public class TimestampTest
