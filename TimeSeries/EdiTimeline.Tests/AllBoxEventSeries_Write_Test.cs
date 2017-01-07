@@ -19,7 +19,7 @@ namespace EdiTimeline.Tests
         public void Write_Batch()
         {
             var firstEvent = WriteToAllBoxEventSeries(ProtoBoxEvent(0xff)).Single();
-            var expectedEvents = WriteToAllBoxEventSeries(Enumerable.Range(0, 10).Select(x => ProtoBoxEvent((byte) x)).ToArray());
+            var expectedEvents = WriteToAllBoxEventSeries(Enumerable.Range(0, 10).Select(x => ProtoBoxEvent((byte)x)).ToArray());
             var actualEvents = ReadEventsToEnd(firstEvent);
             actualEvents.ShouldBeEquivalentWithOrderTo(expectedEvents);
             for (var i = 0; i < expectedEvents.Count; i++)
@@ -73,7 +73,7 @@ namespace EdiTimeline.Tests
                             var queueItems = protoEventsToWrite.Select(x => new AllBoxEventSeriesWriterQueueItem(x, new Promise<Timestamp>())).ToList();
                             allBoxEventSeries.WriteEventsInAnyOrder(queueItems);
                             var boxEvents = queueItems.Where(x => x.EventTimestamp.Result != null)
-                                .Select(x => new BoxEvent(x.ProtoBoxEvent.BoxId, x.ProtoBoxEvent.DocumentCirculationId, x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, new Lazy<BoxEventContent>(() => x.ProtoBoxEvent.EventContent)))
+                                .Select(x => new BoxEvent(x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, x.ProtoBoxEvent.Payload))
                                 .ToList();
                             state.WrittenEvents[writerThreadIndex].AddRange(boxEvents);
                             protoEventsToWrite = queueItems.Where(x => x.EventTimestamp.Result == null).Select(x => x.ProtoBoxEvent).ToArray();
@@ -107,7 +107,7 @@ namespace EdiTimeline.Tests
             {
                 var actualEvents = sharedState.WrittenEvents[th];
                 var expectedProtoBoxEvents = sharedState.ProtoEventsToWrite[th];
-                actualEvents.Select(x => new ProtoBoxEvent(x.EventId, x.BoxId, x.DocumentCirculationId, x.GetEventContent())).ShouldBeEquivalentTo(expectedProtoBoxEvents);
+                actualEvents.Select(x => new ProtoBoxEvent(x.EventId, x.Payload)).ShouldBeEquivalentTo(expectedProtoBoxEvents);
             }
             foreach (var actualEvents in sharedState.ReadEvents)
             {
@@ -146,10 +146,10 @@ namespace EdiTimeline.Tests
                 WrittenEvents = Enumerable.Range(0, writerThreads).Select(x => new List<BoxEvent>()).ToArray();
             }
 
-            public int TotalEventsToRead { get; private set; }
-            public ProtoBoxEvent[][] ProtoEventsToWrite { get; private set; }
-            public List<BoxEvent>[] WrittenEvents { get; private set; }
-            public List<BoxEvent>[] ReadEvents { get; private set; }
+            public int TotalEventsToRead { get; }
+            public ProtoBoxEvent[][] ProtoEventsToWrite { get; }
+            public List<BoxEvent>[] WrittenEvents { get; }
+            public List<BoxEvent>[] ReadEvents { get; }
         }
     }
 }

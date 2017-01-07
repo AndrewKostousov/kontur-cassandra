@@ -22,7 +22,7 @@ namespace EdiTimeline
             eventIdsConnection = cassandraCluster.RetrieveColumnFamilyConnection(BoxEventSeriesCassandraSchemaConfigurator.BoxEventSeriesKeyspace, BoxEventSeriesCassandraSchemaConfigurator.AllBoxEventSeriesEventIdsColumnFamily);
         }
 
-        public TimeSpan PartitionDuration { get { return settings.PartitionDuration; } }
+        public TimeSpan PartitionDuration => settings.PartitionDuration;
 
         public void WriteEventsInAnyOrder([NotNull] List<AllBoxEventSeriesWriterQueueItem> queueItems)
         {
@@ -87,7 +87,7 @@ namespace EdiTimeline
             }
             catch(Exception e)
             {
-                Log.For(this).Error(string.Format("Failed to process AllBoxEventSeries writer queue items: {0}", queueItems.Count), e);
+                Log.For(this).Error($"Failed to process AllBoxEventSeries writer queue items: {queueItems.Count}", e);
                 foreach(var item in queueItems)
                     item.EventTimestamp.SetResult(null);
             }
@@ -112,7 +112,7 @@ namespace EdiTimeline
                                                   .Select(g => new KeyValuePair<string, IEnumerable<Column>>(g.Key, g.Select(x => new Column
                                                       {
                                                           Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(x.EventTimestamp.Ticks, x.EventId),
-                                                          Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(x.BoxId, x.DocumentCirculationId, new Lazy<BoxEventContent>(x.GetEventContent), eventIsCommitted : true)),
+                                                          Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(x.Payload, eventIsCommitted : true)),
                                                           Timestamp = x.EventTimestamp.Ticks,
                                                           TTL = null,
                                                       }))));
@@ -132,7 +132,7 @@ namespace EdiTimeline
             var eventColumnValue = serializer.Deserialize<AllBoxEventSeriesColumnValue>(eventColumn.Value);
             if(!eventColumnValue.EventIsCommitted)
                 return null;
-            return new BoxEvent(eventColumnValue.BoxId, eventColumnValue.DocumentCirculationId, eventId, eventTimestamp, eventColumnValue.EventContent);
+            return new BoxEvent(eventId, eventTimestamp, eventColumnValue.Payload);
         }
 
         [CanBeNull]
@@ -244,12 +244,12 @@ namespace EdiTimeline
                 var columns = columnsIncludingStartColumn.SkipWhile(x => x.Name == range.ExclusiveStartColumnName).ToArray();
                 var boxEvents = columns.Select(x => new {EventSeriesPointer = AllBoxEventSeriesCassandraHelpers.ParseColumnName(x.Name), ColumnValue = serializer.Deserialize<AllBoxEventSeriesColumnValue>(x.Value)})
                                        .TakeWhile(x => x.ColumnValue.EventIsCommitted)
-                                       .Select(x => new BoxEvent(x.ColumnValue.BoxId, x.ColumnValue.DocumentCirculationId, x.EventSeriesPointer.EventId, x.EventSeriesPointer.EventTimestamp, x.ColumnValue.EventContent))
+                                       .Select(x => new BoxEvent(x.EventSeriesPointer.EventId, x.EventSeriesPointer.EventTimestamp, x.ColumnValue.Payload))
                                        .ToArray();
                 events.AddRange(convertAndFilter(boxEvents).Take(eventsToFetch));
                 var notCommittedEventIsReached = boxEvents.Length < columns.Length;
                 var currentPartitionIsExhausted = columnsIncludingStartColumn.Length < columnsToFetch;
-                range = range.MoveNext(notCommittedEventIsReached, currentPartitionIsExhausted, columns.LastOrDefault().With(x => x.Name), settings.PartitionDuration);
+                range = range.MoveNext(notCommittedEventIsReached, currentPartitionIsExhausted, columns.LastOrDefault()?.Name, settings.PartitionDuration);
                 eventsToFetch = take - events.Count;
             } while(range != null && eventsToFetch > 0);
             return events;

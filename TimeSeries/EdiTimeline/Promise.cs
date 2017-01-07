@@ -36,7 +36,7 @@ namespace EdiTimeline
 
         public override string ToString()
         {
-            return string.Format("TaskStatus: {0}, Result: {1}", tcs.Task.Status, tcs.Task.IsCompleted ? Convert.ToString(Result) : "<NOT COMPLETED>");
+            return $"TaskStatus: {tcs.Task.Status}, Result: {(tcs.Task.IsCompleted ? Convert.ToString(Result) : "<NOT COMPLETED>")}";
         }
 
         private readonly TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();

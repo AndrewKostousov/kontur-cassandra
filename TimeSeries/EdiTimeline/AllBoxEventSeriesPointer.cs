@@ -13,13 +13,13 @@ namespace EdiTimeline
         }
 
         [NotNull]
-        public Timestamp EventTimestamp { get; private set; }
+        public Timestamp EventTimestamp { get; }
 
-        public Guid EventId { get; private set; }
+        public Guid EventId { get; }
 
         public override string ToString()
         {
-            return string.Format("EventTimestamp: {0}, EventId: {1}", EventTimestamp, EventId);
+            return $"EventTimestamp: {EventTimestamp}, EventId: {EventId}";
         }
     }
 }

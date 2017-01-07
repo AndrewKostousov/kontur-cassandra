@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Commons;
 using JetBrains.Annotations;
 
@@ -18,9 +17,9 @@ namespace EdiTimeline
         {
             var boxEvent = allBoxEventSeries.TryReadEvent(eventId);
             if (boxEvent == null)
-                throw new InvalidProgramStateException(string.Format("Event not found: {0}", eventId));
-            if (boxEvent.TryGetEventContent() == null)
-                throw new InvalidProgramStateException(string.Format("boxEvent.TryGetEventContent() == null for eventId: {0}", eventId));
+                throw new InvalidProgramStateException($"Event not found: {eventId}");
+            if (boxEvent.Payload == null)
+                throw new InvalidProgramStateException($"boxEvent.Payload == null for eventId: {eventId}");
             return boxEvent;
         }
 
@@ -45,7 +44,7 @@ namespace EdiTimeline
         [NotNull]
         public List<TResultBoxEvent> ReadEvents<TResultBoxEvent>([CanBeNull] AllBoxEventSeriesRange range, int take, [NotNull] Func<BoxEvent[], TResultBoxEvent[]> convertAndFilter)
         {
-            return allBoxEventSeries.ReadEvents(range, take, batch => convertAndFilter(batch.Where(x => x.TryGetEventContent() != null).ToArray()));
+            return allBoxEventSeries.ReadEvents(range, take, convertAndFilter);
         }
 
         private readonly IAllBoxEventSeries allBoxEventSeries;

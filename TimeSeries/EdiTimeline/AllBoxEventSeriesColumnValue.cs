@@ -1,31 +1,26 @@
-using System;
+using Commons;
 using JetBrains.Annotations;
 
 namespace EdiTimeline
 {
     public class AllBoxEventSeriesColumnValue
     {
-        public AllBoxEventSeriesColumnValue([NotNull] BoxIdentifier boxId, Guid documentCirculationId, [NotNull] Lazy<BoxEventContent> eventContent, bool eventIsCommitted)
+        public AllBoxEventSeriesColumnValue([NotNull] byte[] payload, bool eventIsCommitted)
         {
-            BoxId = boxId;
-            DocumentCirculationId = documentCirculationId;
-            EventContent = eventContent;
+            if (payload == null)
+                throw new InvalidProgramStateException("payload is required");
+            Payload = payload;
             EventIsCommitted = eventIsCommitted;
         }
 
         [NotNull]
-        public BoxIdentifier BoxId { get; private set; }
+        public byte[] Payload { get; }
 
-        public Guid DocumentCirculationId { get; private set; }
-
-        [NotNull]
-        public Lazy<BoxEventContent> EventContent { get; private set; }
-
-        public bool EventIsCommitted { get; private set; }
+        public bool EventIsCommitted { get; }
 
         public override string ToString()
         {
-            return string.Format("BoxId: {0}, DocumentCirculationId: {1}, EventIsCommitted: {2}", BoxId, DocumentCirculationId, EventIsCommitted);
+            return $"Payload: {Payload.ToHexString()}, EventIsCommitted: {EventIsCommitted}";
         }
     }
 }

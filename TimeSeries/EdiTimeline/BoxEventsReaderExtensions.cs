@@ -17,7 +17,7 @@ namespace EdiTimeline
                 bool exclusiveStartEventNotFound;
                 var eventsRange = boxEventsReader.TryCreateEventSeriesRange(exclusiveStartEventId, inclusiveEndTimestamp, out exclusiveStartEventNotFound);
                 if (exclusiveStartEventNotFound)
-                    throw new InvalidProgramStateException(string.Format("Exclusive start event not found: {0}", exclusiveStartEventId));
+                    throw new InvalidProgramStateException($"Exclusive start event not found: {exclusiveStartEventId}");
                 var batch = boxEventsReader.ReadEvents(eventsRange, batchSize, x => x);
                 if (batch.Any())
                     yield return batch;

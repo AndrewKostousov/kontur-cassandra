@@ -10,7 +10,7 @@ namespace EdiTimeline
         [NotNull]
         public static string FormatPartitionKey(long eventTicks, TimeSpan partitionDuration)
         {
-            return string.Format("{0}", eventTicks - eventTicks % partitionDuration.Ticks);
+            return $"{eventTicks - eventTicks % partitionDuration.Ticks}";
         }
 
         [NotNull]
@@ -23,13 +23,13 @@ namespace EdiTimeline
         public static string NextPartitionKey([NotNull] string partitionKey, TimeSpan partitionDuration)
         {
             var partitionTicks = ParsePartitionKey(partitionKey).Ticks;
-            return string.Format("{0}", partitionTicks + partitionDuration.Ticks);
+            return $"{partitionTicks + partitionDuration.Ticks}";
         }
 
         [NotNull]
         public static string FormatColumnName(long eventTicks, Guid eventId)
         {
-            return string.Format("{0}_{1}", eventTicks.ToString("D20", CultureInfo.InvariantCulture), eventId);
+            return $"{eventTicks.ToString("D20", CultureInfo.InvariantCulture)}_{eventId}";
         }
 
         [NotNull]

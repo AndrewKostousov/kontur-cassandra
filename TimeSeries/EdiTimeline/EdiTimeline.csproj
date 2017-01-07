@@ -58,16 +58,11 @@
     <Compile Include="AllBoxEventSeriesTicksHolder.cs" />
     <Compile Include="AllBoxEventSeriesWriter.cs" />
     <Compile Include="AllBoxEventSeriesWriterQueueItem.cs" />
-    <Compile Include="BoxEntityContentType.cs" />
-    <Compile Include="BoxEntityDirection.cs" />
-    <Compile Include="BoxEntityId.cs" />
     <Compile Include="BoxEvent.cs" />
-    <Compile Include="BoxEventContent.cs" />
     <Compile Include="BoxEventSeriesCassandraSchemaConfigurator.cs" />
     <Compile Include="BoxEventsReader.cs" />
     <Compile Include="BoxEventsReaderExtensions.cs" />
     <Compile Include="BoxEventsWriter.cs" />
-    <Compile Include="BoxIdentifier.cs" />
     <Compile Include="CassandraHelpers\ActionExtensions.cs" />
     <Compile Include="CassandraHelpers\CassandraClusterSettings.cs" />
     <Compile Include="CassandraHelpers\CassandraColumnFamilyDefinition.cs" />
@@ -78,7 +73,6 @@
     <Compile Include="CassandraHelpers\ICassandraInitializerSettings.cs" />
     <Compile Include="CassandraHelpers\ICassandraMetadataProvider.cs" />
     <Compile Include="CassandraHelpers\ICassandraSchemeActualizer.cs" />
-    <Compile Include="ChainedNullCheckExtensions.cs" />
     <Compile Include="IAllBoxEventSeries.cs" />
     <Compile Include="IAllBoxEventSeriesSettings.cs" />
     <Compile Include="IAllBoxEventSeriesTicksHolder.cs" />

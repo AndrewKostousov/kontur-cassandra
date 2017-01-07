@@ -69,8 +69,6 @@
     <Compile Include="AllBoxEventSeries_Write_Test.cs" />
     <Compile Include="BoxEventFluentAssertionsExtensions.cs" />
     <Compile Include="BoxEventSeriesTestBase.cs" />
-    <Compile Include="BoxEventWithEventContentEquivalencyStep_Test.cs" />
-    <Compile Include="DummyEventContent.cs" />
     <Compile Include="EdiTimelineTestsEnvironment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

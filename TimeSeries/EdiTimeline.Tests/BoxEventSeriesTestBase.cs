@@ -37,47 +37,15 @@ namespace EdiTimeline.Tests
         [NotNull]
         protected static BoxEvent BoxEvent([NotNull] Timestamp eventTimestamp, byte? eventId = null)
         {
-            return BoxEvent(null, eventTimestamp, eventId);
-        }
-
-        [NotNull]
-        protected static BoxEvent BoxEvent(string boxId, byte? eventId = null)
-        {
-            return BoxEvent(boxId, Timestamp.Now, eventId);
-        }
-
-        [NotNull]
-        protected static BoxEvent BoxEvent(string boxId, [NotNull] Timestamp eventTimestamp, byte? eventId = null)
-        {
             var theEventId = eventId.HasValue ? GuidTestingHelpers.Guid(eventId.Value) : Guid.NewGuid();
-            return BoxEvent(boxId, eventTimestamp, theEventId);
-        }
-
-        [NotNull]
-        protected static BoxEvent BoxEvent(string boxId, [NotNull] Timestamp eventTimestamp, Guid eventId)
-        {
-            boxId = boxId ?? Guid.NewGuid().ToString();
-            var partyId = Guid.NewGuid().ToString();
-            var documentCirculationId = Guid.NewGuid();
-            var entityId = Guid.NewGuid();
-            return new BoxEvent(new BoxIdentifier(boxId, partyId), documentCirculationId, eventId, eventTimestamp, new Lazy<BoxEventContent>(() => new DummyEventContent(entityId)));
+            return new BoxEvent(theEventId, eventTimestamp, payload: rng.NextBytes(100));
         }
 
         [NotNull]
         protected static ProtoBoxEvent ProtoBoxEvent(byte? eventId = null)
         {
-            var boxId = Guid.NewGuid().ToString();
-            return ProtoBoxEvent(boxId, eventId);
-        }
-
-        [NotNull]
-        protected static ProtoBoxEvent ProtoBoxEvent(string boxId, byte? eventId = null)
-        {
             var theEventId = eventId.HasValue ? GuidTestingHelpers.Guid(eventId.Value) : Guid.NewGuid();
-            var partyId = Guid.NewGuid().ToString();
-            var documentCirculationId = Guid.NewGuid();
-            var entityId = Guid.NewGuid();
-            return new ProtoBoxEvent(theEventId, new BoxIdentifier(boxId, partyId), documentCirculationId, new DummyEventContent(entityId));
+            return new ProtoBoxEvent(theEventId, payload: rng.NextBytes(100));
         }
 
         protected List<BoxEvent> WriteToAllBoxEventSeries([NotNull] params ProtoBoxEvent[] boxEvents)
@@ -85,7 +53,7 @@ namespace EdiTimeline.Tests
             var queueItems = boxEvents.Select(x => new AllBoxEventSeriesWriterQueueItem(x, new Promise<Timestamp>())).ToList();
             allBoxEventSeries.WriteEventsInAnyOrder(queueItems);
             // ReSharper disable once AssignNullToNotNullAttribute
-            return queueItems.Select(x => new BoxEvent(x.ProtoBoxEvent.BoxId, x.ProtoBoxEvent.DocumentCirculationId, x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, new Lazy<BoxEventContent>(() => x.ProtoBoxEvent.EventContent))).ToList();
+            return queueItems.Select(x => new BoxEvent(x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, x.ProtoBoxEvent.Payload)).ToList();
         }
 
         protected ISerializer serializer;
@@ -96,6 +64,7 @@ namespace EdiTimeline.Tests
         protected readonly TimeSpan tick = TimeSpan.FromTicks(1);
         protected readonly TimeSpan second = TimeSpan.FromSeconds(1);
         protected readonly TimeSpan minute = TimeSpan.FromMinutes(1);
+        private static readonly Random rng = new Random(Guid.NewGuid().GetHashCode());
 
         public class AllBoxEventSeriesSettingsForTests : IAllBoxEventSeriesSettings
         {
@@ -106,9 +75,9 @@ namespace EdiTimeline.Tests
                 NotCommittedEventsTtl = TimeSpan.FromSeconds(10);
             }
 
-            public int MinBatchSizeForRead { get; private set; }
-            public TimeSpan PartitionDuration { get; private set; }
-            public TimeSpan NotCommittedEventsTtl { get; private set; }
+            public int MinBatchSizeForRead { get; }
+            public TimeSpan PartitionDuration { get; }
+            public TimeSpan NotCommittedEventsTtl { get; }
 
             public override string ToString()
             {

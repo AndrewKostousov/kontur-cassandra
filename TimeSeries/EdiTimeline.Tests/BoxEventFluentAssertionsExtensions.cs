@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Commons;
+using Commons.Bits;
 using Commons.Testing;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
@@ -36,8 +38,10 @@ namespace EdiTimeline.Tests
             {
                 var actualBoxEvent = (BoxEvent)context.Subject;
                 var expectedBoxEvent = (BoxEvent)context.Expectation;
-                actualBoxEvent.ShouldBeEquivalentTo(expectedBoxEvent, opt => opt);
-                actualBoxEvent.TryGetEventContent().ShouldBeEquivalentTo(expectedBoxEvent.TryGetEventContent());
+                actualBoxEvent.EventId.Should().Be(expectedBoxEvent.EventId);
+                actualBoxEvent.EventTimestamp.Should().Be(expectedBoxEvent.EventTimestamp);
+                ByteArrayComparer.Instance.Equals(actualBoxEvent.Payload, expectedBoxEvent.Payload)
+                    .Should().BeTrue($"Expected payload: {expectedBoxEvent.Payload.ToHexString()}, Actual payload: {actualBoxEvent.Payload.ToHexString()} for EventId: {expectedBoxEvent.EventId}, EventTimestamp: {expectedBoxEvent.EventTimestamp}");
                 return true;
             }
         }

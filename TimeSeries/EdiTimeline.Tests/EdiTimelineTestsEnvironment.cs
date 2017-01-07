@@ -64,7 +64,7 @@ namespace EdiTimeline.Tests
         }
 
         public static void ResetState()
-                 {
+        {
             foreach (var columnFamily in BoxEventSeriesCassandraSchemaConfigurator.GetAllColumnFamilies())
                 schemeActualizer.TruncateColumnFamily(BoxEventSeriesCassandraSchemaConfigurator.BoxEventSeriesKeyspace, columnFamily);
             AllBoxEventSeriesTicksHolder.ResetInMemoryState();

@@ -75,6 +75,7 @@
     <Compile Include="Bits\LittleEndianBitConverter.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="GuidHelpers.cs" />
+    <Compile Include="HexFormatter.cs" />
     <Compile Include="InvalidProgramStateException.cs" />
     <Compile Include="Json\JsonObjectExtensions.cs" />
     <Compile Include="Json\StringTimestampConverter.cs" />

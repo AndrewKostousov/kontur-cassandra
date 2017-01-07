@@ -16,7 +16,7 @@ namespace EdiTimeline
             if (string.IsNullOrEmpty(startPartitionKey))
                 throw new InvalidProgramStateException("startPartitionKey is empty");
             if (exclusiveStartColumnName != null && AllBoxEventSeriesCassandraHelpers.ParseColumnName(exclusiveStartColumnName).EventTimestamp > inclusiveEndTimestamp)
-                throw new InvalidProgramStateException(string.Format("ExclusiveStartColumnName.Timestamp ({0}) > inclusiveEndTimestamp ({1}); startPartitionKey: {2}", exclusiveStartColumnName, inclusiveEndTimestamp, startPartitionKey));
+                throw new InvalidProgramStateException($"ExclusiveStartColumnName.Timestamp ({exclusiveStartColumnName}) > inclusiveEndTimestamp ({inclusiveEndTimestamp}); startPartitionKey: {startPartitionKey}");
             StartPartitionKey = startPartitionKey;
             ExclusiveStartColumnName = exclusiveStartColumnName;
             this.inclusiveEndTimestamp = inclusiveEndTimestamp;
@@ -40,20 +40,17 @@ namespace EdiTimeline
         }
 
         [NotNull]
-        public string StartPartitionKey { get; private set; }
+        public string StartPartitionKey { get; }
 
         [CanBeNull]
-        public string ExclusiveStartColumnName { get; private set; }
+        public string ExclusiveStartColumnName { get; }
 
         [NotNull]
-        public string InclusiveEndColumnName
-        {
-            get { return AllBoxEventSeriesCassandraHelpers.FormatColumnName(inclusiveEndTimestamp.Ticks, GuidHelpers.MaxGuid); }
-        }
+        public string InclusiveEndColumnName => AllBoxEventSeriesCassandraHelpers.FormatColumnName(inclusiveEndTimestamp.Ticks, GuidHelpers.MaxGuid);
 
         public override string ToString()
         {
-            return string.Format("StartPartitionKey: {0}, ExclusiveStartColumnName: {1}, InclusiveEndEventTimestamp: {2}", StartPartitionKey, ExclusiveStartColumnName, inclusiveEndTimestamp);
+            return $"StartPartitionKey: {StartPartitionKey}, ExclusiveStartColumnName: {ExclusiveStartColumnName}, InclusiveEndEventTimestamp: {inclusiveEndTimestamp}";
         }
 
         private readonly Timestamp inclusiveEndTimestamp;

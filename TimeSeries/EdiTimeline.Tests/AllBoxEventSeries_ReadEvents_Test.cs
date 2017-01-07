@@ -247,7 +247,7 @@ namespace EdiTimeline.Tests
             eventsConnection.AddColumn(AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(e.EventTimestamp.Ticks, partition), new Column
                 {
                     Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(e.EventTimestamp.Ticks, e.EventId),
-                    Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(e.BoxId, e.DocumentCirculationId, new Lazy<BoxEventContent>(e.GetEventContent), eventIsCommitted: false)),
+                    Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(e.Payload, eventIsCommitted: false)),
                     Timestamp = e.EventTimestamp.Ticks,
                     TTL = null,
                 });

@@ -11,8 +11,8 @@ namespace EdiTimeline
             NotCommittedEventsTtl = TimeSpan.FromSeconds(60);
         }
 
-        public int MinBatchSizeForRead { get; private set; }
-        public TimeSpan PartitionDuration { get; private set; }
-        public TimeSpan NotCommittedEventsTtl { get; private set; }
+        public int MinBatchSizeForRead { get; }
+        public TimeSpan PartitionDuration { get; }
+        public TimeSpan NotCommittedEventsTtl { get; }
     }
 }
