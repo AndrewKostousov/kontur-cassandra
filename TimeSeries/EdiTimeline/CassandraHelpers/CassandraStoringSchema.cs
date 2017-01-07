@@ -23,6 +23,11 @@ namespace EdiTimeline.CassandraHelpers
                 .GroupBy(x => x.Keyspace, x => x.Definition.BuildColumnFamilyMetadata(), (s, families) => CreateKeyspace(s, families, cassandraInitializerSettings));
         }
 
+        public void ColumnFamilyDefault(Action<ICassandraColumnFamilyConfiguration> configuration)
+        {
+            defaultConfiguration = defaultConfiguration.Concatenate(configuration);
+        }
+
         public void ColumnFamily(string id, Action<ICassandraColumnFamilyConfiguration> configuration)
         {
             Action<ICassandraColumnFamilyConfiguration, string> cfg = (x, t) => configuration(x);
@@ -58,15 +63,13 @@ namespace EdiTimeline.CassandraHelpers
         private void ApplyConfiguration(ICassandraColumnFamilyConfiguration columnFamilyDefinition, string id)
         {
             if (!columnFamilyConfigurationsById.ContainsKey(id))
-                throw new InvalidProgramStateException(string.Format("ColumnFamily is not registeredin cassandra schema: {0}", id));
+                throw new InvalidProgramStateException($"ColumnFamily is not registered in cassandra schema: {id}");
             defaultConfiguration(columnFamilyDefinition);
-            defaultConfigurationById(columnFamilyDefinition, id);
             columnFamilyConfigurationsById[id](columnFamilyDefinition, id);
         }
 
         private readonly bool durableWrites;
-        private readonly Action<ICassandraColumnFamilyConfiguration> defaultConfiguration = x => { };
-        private readonly Action<ICassandraColumnFamilyConfiguration, string> defaultConfigurationById = (x, t) => { };
+        private Action<ICassandraColumnFamilyConfiguration> defaultConfiguration = x => { };
         private readonly ConcurrentDictionary<string, CassandraColumnFamilyDefinition> columnFamilyDefinitionsById = new ConcurrentDictionary<string, CassandraColumnFamilyDefinition>();
         private readonly ConcurrentDictionary<string, Action<ICassandraColumnFamilyConfiguration, string>> columnFamilyConfigurationsById = new ConcurrentDictionary<string, Action<ICassandraColumnFamilyConfiguration, string>>();
     }
