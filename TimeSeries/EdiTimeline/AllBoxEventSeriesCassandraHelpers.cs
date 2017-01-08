@@ -8,9 +8,9 @@ namespace EdiTimeline
     public static class AllBoxEventSeriesCassandraHelpers
     {
         [NotNull]
-        public static string FormatPartitionKey(long eventTicks, TimeSpan partitionDuration)
+        public static string FormatPartitionKey([NotNull] Timestamp eventTimestamp, TimeSpan partitionDuration)
         {
-            return $"{eventTicks - eventTicks % partitionDuration.Ticks}";
+            return $"{eventTimestamp.Ticks - eventTimestamp.Ticks % partitionDuration.Ticks}";
         }
 
         [NotNull]
@@ -27,9 +27,9 @@ namespace EdiTimeline
         }
 
         [NotNull]
-        public static string FormatColumnName(long eventTicks, Guid eventId)
+        public static string FormatColumnName([NotNull] Timestamp eventTimestamp, Guid eventId)
         {
-            return $"{eventTicks.ToString("D20", CultureInfo.InvariantCulture)}_{eventId}";
+            return $"{eventTimestamp.Ticks.ToString("D20", CultureInfo.InvariantCulture)}_{eventId}";
         }
 
         [NotNull]

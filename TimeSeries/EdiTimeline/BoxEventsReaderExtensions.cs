@@ -19,8 +19,7 @@ namespace EdiTimeline
                     yield return batch;
                 if (batch.Count < batchSize)
                     break;
-                var lastBoxEvent = batch.Last();
-                exclusiveStartEventPointer = new AllBoxEventSeriesPointer(lastBoxEvent.EventTimestamp, lastBoxEvent.EventId);
+                exclusiveStartEventPointer = new AllBoxEventSeriesPointer(batch.Last());
             }
         }
 
@@ -33,8 +32,7 @@ namespace EdiTimeline
                 yield return firstBatch;
             if (firstBatch.Count < batchSize)
                 yield break;
-            var lastBoxEvent = firstBatch.Last();
-            var exclusiveStartEventPointer = new AllBoxEventSeriesPointer(lastBoxEvent.EventTimestamp, lastBoxEvent.EventId);
+            var exclusiveStartEventPointer = new AllBoxEventSeriesPointer(firstBatch.Last());
             foreach (var batch in boxEventsReader.ReadEventsToEnd(exclusiveStartEventPointer, batchSize))
                 yield return batch;
         }

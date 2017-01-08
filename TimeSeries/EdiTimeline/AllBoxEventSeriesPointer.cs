@@ -6,6 +6,11 @@ namespace EdiTimeline
 {
     public class AllBoxEventSeriesPointer
     {
+        public AllBoxEventSeriesPointer([NotNull] BoxEvent boxEvent)
+            : this(boxEvent.EventTimestamp, boxEvent.EventId)
+        {
+        }
+
         public AllBoxEventSeriesPointer([NotNull] Timestamp eventTimestamp, Guid eventId)
         {
             EventTimestamp = eventTimestamp;

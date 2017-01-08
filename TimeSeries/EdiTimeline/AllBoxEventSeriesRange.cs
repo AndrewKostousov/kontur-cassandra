@@ -7,7 +7,7 @@ namespace EdiTimeline
     public class AllBoxEventSeriesRange
     {
         public AllBoxEventSeriesRange([NotNull] Timestamp exclusiveStartTimestamp, Guid exclusiveStartEventId, [NotNull] Timestamp inclusiveEndTimestamp, TimeSpan partitionDuration)
-            : this(AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(exclusiveStartTimestamp.Ticks, partitionDuration), AllBoxEventSeriesCassandraHelpers.FormatColumnName(exclusiveStartTimestamp.Ticks, exclusiveStartEventId), inclusiveEndTimestamp)
+            : this(AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(exclusiveStartTimestamp, partitionDuration), AllBoxEventSeriesCassandraHelpers.FormatColumnName(exclusiveStartTimestamp, exclusiveStartEventId), inclusiveEndTimestamp)
         {
         }
 
@@ -46,7 +46,7 @@ namespace EdiTimeline
         public string ExclusiveStartColumnName { get; }
 
         [NotNull]
-        public string InclusiveEndColumnName => AllBoxEventSeriesCassandraHelpers.FormatColumnName(inclusiveEndTimestamp.Ticks, GuidHelpers.MaxGuid);
+        public string InclusiveEndColumnName => AllBoxEventSeriesCassandraHelpers.FormatColumnName(inclusiveEndTimestamp, GuidHelpers.MaxGuid);
 
         public override string ToString()
         {

@@ -244,9 +244,9 @@ namespace EdiTimeline.Tests
         private void WriteUncommitedEvent(BoxEvent e)
         {
             var eventsConnection = cassandraCluster.RetrieveColumnFamilyConnection(BoxEventSeriesCassandraSchemaConfigurator.BoxEventSeriesKeyspace, BoxEventSeriesCassandraSchemaConfigurator.AllBoxEventSeriesEventsColumnFamily);
-            eventsConnection.AddColumn(AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(e.EventTimestamp.Ticks, partition), new Column
+            eventsConnection.AddColumn(AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(e.EventTimestamp, partition), new Column
                 {
-                    Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(e.EventTimestamp.Ticks, e.EventId),
+                    Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(e.EventTimestamp, e.EventId),
                     Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(e.Payload, eventIsCommitted: false)),
                     Timestamp = e.EventTimestamp.Ticks,
                     TTL = null,

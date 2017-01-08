@@ -33,13 +33,14 @@ namespace EdiTimeline
                 var firstEventTicks = Math.Max(nowTicks, lastGoodEventTicks + 1);
                 var entries = queueItems.Select((x, idx) =>
                 {
-                    var eventTicks = firstEventTicks + idx;
+                    // todo (avk, 08.01.2017): возможно, тут стоит тоже не по тику, а по микросекунде добавлять
+                    var eventTimestamp = new Timestamp(firstEventTicks + idx);
                     return new
                         {
                             QueueItem = x,
-                            EventTicks = eventTicks,
-                            PartitionKey = AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(eventTicks, settings.PartitionDuration),
-                            ColumnName = AllBoxEventSeriesCassandraHelpers.FormatColumnName(eventTicks, x.ProtoBoxEvent.EventId),
+                            EventTicks = eventTimestamp.Ticks,
+                            PartitionKey = AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(eventTimestamp, settings.PartitionDuration),
+                            ColumnName = AllBoxEventSeriesCassandraHelpers.FormatColumnName(eventTimestamp, x.ProtoBoxEvent.EventId),
                         };
                 }).ToArray();
                 eventsConnection.BatchInsert(entries.GroupBy(x => x.PartitionKey)
@@ -87,10 +88,10 @@ namespace EdiTimeline
             if (!boxEvents.Any())
                 return;
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(boxEvents.Select(x => x.EventTimestamp).Min().Ticks - 1);
-            eventsConnection.BatchInsert(boxEvents.GroupBy(x => AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(x.EventTimestamp.Ticks, settings.PartitionDuration))
+            eventsConnection.BatchInsert(boxEvents.GroupBy(x => AllBoxEventSeriesCassandraHelpers.FormatPartitionKey(x.EventTimestamp, settings.PartitionDuration))
                                                   .Select(g => new KeyValuePair<string, IEnumerable<Column>>(g.Key, g.Select(x => new Column
                                                       {
-                                                          Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(x.EventTimestamp.Ticks, x.EventId),
+                                                          Name = AllBoxEventSeriesCassandraHelpers.FormatColumnName(x.EventTimestamp, x.EventId),
                                                           Value = serializer.Serialize(new AllBoxEventSeriesColumnValue(x.Payload, eventIsCommitted: true)),
                                                           Timestamp = x.EventTimestamp.Ticks,
                                                           TTL = null,
