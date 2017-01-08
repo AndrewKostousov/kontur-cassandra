@@ -65,7 +65,7 @@ namespace EdiTimeline
             {
                 sw.Stop();
                 if (sw.Elapsed >= TimeSpan.FromSeconds(10))
-                    Log.For(this).Warn($"[LONG DELAY] AllBoxEventSeriesWriter.Write() took {sw.Elapsed} for: {protoBoxEvent}");
+                    Log.For(this).Warning("[LONG DELAY] AllBoxEventSeriesWriter.Write() took {elapsed} for: {@protoBoxEvent}", sw.Elapsed, protoBoxEvent);
             }
         }
 

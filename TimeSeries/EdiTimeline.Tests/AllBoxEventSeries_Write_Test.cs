@@ -37,12 +37,12 @@ namespace EdiTimeline.Tests
             var sw = Stopwatch.StartNew();
             var expectedEvents = WriteToAllBoxEventSeries(Enumerable.Range(0, 10000).Select(x => ProtoBoxEvent()).ToArray());
             sw.Stop();
-            Log.For(this).InfoFormat("Write({0}) took {1} ms", expectedEvents.Count, sw.ElapsedMilliseconds);
+            Log.For(this).Information("Write({0}) took {1} ms", expectedEvents.Count, sw.ElapsedMilliseconds);
 
             sw = Stopwatch.StartNew();
             var actualEvents = ReadEventsToEnd(firstEvent);
             sw.Stop();
-            Log.For(this).InfoFormat("ReadEventsToEnd({0}) took {1} ms", actualEvents.Count, sw.ElapsedMilliseconds);
+            Log.For(this).Information("ReadEventsToEnd({0}) took {1} ms", actualEvents.Count, sw.ElapsedMilliseconds);
 
             actualEvents.ShouldBeEquivalentWithOrderTo(expectedEvents);
         }
@@ -73,8 +73,8 @@ namespace EdiTimeline.Tests
                             var queueItems = protoEventsToWrite.Select(x => new AllBoxEventSeriesWriterQueueItem(x, new Promise<Timestamp>())).ToList();
                             allBoxEventSeries.WriteEventsInAnyOrder(queueItems);
                             var boxEvents = queueItems.Where(x => x.EventTimestamp.Result != null)
-                                .Select(x => new BoxEvent(x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, x.ProtoBoxEvent.Payload))
-                                .ToList();
+                                                      .Select(x => new BoxEvent(x.ProtoBoxEvent.EventId, x.EventTimestamp.Result, x.ProtoBoxEvent.Payload))
+                                                      .ToList();
                             state.WrittenEvents[writerThreadIndex].AddRange(boxEvents);
                             protoEventsToWrite = queueItems.Where(x => x.EventTimestamp.Result == null).Select(x => x.ProtoBoxEvent).ToArray();
                         }
@@ -101,7 +101,7 @@ namespace EdiTimeline.Tests
             var sw = Stopwatch.StartNew();
             MultithreadingTestHelper.RunOnSeparateThreads(sharedState, TimeSpan.FromMinutes(5), actions);
             sw.Stop();
-            Log.For(this).InfoFormat("ConcurrentReadWrite({0}) took {1} ms", sharedState.TotalEventsToRead, sw.ElapsedMilliseconds);
+            Log.For(this).Information("ConcurrentReadWrite({0}) took {1} ms", sharedState.TotalEventsToRead, sw.ElapsedMilliseconds);
 
             for (var th = 0; th < sharedState.WrittenEvents.Length; th++)
             {
@@ -140,8 +140,8 @@ namespace EdiTimeline.Tests
             {
                 TotalEventsToRead = writerThreads * eventsPerWriterThread;
                 ProtoEventsToWrite = Enumerable.Range(0, writerThreads)
-                    .Select(x => Enumerable.Range(0, eventsPerWriterThread).Select(y => ProtoBoxEvent()).ToArray())
-                    .ToArray();
+                                               .Select(x => Enumerable.Range(0, eventsPerWriterThread).Select(y => ProtoBoxEvent()).ToArray())
+                                               .ToArray();
                 ReadEvents = Enumerable.Range(0, readerThreads).Select(x => new List<BoxEvent>()).ToArray();
                 WrittenEvents = Enumerable.Range(0, writerThreads).Select(x => new List<BoxEvent>()).ToArray();
             }

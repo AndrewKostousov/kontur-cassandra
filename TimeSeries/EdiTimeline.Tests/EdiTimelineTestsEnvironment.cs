@@ -15,7 +15,7 @@ namespace EdiTimeline.Tests
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
-            Logging.SetUpForTests();
+            Logging.SetUp();
             Serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
             SetUpCassandraCluster();
             SetUpCassandraSchema();
@@ -61,6 +61,7 @@ namespace EdiTimeline.Tests
         public void RunAfterAnyTests()
         {
             CassandraCluster.Dispose();
+            Logging.TearDown();
         }
 
         public static void ResetState()

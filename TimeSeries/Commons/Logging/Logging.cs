@@ -1,53 +1,56 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using log4net;
-using log4net.Config;
+using Serilog;
 
 namespace Commons.Logging
 {
     public static class Logging
     {
-        public static void SetUpForTests([NotNull] string logName = "AllTests")
+        [NotNull]
+        public static ILogger GetLoggerByName([NotNull] string loggerName)
         {
-            if (initialized)
-                return;
-            SetUpLog4Net(logName);
+            return loggers.GetOrAdd(loggerName, t => GetBasicConfiguration().Enrich.With(new LoggerNameLogEventEnricher(loggerName)).CreateLogger());
+        }
+
+        public static void SetUp()
+        {
+            logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", $"{DateTime.Now:yyyy-MM-dd_HH.mm.ss}.log");
+            Serilog.Log.Logger = GetBasicConfiguration().CreateLogger();
             RegisterUnhandledExceptionsHandlers(Log.For("UnhandledExceptions"));
-            initialized = true;
         }
 
-        private static void SetUpLog4Net([NotNull] string logName)
+        public static void TearDown()
         {
-            GlobalContext.Properties["LogDirectory"] = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-            GlobalContext.Properties["LogFileName"] = $"{logName}-{DateTime.Now:yyyy-MM-dd-HH.mm.ss}.log";
-            XmlConfigurator.Configure(GetConfigStream());
+            foreach (var logger in loggers.Values.Select(x => x as IDisposable).Where(x => x != null))
+                logger.Dispose();
+            Serilog.Log.CloseAndFlush();
         }
 
-        [CanBeNull]
-        private static Stream GetConfigStream()
+        [NotNull]
+        private static LoggerConfiguration GetBasicConfiguration()
         {
-            var thisType = typeof(Logging);
-            var configResourceName = $"{(IsExecutionViaTeamCity() ? "tc" : "local")}.test.log4net.config";
-            return thisType.Assembly.GetManifestResourceStream(thisType, configResourceName);
+            return new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .Enrich.With(new ThreadNameLogEventEnricher())
+                .WriteTo.LiterateConsole(outputTemplate: "{Timestamp:HH:mm:ss.fff} {Level} [{ThreadName}] {Message}{NewLine}{Exception}")
+                .WriteTo.File(path: logFilePath, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fffzzz} {Level:u4} [{ThreadName}] [{LoggerName}] {Message}{NewLine}{Exception}", shared: true);
         }
 
-        private static bool IsExecutionViaTeamCity()
+        private static void RegisterUnhandledExceptionsHandlers([NotNull] ILogger logger)
         {
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TEAMCITY_VERSION"));
-        }
-
-        private static void RegisterUnhandledExceptionsHandlers([NotNull] ILog logger)
-        {
-            AppDomain.CurrentDomain.UnhandledException += (sender, args) => { logger.Fatal("Unhandled exception in current AppDomain", (Exception)args.ExceptionObject); };
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) => { logger.Fatal((Exception)args.ExceptionObject, "Unhandled exception in current AppDomain"); };
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {
-                logger.Fatal("Unobserved TaskException", args.Exception);
+                logger.Fatal(args.Exception, "Unobserved TaskException");
                 args.SetObserved();
             };
         }
 
-        private static bool initialized;
+        private static string logFilePath;
+        private static readonly ConcurrentDictionary<string, ILogger> loggers = new ConcurrentDictionary<string, ILogger>();
     }
 }

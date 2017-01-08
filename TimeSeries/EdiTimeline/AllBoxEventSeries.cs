@@ -77,7 +77,7 @@ namespace EdiTimeline
             }
             catch (Exception e)
             {
-                Log.For(this).Error($"Failed to process AllBoxEventSeries writer queue items: {queueItems.Count}", e);
+                Log.For(this).Error(e, "Failed to process AllBoxEventSeries writer queue items: {queueItemsCount}", queueItems.Count);
                 foreach (var item in queueItems)
                     item.EventTimestamp.SetResult(null);
             }
