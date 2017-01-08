@@ -40,7 +40,5 @@ namespace EdiTimeline
             var eventId = Guid.Parse(parts[1]);
             return new AllBoxEventSeriesPointer(eventTimestamp, eventId);
         }
-
-        public const string EventTicksColumnName = "Ticks";
     }
 }

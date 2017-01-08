@@ -12,17 +12,6 @@ namespace EdiTimeline
             this.allBoxEventSeries = allBoxEventSeries;
         }
 
-        [NotNull]
-        public BoxEvent ReadEvent(Guid eventId)
-        {
-            var boxEvent = allBoxEventSeries.TryReadEvent(eventId);
-            if (boxEvent == null)
-                throw new InvalidProgramStateException($"Event not found: {eventId}");
-            if (boxEvent.Payload == null)
-                throw new InvalidProgramStateException($"boxEvent.Payload == null for eventId: {eventId}");
-            return boxEvent;
-        }
-
         [CanBeNull]
         public AllBoxEventSeriesRange TryCreateEventSeriesRange([CanBeNull] AllBoxEventSeriesPointer exclusiveStartEventPointer, [CanBeNull] Timestamp inclusiveEndTimestamp)
         {
@@ -33,12 +22,6 @@ namespace EdiTimeline
         public AllBoxEventSeriesRange TryCreateEventSeriesRange([CanBeNull] Timestamp exclusiveStartTimestamp, [CanBeNull] Timestamp inclusiveEndTimestamp)
         {
             return allBoxEventSeries.TryCreateRange(exclusiveStartTimestamp, inclusiveEndTimestamp);
-        }
-
-        [CanBeNull]
-        public AllBoxEventSeriesRange TryCreateEventSeriesRange(Guid? exclusiveStartEventId, [CanBeNull] Timestamp inclusiveEndTimestamp, out bool exclusiveStartEventNotFound)
-        {
-            return allBoxEventSeries.TryCreateRange(exclusiveStartEventId, inclusiveEndTimestamp, out exclusiveStartEventNotFound);
         }
 
         [NotNull]

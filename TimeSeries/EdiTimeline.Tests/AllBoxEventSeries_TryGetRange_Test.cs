@@ -15,7 +15,7 @@ namespace EdiTimeline.Tests
             var lastGoodEventTimestamp = eventTimestamp.AddTicks(1);
             allBoxEventSeriesTicksHolder.SetLastGoodEventTicks(lastGoodEventTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(new AllBoxEventSeriesPointer(eventTimestamp, eventId), inclusiveEndTimestamp: null)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventTimestamp, eventId, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventTimestamp, eventId, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace EdiTimeline.Tests
             var eventTimestamp = Timestamp.Now;
             var endTimestamp = eventTimestamp.AddTicks(1);
             allBoxEventSeries.TryCreateRange(new AllBoxEventSeriesPointer(eventTimestamp, eventId), endTimestamp)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventTimestamp, eventId, endTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventTimestamp, eventId, endTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace EdiTimeline.Tests
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
             allBoxEventSeriesTicksHolder.SetLastGoodEventTicks(lastGoodEventTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(exclusiveStartEventPointer: null, inclusiveEndTimestamp: null)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace EdiTimeline.Tests
             var endTimestamp = eventSeriesStartTimestamp.AddTicks(1);
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(exclusiveStartTimestamp: null, inclusiveEndTimestamp: endTimestamp)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace EdiTimeline.Tests
             var endTimestamp = eventSeriesStartTimestamp.AddTicks(1);
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(startTimestamp, endTimestamp)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace EdiTimeline.Tests
             var endTimestamp = eventSeriesStartTimestamp.AddTicks(2);
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(startTimestamp, endTimestamp)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(startTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(startTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -124,7 +124,7 @@ namespace EdiTimeline.Tests
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
             allBoxEventSeriesTicksHolder.SetLastGoodEventTicks(lastGoodEventTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(startTimestamp, inclusiveEndTimestamp: null)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(startTimestamp, GuidHelpers.MaxGuid, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
+                             .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(startTimestamp, GuidHelpers.MaxGuid, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
         }
 
         [Test]
@@ -134,81 +134,6 @@ namespace EdiTimeline.Tests
             var endTimestamp = startTimestamp.AddTicks(-1);
             allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(startTimestamp.Ticks);
             allBoxEventSeries.TryCreateRange(startTimestamp, endTimestamp).Should().BeNull();
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_NullStartEventId_EventSeriesStartNotSet()
-        {
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(exclusiveStartEventId: null, inclusiveEndTimestamp: Timestamp.Now, exclusiveStartEventNotFound: out exclusiveStartEventNotFound).Should().BeNull();
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_NullStartEventId()
-        {
-            var eventSeriesStartTimestamp = Timestamp.Now;
-            var endTimestamp = eventSeriesStartTimestamp.AddTicks(1);
-            allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(exclusiveStartEventId: null, inclusiveEndTimestamp: endTimestamp, exclusiveStartEventNotFound: out exclusiveStartEventNotFound)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, endTimestamp, allBoxEventSeries.PartitionDuration));
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_NullEndTimestamp_LastGooEventNotSet()
-        {
-            allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(Timestamp.Now.Ticks);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(exclusiveStartEventId: null, inclusiveEndTimestamp: null, exclusiveStartEventNotFound: out exclusiveStartEventNotFound).Should().BeNull();
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_NullStartEventId_NullEndTimestamp()
-        {
-            var eventSeriesStartTimestamp = Timestamp.Now;
-            var lastGoodEventTimestamp = eventSeriesStartTimestamp.AddTicks(1);
-            allBoxEventSeriesTicksHolder.SetEventSeriesExclusiveStartTicks(eventSeriesStartTimestamp.Ticks);
-            allBoxEventSeriesTicksHolder.SetLastGoodEventTicks(lastGoodEventTimestamp.Ticks);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(exclusiveStartEventId: null, inclusiveEndTimestamp: null, exclusiveStartEventNotFound: out exclusiveStartEventNotFound)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(eventSeriesStartTimestamp, GuidHelpers.MaxGuid, lastGoodEventTimestamp, allBoxEventSeries.PartitionDuration));
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_StartEventTimestampNotSet()
-        {
-            var startEventId = Guid.NewGuid();
-            var startTimestamp = Timestamp.Now;
-            var endTimestamp = startTimestamp.AddTicks(1);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(startEventId, endTimestamp, out exclusiveStartEventNotFound).Should().BeNull();
-            exclusiveStartEventNotFound.Should().BeTrue();
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId_StartEventTimestampIsGreaterThanEndTimestamp()
-        {
-            var boxEvent = BoxEvent();
-            allBoxEventSeries.WriteEventsWithNoSynchronization(boxEvent);
-            var startEventId = boxEvent.EventId;
-            var startEventTimestamp = boxEvent.EventTimestamp;
-            var endTimestamp = startEventTimestamp.AddTicks(-1);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(startEventId, endTimestamp, out exclusiveStartEventNotFound).Should().BeNull();
-        }
-
-        [Test]
-        public void TryCreateRange_ByEventId()
-        {
-            var boxEvent = BoxEvent();
-            allBoxEventSeries.WriteEventsWithNoSynchronization(boxEvent);
-            var startEventId = boxEvent.EventId;
-            var startEventTimestamp = boxEvent.EventTimestamp;
-            var endTimestamp = startEventTimestamp.AddTicks(1);
-            bool exclusiveStartEventNotFound;
-            allBoxEventSeries.TryCreateRange(startEventId, endTimestamp, out exclusiveStartEventNotFound)
-                .ShouldBeEquivalentTo(new AllBoxEventSeriesRange(startEventTimestamp, startEventId, endTimestamp, allBoxEventSeries.PartitionDuration));
-            exclusiveStartEventNotFound.Should().BeFalse();
         }
     }
 }

@@ -11,15 +11,6 @@ namespace EdiTimeline.Tests
     public class AllBoxEventSeriesTest : BoxEventSeriesTestBase
     {
         [Test]
-        public void ReadEvent()
-        {
-            var expectedEvent = BoxEvent();
-            allBoxEventSeries.TryReadEvent(expectedEvent.EventId).Should().BeNull();
-            WriteWithNoSync(expectedEvent);
-            allBoxEventSeries.TryReadEvent(expectedEvent.EventId).ShouldBeEquivalentTo(expectedEvent);
-        }
-
-        [Test]
         public void ReadEventsToEnd_StartFromEvent()
         {
             var firstEvent = BoxEvent(0xff);
@@ -35,15 +26,6 @@ namespace EdiTimeline.Tests
         }
 
         [Test]
-        public void ReadEventsToEnd_StartFromEventId()
-        {
-            var boxEvents = GenerateEvents(10);
-            var exlusiveStartEventId = boxEvents[2].EventId;
-            var expectedEvents = boxEvents.Skip(3).ToList();
-            ReadEventsToEnd(exlusiveStartEventId).ShouldBeEquivalentWithOrderTo(expectedEvents);
-        }
-
-        [Test]
         public void ReadEventsToEnd_StartFromTimestamp()
         {
             var expectedEvents = GenerateEvents(10).Skip(3).ToList();
@@ -53,7 +35,7 @@ namespace EdiTimeline.Tests
 
         private List<BoxEvent> GenerateEvents(byte count)
         {
-            var expectedEvents = Enumerable.Range(0, count).Select(x => BoxEvent((byte) x)).ToList();
+            var expectedEvents = Enumerable.Range(0, count).Select(x => BoxEvent((byte)x)).ToList();
             WriteWithNoSync(expectedEvents.ToArray());
             return expectedEvents;
         }
@@ -69,16 +51,6 @@ namespace EdiTimeline.Tests
         {
             var range = allBoxEventSeries.TryCreateRange(new AllBoxEventSeriesPointer(exclusiveStartEvent.EventTimestamp, exclusiveStartEvent.EventId), inclusiveEndTimestamp: null);
             range.Should().NotBeNull();
-            return allBoxEventSeries.ReadEvents(range, int.MaxValue, x => x);
-        }
-
-        [NotNull]
-        private List<BoxEvent> ReadEventsToEnd(Guid exclusiveStartEventId)
-        {
-            bool exclusiveStartEventNotFound;
-            var range = allBoxEventSeries.TryCreateRange(exclusiveStartEventId, null, out exclusiveStartEventNotFound);
-            range.Should().NotBeNull();
-            exclusiveStartEventNotFound.Should().BeFalse();
             return allBoxEventSeries.ReadEvents(range, int.MaxValue, x => x);
         }
 
