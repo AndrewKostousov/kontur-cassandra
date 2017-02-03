@@ -12,14 +12,14 @@ namespace CassandraTimeSeries.Model
 {
     public class TimeSeries : ITimeSeries
     {
-        private readonly Table<Event> table;
+        protected readonly Table<Event> table;
         
         public TimeSeries(Table<Event> table)
         {
             this.table = table;
         }
 
-        public Event Write(EventProto ev)
+        public virtual Event Write(EventProto ev)
         {
             var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
             table.Insert(eventToWrite).Execute();
