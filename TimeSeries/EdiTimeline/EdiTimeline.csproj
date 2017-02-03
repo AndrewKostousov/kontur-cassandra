@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EdiTimeline</RootNamespace>
+    <AssemblyName>EdiTimeline</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Cassandra.CassandraClient, Version=1.8.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\ExternalRefs\Cassandra.CassandraClient.dll</HintPath>
+    </Reference>
+    <Reference Include="GroBuf, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\GroBuf.1.2.0\lib\net40\GroBuf.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=10.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\packages\Serilog.2.3.0\lib\net46\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AllBoxEventSeries.cs" />
+    <Compile Include="AllBoxEventSeriesCassandraHelpers.cs" />
+    <Compile Include="AllBoxEventSeriesColumnValue.cs" />
+    <Compile Include="AllBoxEventSeriesPointer.cs" />
+    <Compile Include="AllBoxEventSeriesRange.cs" />
+    <Compile Include="AllBoxEventSeriesSettings.cs" />
+    <Compile Include="AllBoxEventSeriesTicksHolder.cs" />
+    <Compile Include="AllBoxEventSeriesWriter.cs" />
+    <Compile Include="AllBoxEventSeriesWriterQueueItem.cs" />
+    <Compile Include="BoxEvent.cs" />
+    <Compile Include="BoxEventSeriesCassandraSchemaConfigurator.cs" />
+    <Compile Include="BoxEventsReader.cs" />
+    <Compile Include="BoxEventsReaderExtensions.cs" />
+    <Compile Include="BoxEventsWriter.cs" />
+    <Compile Include="CassandraHelpers\ActionExtensions.cs" />
+    <Compile Include="CassandraHelpers\CassandraClusterSettings.cs" />
+    <Compile Include="CassandraHelpers\CassandraColumnFamilyDefinition.cs" />
+    <Compile Include="CassandraHelpers\CassandraInitializerSettings.cs" />
+    <Compile Include="CassandraHelpers\CassandraSchemeActualizer.cs" />
+    <Compile Include="CassandraHelpers\CassandraStoringSchema.cs" />
+    <Compile Include="CassandraHelpers\ICassandraColumnFamilyConfiguration.cs" />
+    <Compile Include="CassandraHelpers\ICassandraInitializerSettings.cs" />
+    <Compile Include="CassandraHelpers\ICassandraMetadataProvider.cs" />
+    <Compile Include="CassandraHelpers\ICassandraSchemeActualizer.cs" />
+    <Compile Include="IAllBoxEventSeries.cs" />
+    <Compile Include="IAllBoxEventSeriesSettings.cs" />
+    <Compile Include="IAllBoxEventSeriesTicksHolder.cs" />
+    <Compile Include="IBoxEventsReader.cs" />
+    <Compile Include="IBoxEventsWriter.cs" />
+    <Compile Include="MaxTicksHolder.cs" />
+    <Compile Include="MinTicksHolder.cs" />
+    <Compile Include="Promise.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtoBoxEvent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Commons\Commons.csproj">
+      <Project>{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}</Project>
+      <Name>Commons</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
