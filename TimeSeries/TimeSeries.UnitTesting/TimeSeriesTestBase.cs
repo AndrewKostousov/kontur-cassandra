@@ -10,7 +10,7 @@ namespace CassandraTimeSeries.UnitTesting
         protected DatabaseWrapper Wrapper;
         protected ITimeSeries Series;
 
-        protected abstract TimeSeries TimeSeriesFactory();
+        protected abstract ITimeSeries TimeSeriesFactory();
 
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()

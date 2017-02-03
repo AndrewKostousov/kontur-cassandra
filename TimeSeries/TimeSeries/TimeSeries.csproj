@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Model\DatabaseWrapper.cs" />
     <Compile Include="Model\EventProto.cs" />
+    <Compile Include="Model\CasTimeSeries.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />
     <Compile Include="ReadWrite\EventWriter.cs" />
     <Compile Include="ReadWrite\ReaderSettings.cs" />

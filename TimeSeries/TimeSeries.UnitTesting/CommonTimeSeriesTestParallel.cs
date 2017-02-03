@@ -44,22 +44,22 @@ namespace CassandraTimeSeries.UnitTesting
 
         private void DoTestParallel(int readersCount, int writersCount)
         {
-            var readers = Enumerable.Range(0, readersCount).Select(_ => new EventReader(Series, new ReaderSettings())).ToList();
-            var writers = Enumerable.Range(0, writersCount).Select(_ => new EventWriter(Series, new WriterSettings())).ToList();
+            var readers = Enumerable.Range(0, readersCount).Select(_ => new EventReader(TimeSeriesFactory(), new ReaderSettings())).ToList();
+            var writers = Enumerable.Range(0, writersCount).Select(_ => new EventWriter(TimeSeriesFactory(), new WriterSettings())).ToList();
 
-            var writtenEvents = writers.ToDictionary(r => r, r => new List<TimeGuid>());
-            var readEvents = readers.ToDictionary(r => r, r => new List<TimeGuid>());
-
-            var isAlive = writers.ToDictionary(w => w, w => true);
+            var writtenEvents = writers.ToDictionary(r => r, r => new List<Event>());
+            var readEvents = readers.ToDictionary(r => r, r => new List<Event>());
+            
+            var keepReadersAlive = true;
 
             var readersThreads = readers.Select(reader =>
                 {
                     return new Thread(() =>
                     {
-                        readEvents[reader].Add(reader.ReadFirst().TimeGuid);
+                        readEvents[reader].Add(reader.ReadFirst());
 
-                        while (isAlive.Values.Any(x => x))
-                            readEvents[reader].AddRange(reader.ReadNext().Select(x => x.TimeGuid));
+                        while (keepReadersAlive)
+                            readEvents[reader].AddRange(reader.ReadNext());
                     });
                 }
             ).ToList();
@@ -70,29 +70,32 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     for (int i = 0; i < 100; ++i)
                         writtenEvents[writer].Add(writer.WriteNext());
-
-                    Thread.Sleep(500);
-
-                    isAlive[writer] = false;
                 });
             }).ToList();
 
             foreach (var writer in writersThreads)
                 writer.Start();
-
+            
             foreach (var reader in readersThreads)
                 reader.Start();
 
             foreach (var writer in writersThreads)
                 writer.Join();
 
+            Thread.Sleep(1000); // wait readers
+
+            keepReadersAlive = false;
+
             foreach (var reader in readersThreads)
                 reader.Join();
 
-            var allWrittenEvents = writtenEvents.SelectMany(x => x.Value); //.OrderBy(x => x.Id);
+            var allWrittenEvents = writtenEvents
+                .SelectMany(x => x.Value)
+                .OrderBy(x => x.Id)
+                .ToList();
 
             foreach (var eventsList in readEvents.Values)
-                eventsList.ShouldBeEquivalentTo(allWrittenEvents, options => options.WithStrictOrderingFor(x => x));
+                eventsList.ShouldAllBeEquivalentTo(allWrittenEvents, options => options.WithStrictOrderingFor(x => x));
         }
     }
 }

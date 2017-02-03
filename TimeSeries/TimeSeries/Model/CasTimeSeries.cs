@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
@@ -10,20 +11,28 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
-    public class TimeSeries : ITimeSeries
+    public class CasTimeSeries : ITimeSeries
     {
         private readonly Table<Event> table;
         
-        public TimeSeries(Table<Event> table)
+        public CasTimeSeries(Table<Event> table)
         {
             this.table = table;
         }
 
+        private TimeGuid lastId = TimeGuid.MinValue;
+
         public Event Write(EventProto ev)
         {
-            var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
-            table.Insert(eventToWrite).Execute();
+            Event eventToWrite;
 
+            do
+            {
+                eventToWrite = new Event(lastId, ev);
+                lastId = new TimeGuid(lastId.GetTimestamp().AddMilliseconds(1), lastId.GetClockSequence(), lastId.GetNode());
+
+            } while (!table.Insert(eventToWrite).IfNotExists().Execute().Applied);
+             
             return eventToWrite;
         }
 
@@ -52,7 +61,7 @@ namespace CassandraTimeSeries.Model
             var slices = TimeSlicer
                 .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.SliceDutation)
                 .Select(s => s.Ticks);
-            
+
             return table.Where(e => slices.Contains(e.SliceId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
                 .Take(count)
                 .Execute()

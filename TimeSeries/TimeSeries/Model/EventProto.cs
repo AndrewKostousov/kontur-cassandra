@@ -1,5 +1,6 @@
 ﻿using System;
 using Cassandra.Mapping.Attributes;
+using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
@@ -17,6 +18,6 @@ namespace CassandraTimeSeries.Model
             Payload = payload;
         }
 
-        public EventProto(byte[] payload=null) : this(Guid.NewGuid(), payload) { }
+        public EventProto(byte[] payload=null) : this(TimeGuid.NowGuid().ToGuid(), payload) { }
     }
 }

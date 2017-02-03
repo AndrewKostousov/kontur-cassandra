@@ -14,12 +14,12 @@ namespace Benchmarks.ReadWrite
         public BenchmarkEventWriter(TimeSeries series, WriterSettings settings) 
             : base(series, settings) { }
 
-        public override TimeGuid WriteNext()
+        public override Event WriteNext()
         {
             var sw = Stopwatch.StartNew();
-            var writtenTimeGuid = base.WriteNext();
+            var writtenEvent = base.WriteNext();
             Latency.Add(sw.Elapsed);
-            return writtenTimeGuid;
+            return writtenEvent;
         }
     }
 }

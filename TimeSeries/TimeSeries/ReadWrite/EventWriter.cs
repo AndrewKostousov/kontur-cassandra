@@ -16,11 +16,11 @@ namespace CassandraTimeSeries.ReadWrite
             this.series = series;
         }
 
-        public virtual TimeGuid WriteNext()
+        public virtual Event WriteNext()
         {
-            var writtenTimeGuid = series.Write(new EventProto());
+            var writtenEvent = series.Write(new EventProto());
             Thread.Sleep(Settings.MillisecondsSleep);
-            return writtenTimeGuid;
+            return writtenEvent;
         }
     }
 }

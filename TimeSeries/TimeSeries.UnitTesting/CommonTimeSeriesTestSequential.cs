@@ -1,4 +1,5 @@
 using CassandraTimeSeries.Model;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 using FluentAssertions;
@@ -35,7 +36,7 @@ namespace CassandraTimeSeries.UnitTesting
         public override void OneTimeSetUp()
         {
             base.OneTimeSetUp();
-
+            
             t00 = Timestamp.Now.Floor(Event.SliceDutation);
 
             t10 = t00 + Event.SliceDutation;
