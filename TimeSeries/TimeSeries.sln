@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSeries", "TimeSeries\TimeSeries.csproj", "{ED137858-C0C9-4246-AB0F-D8AAD9ABF2AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSeries.UnitTesting", "TimeSeries.UnitTesting\TimeSeries.UnitTesting.csproj", "{1964432F-63EC-4AB4-A65A-530A887B1B8E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSeries.Tests", "TimeSeries.UnitTesting\TimeSeries.Tests.csproj", "{1964432F-63EC-4AB4-A65A-530A887B1B8E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons", "Commons\Commons.csproj", "{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}"
 EndProject
