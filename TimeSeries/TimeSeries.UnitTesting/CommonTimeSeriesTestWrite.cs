@@ -6,9 +6,16 @@ namespace CassandraTimeSeries.UnitTesting
     public abstract class CommonTimeSeriesTestWrite : TimeSeriesTestBase
     {
         [Test]
-        public void Write_GenericCase()
+        public void Write_WriteOne()
         {
             Series.Write(new EventProto());
-        } 
+        }
+
+        [Test]
+        public void Write_WriteMany()
+        {
+            for (var i = 0; i < 3; ++i)
+                Series.Write(new EventProto());
+        }
     }
 }

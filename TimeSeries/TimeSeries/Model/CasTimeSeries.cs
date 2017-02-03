@@ -28,17 +28,17 @@ namespace CassandraTimeSeries.Model
             var e = eventToWrite;
             var session = table.GetSession();
 
-            var updateStatement = session
-                .Prepare(
-                    $"UPDATE {table.Name} " +
-                    "SET user_id = ?, payload = ?, ticks = ?, max_ticks = ? " +
-                    "WHERE event_id = ? AND slice_id = ? " +
-                    (isFirstWrite ? "IF max_ticks = NULL" : "IF max_ticks <= ticks"))   // "max_ticks <= ticks" fails when inserting first row
-                .Bind(e.UserId, e.Payload, e.Ticks, e.Ticks, e.Id, e.SliceId);
+            var preparedStatement = session.Prepare(
+                $"UPDATE {table.Name} " +
+                "SET user_id = ?, payload = ?, ticks = ?, max_ticks = ? " +
+                "WHERE event_id = ? AND slice_id = ? " +
+                (isFirstWrite ? "IF max_ticks = NULL" : "IF max_ticks <= ?"));   // "max_ticks <= ticks" fails when inserting first row
+
+            if (!isFirstWrite)
+                return Execute(session, preparedStatement.Bind(e.UserId, e.Payload, e.Ticks, e.Ticks, e.Id, e.SliceId, e.Ticks));
 
             isFirstWrite = false;
-
-            return Execute(session, updateStatement);
+            return Execute(session, preparedStatement.Bind(e.UserId, e.Payload, e.Ticks, e.Ticks, e.Id, e.SliceId));
         }
 
         private bool Execute(ISession session, IStatement statement)

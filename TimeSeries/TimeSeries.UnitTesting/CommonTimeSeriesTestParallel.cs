@@ -75,7 +75,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             foreach (var writer in writersThreads)
                 writer.Start();
-            
+
             foreach (var reader in readersThreads)
                 reader.Start();
 
