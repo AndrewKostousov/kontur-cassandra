@@ -30,9 +30,8 @@ namespace CassandraTimeSeries.Model
             {
                 eventToWrite = new Event(lastId, ev);
                 lastId = new TimeGuid(lastId.GetTimestamp().AddMilliseconds(1), lastId.GetClockSequence(), lastId.GetNode());
-
             } while (!table.Insert(eventToWrite).IfNotExists().Execute().Applied);
-             
+
             return eventToWrite;
         }
 
