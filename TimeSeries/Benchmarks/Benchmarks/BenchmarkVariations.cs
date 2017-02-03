@@ -4,14 +4,14 @@ using CassandraTimeSeries.Model;
 namespace Benchmarks.Benchmarks
 {
     [BenchmarkClass]
-    public class ReadAndWriteBenchmark : TimeSeriesBenchmark
+    public abstract class ReadAndWriteBenchmark : BaseTimeSeriesBenchmark
     {
         protected override int ReadersCount => 4;
         protected override int WritersCount => 4;
     }
 
     [BenchmarkClass]
-    public class ReadOnlyBenchmark : TimeSeriesBenchmark
+    public abstract class ReadOnlyBenchmark : BaseTimeSeriesBenchmark
     {
         protected override int ReadersCount => 4;
         protected override int WritersCount => 0;
@@ -28,7 +28,7 @@ namespace Benchmarks.Benchmarks
     }
 
     [BenchmarkClass]
-    public class WriteOnlyBenchmark : TimeSeriesBenchmark
+    public abstract class WriteOnlyBenchmark : BaseTimeSeriesBenchmark
     {
         protected override int ReadersCount => 0;
         protected override int WritersCount => 4;

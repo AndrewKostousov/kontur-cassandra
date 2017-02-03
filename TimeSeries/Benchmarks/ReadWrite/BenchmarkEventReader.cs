@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Cassandra;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using Commons;
@@ -18,7 +19,7 @@ namespace Benchmarks.ReadWrite
 
         public int TotalEventsRead => ReadsLength.Sum();
 
-        public BenchmarkEventReader(TimeSeries series, ReaderSettings settings) 
+        public BenchmarkEventReader(ITimeSeries series, ReaderSettings settings) 
             : base(series, settings) { }
 
         public override List<Event> ReadNext()

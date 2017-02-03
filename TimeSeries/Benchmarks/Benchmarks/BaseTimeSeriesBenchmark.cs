@@ -4,6 +4,7 @@ using System.Threading;
 using Benchmarks.ReadWrite;
 using Benchmarks.Reflection;
 using Benchmarks.Results;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using CassandraTimeSeries.Utils;
@@ -11,10 +12,10 @@ using CassandraTimeSeries.Utils;
 namespace Benchmarks.Benchmarks
 {
     [BenchmarkClass]
-    public abstract class TimeSeriesBenchmark
+    public abstract class BaseTimeSeriesBenchmark
     {
-        private DatabaseWrapper database;
-        protected TimeSeries Series;
+        protected DatabaseWrapper Database { get; private set; }
+        protected ITimeSeries Series { get; private set; }
         private ReadersWritersPool pool;
 
         private List<BenchmarkEventReader> readers;
@@ -28,41 +29,41 @@ namespace Benchmarks.Benchmarks
 
         protected int CurrentIteration { get; private set; }
 
-        protected TimeSeriesBenchmark()
+        protected BaseTimeSeriesBenchmark()
         {
             readerSettings = new ReaderSettings();
             writerSettings = new WriterSettings();
         }
 
+        protected abstract ITimeSeries TimeSeriesFactory();
+
         [BenchmarkSetUp]
         public virtual void SetUp()
         {
             readers = Enumerable.Range(0, ReadersCount)
-                .Select(_ => new BenchmarkEventReader(Series, readerSettings))
+                .Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), readerSettings))
                 .ToList();
 
             writers = Enumerable.Range(0, WritersCount)
-                .Select(_ => new BenchmarkEventWriter(Series, writerSettings))
+                .Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), writerSettings))
                 .ToList();
 
             pool = new ReadersWritersPool(readers, writers);
 
-            database.Table.Truncate();
-            //Series.Write(new Event(TimeGuid.NowGuid()));
+            Database.Table.Truncate();
         }
 
         [BenchmarkClassSetUp]
         public void ClassSetUp()
         {
-            database = new DatabaseWrapper("test");
-            Series = new TimeSeries(database.Table);
-            //Series.Write(new Event(TimeGuid.NowGuid()));
+            Database = new DatabaseWrapper("test");
+            Series = TimeSeriesFactory();
         }
         
         [BenchmarkClassTearDown]
         public void ClassTearDown()
         {
-            database.Dispose();
+            Database.Dispose();
         }
         
         [BenchmarkMethod(executionsCount:1, result:nameof(Result))]
