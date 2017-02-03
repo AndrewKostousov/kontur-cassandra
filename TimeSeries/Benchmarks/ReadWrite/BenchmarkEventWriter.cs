@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
+using Commons.TimeBasedUuid;
 
 namespace Benchmarks.ReadWrite
 {
@@ -13,12 +14,12 @@ namespace Benchmarks.ReadWrite
         public BenchmarkEventWriter(TimeSeries series, WriterSettings settings) 
             : base(series, settings) { }
 
-        public override Event WriteNext()
+        public override TimeGuid WriteNext()
         {
             var sw = Stopwatch.StartNew();
-            var eventWritten = base.WriteNext();
+            var writtenTimeGuid = base.WriteNext();
             Latency.Add(sw.Elapsed);
-            return eventWritten;
+            return writtenTimeGuid;
         }
     }
 }

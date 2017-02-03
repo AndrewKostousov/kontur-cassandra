@@ -19,12 +19,12 @@ namespace CassandraTimeSeries.Model
             this.table = table;
         }
 
-        public Event Write(EventProto ev)
+        public TimeGuid Write(EventProto ev)
         {
             var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
             table.Insert(eventToWrite).Execute();
 
-            return eventToWrite;
+            return eventToWrite.TimeGuid;
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)

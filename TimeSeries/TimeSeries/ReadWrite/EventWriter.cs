@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
+using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
 {
@@ -15,11 +16,11 @@ namespace CassandraTimeSeries.ReadWrite
             this.series = series;
         }
 
-        public virtual Event WriteNext()
+        public virtual TimeGuid WriteNext()
         {
-            var @event = series.Write(new EventProto());
+            var writtenTimeGuid = series.Write(new EventProto());
             Thread.Sleep(Settings.MillisecondsSleep);
-            return @event;
+            return writtenTimeGuid;
         }
     }
 }
