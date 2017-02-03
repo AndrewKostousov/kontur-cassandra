@@ -95,7 +95,7 @@ namespace CassandraTimeSeries.UnitTesting
                 .ToList();
 
             foreach (var eventsList in readEvents.Values)
-                eventsList.ShouldAllBeEquivalentTo(allWrittenEvents, options => options.WithStrictOrderingFor(x => x));
+                eventsList.ShouldBeExactly(allWrittenEvents);
         }
     }
 }

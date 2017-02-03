@@ -9,8 +9,8 @@ namespace CassandraTimeSeries.Model
     [Table("time_series")]
     public class Event : EventProto
     {
-        public static TimeSpan SliceDutation => TimeSpan.FromHours(10);
-        //public static TimeSpan SliceDutation => TimeSpan.FromMinutes(1);
+        //public static TimeSpan SliceDutation => TimeSpan.FromHours(10);
+        public static TimeSpan SliceDutation => TimeSpan.FromMinutes(1);
 
         [PartitionKey]
         [Column("slice_id")]
@@ -19,8 +19,16 @@ namespace CassandraTimeSeries.Model
         [ClusteringKey]
         [Column("event_id")]
         public TimeUuid Id { get; set; }
-        
-        public Timestamp Timestamp => new Timestamp(Id.GetDate());
+
+        [StaticColumn]
+        [Column("max_ticks")]
+        public long MaxTicks { get; set; } = TimeGuid.MinValue.GetTimestamp().Ticks;
+
+        [Column("ticks")]
+        public long Ticks { get; set; }
+
+        public Timestamp Timestamp => Id.ToTimeGuid().GetTimestamp();
+
         public TimeGuid TimeGuid => Id.ToTimeGuid();
 
         public Event() { }
@@ -31,6 +39,9 @@ namespace CassandraTimeSeries.Model
             SliceId = new Timestamp(Id.GetDate()).Floor(SliceDutation).Ticks;
             Payload = proto.Payload;
             UserId = proto.UserId;
+
+            Ticks = id.GetTimestamp().Ticks;
+            MaxTicks = Ticks > MaxTicks ? Ticks : MaxTicks;
         }
 
         public override string ToString()

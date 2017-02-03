@@ -15,7 +15,7 @@ namespace CassandraTimeSeries.Model
         public EventProto(Guid userId, byte[] payload=null)
         {
             UserId = userId;
-            Payload = payload;
+            Payload = payload ?? new byte[0];
         }
 
         public EventProto(byte[] payload=null) : this(TimeGuid.NowGuid().ToGuid(), payload) { }
