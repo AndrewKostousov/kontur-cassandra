@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -82,7 +83,7 @@ namespace CassandraTimeSeries.UnitTesting
             foreach (var writer in writersThreads)
                 writer.Join();
 
-            Thread.Sleep(1000); // wait readers
+            Thread.Sleep(2000); // wait readers
 
             keepReadersAlive = false;
 
@@ -94,8 +95,14 @@ namespace CassandraTimeSeries.UnitTesting
                 .OrderBy(x => x.Id)
                 .ToList();
 
-            foreach (var eventsList in readEvents.Values)
-                eventsList.ShouldBeExactly(allWrittenEvents);
+            foreach (var eventsReadBySingleReader in readEvents.Values)
+            {
+                for (int i = 0; i < eventsReadBySingleReader.Count; ++i)
+                    if (eventsReadBySingleReader[i].Id != allWrittenEvents[i].Id)
+                        throw new Exception($"{i}th events do not match!");
+
+                eventsReadBySingleReader.ShouldBeExactly(allWrittenEvents);
+            }
         }
     }
 }
