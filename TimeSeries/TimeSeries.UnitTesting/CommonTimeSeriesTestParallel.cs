@@ -83,7 +83,7 @@ namespace CassandraTimeSeries.UnitTesting
             foreach (var writer in writersThreads)
                 writer.Join();
 
-            Thread.Sleep(2000); // wait readers
+            Thread.Sleep(1000); // wait readers
 
             keepReadersAlive = false;
 
@@ -96,13 +96,7 @@ namespace CassandraTimeSeries.UnitTesting
                 .ToList();
 
             foreach (var eventsReadBySingleReader in readEvents.Values)
-            {
-                for (int i = 0; i < eventsReadBySingleReader.Count; ++i)
-                    if (eventsReadBySingleReader[i].Id != allWrittenEvents[i].Id)
-                        throw new Exception($"{i}th events do not match!");
-
                 eventsReadBySingleReader.ShouldBeExactly(allWrittenEvents);
-            }
         }
     }
 }
