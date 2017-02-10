@@ -7,10 +7,15 @@ namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeries : TimeSeries
     {
-        public CasTimeSeries(Table<Event> table) : base(table) { }
-
         private bool isFirstWrite = true;
         private long lastSliceId;
+
+        private readonly ISession session;
+
+        public CasTimeSeries(Table<Event> table) : base(table)
+        {
+            session = table.GetSession();
+        }
 
         public override Event Write(EventProto ev)
         {
@@ -37,20 +42,23 @@ namespace CassandraTimeSeries.Model
         private bool CompareAndUpdate(Event eventToWrite)
         {
             var e = eventToWrite;
-            var session = table.GetSession();
+
+            // FIXME: иногда теряется последний эвент в слайсе, так как колонка max_id общая только
+            // для записей в одном слайсе. Если появляется эвент в следующем слайсе, то ничего
+            // не мешает вставить следующий эвент в предыдущий слайс. 
 
             var preparedStatement = session.Prepare(
                 $"UPDATE {table.Name} " +
                 "SET user_id = ?, payload = ?, max_id = ? " +
                 "WHERE event_id = ? AND slice_id = ? " +
-                (isFirstWrite ? "IF max_id = NULL" : "IF max_id <= ?"));   // "max_ticks <= ticks" fails when inserting first row
+                (isFirstWrite ? "IF max_id = NULL" : "IF max_id < ?"));   // "max_ticks < ticks" fails when inserting first row
 
-            return Execute(session, isFirstWrite 
+            return Execute(isFirstWrite 
                 ? preparedStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId) 
                 : preparedStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId, e.Id));
         }
 
-        private bool Execute(ISession session, IStatement statement)
+        private bool Execute(IStatement statement)
         {
             return session.Execute(statement).GetRows().Select(x => x.GetValue<bool>("[applied]")).Single();
         }
