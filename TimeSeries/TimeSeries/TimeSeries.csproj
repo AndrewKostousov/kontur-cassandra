@@ -42,6 +42,13 @@
     <Reference Include="Cassandra, Version=3.99.0.0, Culture=neutral, PublicKeyToken=10b231fbfc8c4b4d">
       <HintPath>..\packages\CassandraCSharpDriver.3.2.0\lib\net45\Cassandra.dll</HintPath>
     </Reference>
+    <Reference Include="Cassandra.CassandraClient">
+      <HintPath>..\ExternalRefs\Cassandra.CassandraClient.dll</HintPath>
+    </Reference>
+    <Reference Include="GroBuf, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GroBuf.1.2.0\lib\net40\GroBuf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.10.2.1\lib\net\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -66,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\AllBoxEventSeriesWrapper.cs" />
     <Compile Include="Model\DatabaseWrapper.cs" />
     <Compile Include="Model\EventProto.cs" />
     <Compile Include="Model\CasTimeSeries.cs" />
@@ -89,6 +97,10 @@
     <ProjectReference Include="..\Commons\Commons.csproj">
       <Project>{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}</Project>
       <Name>Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EdiTimeline\EdiTimeline.csproj">
+      <Project>{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}</Project>
+      <Name>EdiTimeline</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
