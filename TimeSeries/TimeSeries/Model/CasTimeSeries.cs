@@ -10,6 +10,7 @@ namespace CassandraTimeSeries.Model
         public CasTimeSeries(Table<Event> table) : base(table) { }
 
         private bool isFirstWrite = true;
+        private long lastSliceId;
 
         public override Event Write(EventProto ev)
         {
@@ -17,8 +18,18 @@ namespace CassandraTimeSeries.Model
             
             do
             {
-                eventToWrite = new Event(TimeGuid.NowGuid(), ev);
+                eventToWrite = CreateEventToWrite(ev);
             } while (!CompareAndUpdate(eventToWrite));
+
+            return eventToWrite;
+        }
+
+        private Event CreateEventToWrite(EventProto ev)
+        {
+            var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
+
+            isFirstWrite = eventToWrite.SliceId != lastSliceId;
+            lastSliceId = eventToWrite.SliceId;
 
             return eventToWrite;
         }
@@ -30,15 +41,13 @@ namespace CassandraTimeSeries.Model
 
             var preparedStatement = session.Prepare(
                 $"UPDATE {table.Name} " +
-                "SET user_id = ?, payload = ?, ticks = ?, max_ticks = ? " +
+                "SET user_id = ?, payload = ?, max_id = ? " +
                 "WHERE event_id = ? AND slice_id = ? " +
-                (isFirstWrite ? "IF max_ticks = NULL" : "IF max_ticks <= ?"));   // "max_ticks <= ticks" fails when inserting first row
+                (isFirstWrite ? "IF max_id = NULL" : "IF max_id <= ?"));   // "max_ticks <= ticks" fails when inserting first row
 
-            if (!isFirstWrite)
-                return Execute(session, preparedStatement.Bind(e.UserId, e.Payload, e.Ticks, e.Ticks, e.Id, e.SliceId, e.Ticks));
-
-            isFirstWrite = false;
-            return Execute(session, preparedStatement.Bind(e.UserId, e.Payload, e.Ticks, e.Ticks, e.Id, e.SliceId));
+            return Execute(session, isFirstWrite 
+                ? preparedStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId) 
+                : preparedStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId, e.Id));
         }
 
         private bool Execute(ISession session, IStatement statement)
