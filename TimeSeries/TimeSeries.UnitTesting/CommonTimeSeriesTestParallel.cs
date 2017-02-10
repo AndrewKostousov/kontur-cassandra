@@ -5,6 +5,7 @@ using System.Threading;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using CassandraTimeSeries.Utils;
+using Commons;
 using Commons.TimeBasedUuid;
 using FluentAssertions;
 using NUnit.Framework;
@@ -48,7 +49,7 @@ namespace CassandraTimeSeries.UnitTesting
             var readers = Enumerable.Range(0, readersCount).Select(_ => new EventReader(TimeSeriesFactory(), new ReaderSettings())).ToList();
             var writers = Enumerable.Range(0, writersCount).Select(_ => new EventWriter(TimeSeriesFactory(), new WriterSettings())).ToList();
 
-            var writtenEvents = writers.ToDictionary(r => r, r => new List<Event>());
+            var writtenEvents = writers.ToDictionary(r => r, r => new List<Tuple<Timestamp, EventProto>>());
             var readEvents = readers.ToDictionary(r => r, r => new List<Event>());
             
             var keepReadersAlive = true;
@@ -70,7 +71,10 @@ namespace CassandraTimeSeries.UnitTesting
                 return new Thread(() =>
                 {
                     for (int i = 0; i < 100; ++i)
-                        writtenEvents[writer].Add(writer.WriteNext());
+                    {
+                        var eventProto = new EventProto();
+                        writtenEvents[writer].Add(Tuple.Create(writer.WriteNext(eventProto), eventProto));
+                    }
                 });
             }).ToList();
 
@@ -92,11 +96,14 @@ namespace CassandraTimeSeries.UnitTesting
 
             var allWrittenEvents = writtenEvents
                 .SelectMany(x => x.Value)
-                .OrderBy(x => x.Id)
-                .ToList();
+                .OrderBy(x => x.Item1.Ticks)
+                .ToArray();
 
             foreach (var eventsReadBySingleReader in readEvents.Values)
-                eventsReadBySingleReader.ShouldBeExactly(allWrittenEvents);
+            {
+                eventsReadBySingleReader.Select(x => new EventProto(x.UserId, x.Payload)).ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
+                eventsReadBySingleReader.Select(x => x.Timestamp).ShouldBeExactly(allWrittenEvents.Select(x => x.Item1));
+            }
         }
     }
 }

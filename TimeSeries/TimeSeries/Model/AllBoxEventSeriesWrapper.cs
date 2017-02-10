@@ -17,7 +17,7 @@ namespace CassandraTimeSeries.Model
     {
         private readonly AllBoxEventSeries series;
         private readonly BoxEventsReader reader;
-        private readonly BoxEventsWriter writer;
+        private readonly AllBoxEventSeriesWriter writer;
 
         public AllBoxEventSeriesWrapper()
         {
@@ -28,7 +28,7 @@ namespace CassandraTimeSeries.Model
             series = new AllBoxEventSeries(new AllBoxEventSeriesSettings(), serializer, ticksHolder, cluster);
 
             reader= new BoxEventsReader(series);
-            writer = new BoxEventsWriter(new Lazy<AllBoxEventSeriesWriter>(() => new AllBoxEventSeriesWriter(series)));
+            writer = new AllBoxEventSeriesWriter(series);
         }
 
         private static CassandraCluster SetUpCassandraCluster()
@@ -49,25 +49,30 @@ namespace CassandraTimeSeries.Model
             });
         }
 
-        public Event Write(EventProto ev)
+        public Timestamp Write(EventProto ev)
         {
-            throw new NotImplementedException();
-
-            var guid = writer.WriteEvent(ev.Payload);
-            return new Event();
+            return writer.Write(new ProtoBoxEvent(ev.UserId, ev.Payload));
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)
         {
-            throw new NotImplementedException();
-
-            var range = reader.TryCreateEventSeriesRange(startExclusive, endInclusive);
-            return reader.ReadEvents(range, count, x => x.Select(e => new Event(new TimeGuid(e.EventId), new EventProto(e.Payload))).ToArray()).ToList();
+            return ReadRange(reader.TryCreateEventSeriesRange(startExclusive, endInclusive), count);
         }
 
         public List<Event> ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count = 1000)
         {
-            throw new NotImplementedException();
+            var seriesPointer = startExclusive == null
+                ? null
+                : new AllBoxEventSeriesPointer(startExclusive.GetTimestamp(), startExclusive.ToGuid());
+
+            var range = reader.TryCreateEventSeriesRange(seriesPointer, endInclusive?.GetTimestamp());
+
+            return ReadRange(range, count);
+        }
+
+        private List<Event> ReadRange(AllBoxEventSeriesRange range, int count)
+        {
+            return reader.ReadEvents(range, count, x => x.Select(e => new Event(new TimeGuid(e.EventId), new EventProto(e.Payload))).ToArray()).ToList();
         }
     }
 }

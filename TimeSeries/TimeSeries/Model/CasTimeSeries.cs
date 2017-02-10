@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
+using Commons;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
@@ -16,7 +17,7 @@ namespace CassandraTimeSeries.Model
             session = table.GetSession();
         }
 
-        public override Event Write(EventProto ev)
+        public override Timestamp Write(EventProto ev)
         {
             Event eventToWrite;
             
@@ -25,7 +26,7 @@ namespace CassandraTimeSeries.Model
                 eventToWrite = new Event(TimeGuid.NowGuid(), ev);
             } while (!CompareAndUpdate(eventToWrite));
 
-            return eventToWrite;
+            return eventToWrite.Timestamp;
         }
 
         private bool CompareAndUpdate(Event eventToWrite)

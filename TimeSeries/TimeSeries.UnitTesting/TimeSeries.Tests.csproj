@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AllBoxEventSeriesTest.cs" />
     <Compile Include="CasTimeSeriesTest.cs" />
     <Compile Include="CommonTimeSeriesTestWrite.cs" />
     <Compile Include="FluentAssertionsExt.cs" />
