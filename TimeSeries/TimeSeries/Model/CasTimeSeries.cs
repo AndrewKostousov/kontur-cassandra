@@ -6,7 +6,7 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
-    public class CasTimeSeries : TimeSeries
+    public class CasTimeSeries : SimpleTimeSeries
     {
         private long lastSliceId;
 
@@ -35,12 +35,12 @@ namespace CassandraTimeSeries.Model
             lastSliceId = eventToWrite.SliceId;
 
             if (isFirstWrite)
-                UpdatePreviousSlice(eventToWrite);
+                WriteMaxIdToPreviousSlice(eventToWrite);
 
-            return WriteEvent(eventToWrite, isFirstWrite);
+            return WriteEventToCurrentSlice(eventToWrite, isFirstWrite);
         }
 
-        private bool WriteEvent(Event eventToWrite, bool isFirstWrite)
+        private bool WriteEventToCurrentSlice(Event eventToWrite, bool isFirstWrite)
         {
             var updateStatement = session.Prepare(
                 $"UPDATE {table.Name} " +
@@ -56,7 +56,7 @@ namespace CassandraTimeSeries.Model
                 : updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId, e.Id));
         }
 
-        private void UpdatePreviousSlice(Event eventToWrite)
+        private void WriteMaxIdToPreviousSlice(Event eventToWrite)
         {
             var prevSliceId = eventToWrite.SliceId - Event.SliceDutation.Ticks;
 

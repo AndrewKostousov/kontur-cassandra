@@ -63,7 +63,7 @@ namespace CassandraTimeSeries.UnitTesting
         private Event EventAt(Timestamp time)
         {
             var ev = new Event(TimeGuid.NewGuid(time), new EventProto());
-            Wrapper.Table.Insert(ev).Execute();
+            Series.WriteWithoutSync(ev);
 
             return ev;
         }

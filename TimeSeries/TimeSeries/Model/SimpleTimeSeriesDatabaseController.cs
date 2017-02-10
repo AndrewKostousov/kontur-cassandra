@@ -1,18 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cassandra;
 using Cassandra.Data.Linq;
+using CassandraTimeSeries.Interfaces;
+using CassandraTimeSeries.Utils;
 
 namespace CassandraTimeSeries.Model
 {
-    public class DatabaseWrapper : IDisposable
+    public class SimpleTimeSeriesDatabaseController : IDatabaseController
     {
-        private readonly Cluster cluster;
-        private readonly ISession session;
+        private const string keyspace = "TestingKeyspace";
 
-        public Table<Event> Table { get; }
-        
-        public DatabaseWrapper(string keyspace)
+        private Cluster cluster;
+        private ISession session;
+
+        public Table<Event> Table { get; private set; }
+
+        public void SetUpSchema()
         {
             cluster = Cluster
                 .Builder()
@@ -30,10 +33,18 @@ namespace CassandraTimeSeries.Model
             session.ChangeKeyspace(keyspace);
 
             Table = new Table<Event>(session);
+
             Table.CreateIfNotExists();
+            Table.Drop();
+            Table.Create();
         }
 
-        public void Dispose()
+        public void ResetSchema()
+        {
+            Table.Truncate();
+        }
+
+        public void TearDownSchema()
         {
             session.Dispose();
             cluster.Dispose();

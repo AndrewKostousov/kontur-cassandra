@@ -19,10 +19,9 @@ namespace CassandraTimeSeries.Model
         private readonly BoxEventsReader reader;
         private readonly AllBoxEventSeriesWriter writer;
 
-        public AllBoxEventSeriesWrapper()
+        public AllBoxEventSeriesWrapper(ICassandraCluster cluster)
         {
             var serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
-            var cluster = SetUpCassandraCluster();
             var ticksHolder = new AllBoxEventSeriesTicksHolder(serializer, cluster);
 
             series = new AllBoxEventSeries(new AllBoxEventSeriesSettings(), serializer, ticksHolder, cluster);
@@ -31,27 +30,14 @@ namespace CassandraTimeSeries.Model
             writer = new AllBoxEventSeriesWriter(series);
         }
 
-        private static CassandraCluster SetUpCassandraCluster()
-        {
-            var localEndPoint = CassandraClusterSettings.ParseEndPoint("127.0.0.1:9160");
-            return new CassandraCluster(new CassandraClusterSettings
-            {
-                ClusterName = "TestCluster",
-                Endpoints = new[] { localEndPoint },
-                EndpointForFierceCommands = localEndPoint,
-                ReadConsistencyLevel = ConsistencyLevel.QUORUM,
-                WriteConsistencyLevel = ConsistencyLevel.QUORUM,
-                Attempts = 5,
-                Timeout = 6000,
-                FierceTimeout = 6000,
-                ConnectionIdleTimeout = TimeSpan.FromMinutes(10),
-                EnableMetrics = false,
-            });
-        }
-
         public Timestamp Write(EventProto ev)
         {
             return writer.Write(new ProtoBoxEvent(ev.UserId, ev.Payload));
+        }
+
+        public void WriteWithoutSync(Event ev)
+        {
+            series.WriteEventsWithNoSynchronization(new BoxEvent(ev.Id.ToGuid(), ev.Timestamp, ev.Payload));
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)

@@ -12,37 +12,49 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public class SimpleSeriesReadAndWriteBenchmark : ReadAndWriteBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new TimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class SimpleSeriesReadOnlyBenchmark : ReadOnlyBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new TimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class SimpleSeriesWriteOnlyBenchmark : WriteOnlyBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new TimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class CasSeriesReadAndWriteBenchmark : ReadAndWriteBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class CasSeriesReadOnlyBenchmark : ReadOnlyBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class CasSeriesWriteOnlyBenchmark : WriteOnlyBenchmark
     {
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(Database.Table);
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
 }

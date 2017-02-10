@@ -73,8 +73,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IDatabaseController.cs" />
+    <Compile Include="Model\AllBoxEventSeriesDatabaseController.cs" />
     <Compile Include="Model\AllBoxEventSeriesWrapper.cs" />
-    <Compile Include="Model\DatabaseWrapper.cs" />
+    <Compile Include="Model\SimpleTimeSeriesDatabaseController.cs" />
     <Compile Include="Model\EventProto.cs" />
     <Compile Include="Model\CasTimeSeries.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />
@@ -87,7 +89,7 @@
     <Compile Include="Interfaces\ITimeSeries.cs" />
     <Compile Include="Model\Event.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\TimeSeries.cs" />
+    <Compile Include="Model\SimpleTimeSeries.cs" />
     <Compile Include="Utils\TimeSlices.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +99,10 @@
     <ProjectReference Include="..\Commons\Commons.csproj">
       <Project>{95B2CCB1-0C83-4A9B-A33F-EA8B13FD099B}</Project>
       <Name>Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EdiTimeline.Tests\EdiTimeline.Tests.csproj">
+      <Project>{C00C23B5-F4EE-448A-BD05-8C62FEF47C4A}</Project>
+      <Name>EdiTimeline.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\EdiTimeline\EdiTimeline.csproj">
       <Project>{3FF2536E-7A82-49E1-9AD0-8A1EF948B51C}</Project>

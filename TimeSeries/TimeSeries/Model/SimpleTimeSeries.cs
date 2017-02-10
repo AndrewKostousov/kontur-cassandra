@@ -10,11 +10,11 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
-    public class TimeSeries : ITimeSeries
+    public class SimpleTimeSeries : ITimeSeries
     {
         protected readonly Table<Event> table;
         
-        public TimeSeries(Table<Event> table)
+        public SimpleTimeSeries(Table<Event> table)
         {
             this.table = table;
         }
@@ -25,6 +25,11 @@ namespace CassandraTimeSeries.Model
             table.Insert(eventToWrite).Execute();
 
             return eventToWrite.Timestamp;
+        }
+
+        public void WriteWithoutSync(Event ev)
+        {
+            table.Insert(ev).Execute();
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)

@@ -14,7 +14,8 @@ namespace Benchmarks.Benchmarks
     [BenchmarkClass]
     public abstract class BaseTimeSeriesBenchmark
     {
-        protected DatabaseWrapper Database { get; private set; }
+        protected abstract IDatabaseController Database { get; }
+
         protected ITimeSeries Series { get; private set; }
         private ReadersWritersPool pool;
 
@@ -50,20 +51,20 @@ namespace Benchmarks.Benchmarks
 
             pool = new ReadersWritersPool(readers, writers);
 
-            Database.Table.Truncate();
+            Database.ResetSchema();
         }
 
         [BenchmarkClassSetUp]
         public void ClassSetUp()
         {
-            Database = new DatabaseWrapper("test");
+            Database.SetUpSchema();
             Series = TimeSeriesFactory();
         }
         
         [BenchmarkClassTearDown]
         public void ClassTearDown()
         {
-            Database.Dispose();
+            Database.TearDownSchema();
         }
         
         [BenchmarkMethod(executionsCount:1, result:nameof(Result))]

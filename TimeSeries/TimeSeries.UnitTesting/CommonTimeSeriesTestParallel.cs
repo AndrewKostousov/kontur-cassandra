@@ -15,9 +15,9 @@ namespace CassandraTimeSeries.UnitTesting
     public abstract class CommonTimeSeriesTestParallel : TimeSeriesTestBase
     {
         [SetUp]
-        public void TruncateTable()
+        public void ResetDatabaseSchema()
         {
-            Wrapper.Table.Truncate();
+            Database.ResetSchema();
         }
 
         [Test]

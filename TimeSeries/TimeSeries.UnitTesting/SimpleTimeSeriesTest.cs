@@ -6,26 +6,26 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class CasTimeSeriesTestSequential : CommonTimeSeriesTestSequential
+    public class TimeSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [TestFixture]
-    public class CasTimeSeriesTestParallel : CommonTimeSeriesTestParallel
+    public class TimeSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
     [TestFixture]
-    public class CasTimeSeriesTestWrite : CommonTimeSeriesTestWrite
+    public class TimeSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 }
