@@ -35,7 +35,7 @@ namespace CassandraTimeSeries.Model
         public Event(TimeGuid id, EventProto proto)
         {
             Id = id.ToTimeUuid();
-            SliceId = new Timestamp(Id.GetDate()).Floor(SliceDutation).Ticks;
+            SliceId = id.GetTimestamp().Floor(SliceDutation).Ticks;
             Payload = proto.Payload;
             UserId = proto.UserId;
 
