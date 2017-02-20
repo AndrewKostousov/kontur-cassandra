@@ -10,18 +10,18 @@ using Commons.TimeBasedUuid;
 namespace CassandraTimeSeries.Model
 {
     [Table("time_series_sync")]
-    public class CasTimeSeriesSyncColumn
+    public class CasTimeSeriesSyncData
     {
         [PartitionKey]
         [Column("global_start")]
         public TimeUuid GlobalStartOfTimeSeries { get; set; }
 
-        public CasTimeSeriesSyncColumn(TimeUuid globalStartOfTimeSeries)
+        public CasTimeSeriesSyncData(TimeUuid globalStartOfTimeSeries)
         {
             GlobalStartOfTimeSeries = globalStartOfTimeSeries;
         }
 
-        public CasTimeSeriesSyncColumn(TimeGuid globalStartOfTimeSeries) 
+        public CasTimeSeriesSyncData(TimeGuid globalStartOfTimeSeries) 
             : this(globalStartOfTimeSeries.ToTimeUuid()) { }
     }
 }

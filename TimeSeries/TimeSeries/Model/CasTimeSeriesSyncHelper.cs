@@ -8,11 +8,11 @@ namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeriesSyncHelper
     {
-        private readonly Table<CasTimeSeriesSyncColumn> syncTable;
+        private readonly Table<CasTimeSeriesSyncData> syncTable;
 
         private TimeGuid startOfTimes;
 
-        public CasTimeSeriesSyncHelper(Table<CasTimeSeriesSyncColumn> syncTable)
+        public CasTimeSeriesSyncHelper(Table<CasTimeSeriesSyncData> syncTable)
         {
             this.syncTable = syncTable;
         }

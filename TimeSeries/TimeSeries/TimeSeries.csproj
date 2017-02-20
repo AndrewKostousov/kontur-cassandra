@@ -80,7 +80,7 @@
     <Compile Include="Model\SimpleTimeSeriesDatabaseController.cs" />
     <Compile Include="Model\EventProto.cs" />
     <Compile Include="Model\CasTimeSeries.cs" />
-    <Compile Include="Model\CasTimeSeriesSyncColumn.cs" />
+    <Compile Include="Model\CasTimeSeriesSyncData.cs" />
     <Compile Include="Model\CasTimeSeriesSyncHelper.cs" />
     <Compile Include="Model\WriteTimeoutException.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />

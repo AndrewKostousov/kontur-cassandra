@@ -31,7 +31,7 @@ namespace CassandraTimeSeries.Model
 
         private readonly int writeAttemptsLimit;
 
-        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncColumn> syncTable, int writeAttemptsLimit=100) : base(eventTable)
+        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, int writeAttemptsLimit=100) : base(eventTable)
         {
             session = eventTable.GetSession();
             syncHelper = new CasTimeSeriesSyncHelper(syncTable);
