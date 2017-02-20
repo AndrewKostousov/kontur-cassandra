@@ -29,10 +29,13 @@ namespace CassandraTimeSeries.Model
         private long lastWrittenPartitionId;
         private TimeGuid lastWrittenTimeGuid;
 
-        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncColumn> syncTable) : base(eventTable)
+        private int writeAttemptsLimit;
+
+        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncColumn> syncTable, int writeAttemptsLimit=100) : base(eventTable)
         {
             session = eventTable.GetSession();
             syncHelper = new CasTimeSeriesSyncHelper(syncTable);
+            this.writeAttemptsLimit = writeAttemptsLimit;
         }
 
         public override Timestamp Write(EventProto ev)
@@ -40,17 +43,19 @@ namespace CassandraTimeSeries.Model
             Event eventToWrite;
             UpdateResult updateResult;
 
+            int writeAttemptsMade = 0;
+
             do
             {
-                var guid = CreateSyncId();
-
-                updateResult = CompareAndUpdate(eventToWrite = new Event(guid, ev));
+                updateResult = CompareAndUpdate(eventToWrite = new Event(CreateSyncId(), ev));
 
                 if (updateResult.State == UpdateState.PartitionClosed)
                     lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
 
                 if (updateResult.State == UpdateState.OutdatedId)
                     lastWrittenTimeGuid = updateResult.PartitionMaxGuid;
+
+                if (++writeAttemptsMade >= writeAttemptsLimit) throw new WriteTimeoutException(writeAttemptsLimit);
 
             } while (updateResult.State != UpdateState.Success);
 
