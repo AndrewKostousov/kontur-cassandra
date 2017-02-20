@@ -58,6 +58,8 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     return new Thread(() =>
                     {
+                        var a = writers.Count;
+
                         readEvents[reader].Add(reader.ReadFirst());
 
                         while (keepReadersAlive)

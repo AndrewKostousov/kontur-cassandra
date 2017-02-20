@@ -9,23 +9,23 @@ namespace CassandraTimeSeries.UnitTesting
     public class CasTimeSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
     [TestFixture]
     public class CasTimeSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
     [TestFixture]
     public class CasTimeSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 }

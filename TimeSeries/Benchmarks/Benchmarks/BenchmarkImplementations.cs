@@ -37,24 +37,24 @@ namespace Benchmarks.Benchmarks
     public class CasSeriesReadAndWriteBenchmark : ReadAndWriteBenchmark
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class CasSeriesReadOnlyBenchmark : ReadOnlyBenchmark
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
     [BenchmarkClass]
     public class CasSeriesWriteOnlyBenchmark : WriteOnlyBenchmark
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
+        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
 }

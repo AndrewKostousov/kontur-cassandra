@@ -31,7 +31,7 @@ namespace CassandraTimeSeries.ReadWrite
         public virtual List<Event> ReadNext()
         {
             var events = series.ReadRange(lastEvent.Id.ToTimeGuid(), 
-                TimeGuid.MinForTimestamp(lastEvent.Timestamp + Event.SliceDutation), Settings.EventsToRead);
+                TimeGuid.MinForTimestamp(lastEvent.Timestamp + Event.PartitionDutation), Settings.EventsToRead);
 
             if (events.Count != 0)
             {

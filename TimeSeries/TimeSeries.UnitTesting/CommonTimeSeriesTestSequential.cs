@@ -37,19 +37,19 @@ namespace CassandraTimeSeries.UnitTesting
         {
             base.OneTimeSetUp();
             
-            t00 = Timestamp.Now.Floor(Event.SliceDutation);
+            t00 = Timestamp.Now.Floor(Event.PartitionDutation);
 
-            t10 = t00 + Event.SliceDutation;
-            t20 = t00 + Event.SliceDutation.Multiply(2);
-            t30 = t00 + Event.SliceDutation.Multiply(3);
+            t10 = t00 + Event.PartitionDutation;
+            t20 = t00 + Event.PartitionDutation.Multiply(2);
+            t30 = t00 + Event.PartitionDutation.Multiply(3);
 
-            t01 = t00 + Event.SliceDutation.Divide(4);
-            t02 = t00 + Event.SliceDutation.Divide(2);
-            t03 = t00 + Event.SliceDutation.Divide(4).Multiply(3);
+            t01 = t00 + Event.PartitionDutation.Divide(4);
+            t02 = t00 + Event.PartitionDutation.Divide(2);
+            t03 = t00 + Event.PartitionDutation.Divide(4).Multiply(3);
 
-            t11 = t10 + Event.SliceDutation.Divide(2);
+            t11 = t10 + Event.PartitionDutation.Divide(2);
 
-            t21 = t20 + Event.SliceDutation.Divide(2);
+            t21 = t20 + Event.PartitionDutation.Divide(2);
             
             e00 = EventAt(t00);
             e01 = EventAt(t01);

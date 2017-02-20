@@ -37,6 +37,8 @@ namespace CassandraTimeSeries.Model
 
         public void WriteWithoutSync(Event ev)
         {
+            if (ev.Payload == null) throw new ArgumentException("Event payload cannot be null");
+
             series.WriteEventsWithNoSynchronization(new BoxEvent(ev.Id.ToGuid(), ev.Timestamp, ev.Payload));
         }
 
@@ -58,7 +60,7 @@ namespace CassandraTimeSeries.Model
 
         private List<Event> ReadRange(AllBoxEventSeriesRange range, int count)
         {
-            return reader.ReadEvents(range, count, x => x.Select(e => new Event(new TimeGuid(e.EventId), new EventProto(e.Payload))).ToArray()).ToList();
+            return reader.ReadEvents(range, count, x => x.Select(e => new Event(new TimeGuid(e.EventId), new EventProto(e.EventId, e.Payload))).ToArray()).ToList();
         }
     }
 }

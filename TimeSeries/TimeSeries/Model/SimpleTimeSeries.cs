@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Apache.Cassandra;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
@@ -12,24 +13,24 @@ namespace CassandraTimeSeries.Model
 {
     public class SimpleTimeSeries : ITimeSeries
     {
-        protected readonly Table<Event> table;
-        
-        public SimpleTimeSeries(Table<Event> table)
+        protected readonly Table<Event> eventTable;
+
+        public SimpleTimeSeries(Table<Event> eventTable)
         {
-            this.table = table;
+            this.eventTable = eventTable;
         }
 
         public virtual Timestamp Write(EventProto ev)
         {
             var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
-            table.Insert(eventToWrite).Execute();
+            eventTable.Insert(eventToWrite).Execute();
 
             return eventToWrite.Timestamp;
         }
 
         public void WriteWithoutSync(Event ev)
         {
-            table.Insert(ev).Execute();
+            eventTable.Insert(ev).Execute();
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)
@@ -42,31 +43,39 @@ namespace CassandraTimeSeries.Model
 
         public List<Event> ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count = 1000)
         {
-            var start = startExclusive?.ToTimeUuid();
-            var end = endInclusive?.ToTimeUuid();
+            try
+            {
+                var start = startExclusive?.ToTimeUuid();
+                var end = endInclusive?.ToTimeUuid();
 
-            if (!start.HasValue && !end.HasValue)
-                return table.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
+                if (!start.HasValue && !end.HasValue)
+                    return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
 
-            if (!start.HasValue)
-                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
+                if (!start.HasValue)
+                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
 
-            if (!end.HasValue)
-                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
+                if (!end.HasValue)
+                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
 
-            var slices = TimeSlicer
-                .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.SliceDutation)
-                .Select(s => s.Ticks);
-            
-            return table.Where(e => slices.Contains(e.SliceId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
-                .Take(count)
-                .Execute()
-                .ToList();
+                var slices = TimeSlicer
+                    .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
+                    .Select(s => s.Ticks);
+
+                return eventTable
+                    .Where(e => slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
+                    .Take(count)
+                    .Execute()
+                    .ToList();
+            }
+            catch (TimeoutException)
+            {
+                return new List<Event>();
+            }
         }
 
         private List<Event> GetFromTableAndSort(int count, Expression<Func<Event, bool>> query)
         {
-            return table
+            return eventTable
                 .AllowFiltering()
                 .Where(query)
                 .Execute()

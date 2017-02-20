@@ -1,5 +1,6 @@
 ﻿using Benchmarks.Reflection;
 using CassandraTimeSeries.Model;
+using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
@@ -15,7 +16,7 @@ namespace Benchmarks.Benchmarks
     {
         protected override int ReadersCount => 4;
         protected override int WritersCount => 0;
-        protected readonly int PreloadedEventsCount = 25000;
+        protected readonly int PreloadedEventsCount = 5000;
 
         [BenchmarkSetUp]
         public override void SetUp()
@@ -23,7 +24,7 @@ namespace Benchmarks.Benchmarks
             base.SetUp();
 
             for(var i = 0; i < PreloadedEventsCount; ++i)
-                Series.Write(new EventProto());
+                Series.WriteWithoutSync(new Event(TimeGuid.NowGuid(), new EventProto()));
         }
     }
 

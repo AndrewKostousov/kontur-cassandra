@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 
@@ -8,70 +10,127 @@ namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeries : SimpleTimeSeries
     {
-        private long lastSliceId;
+        class UpdateResult
+        {
+            public UpdateState State { get; set; }
+            public TimeGuid PartitionMaxGuid { get; set; }
+        }
 
+        enum UpdateState
+        {
+            Success,
+            OutdatedId,
+            PartitionClosed,
+        }
+
+        private readonly CasTimeSeriesSyncHelper syncHelper;
         private readonly ISession session;
 
-        public CasTimeSeries(Table<Event> table) : base(table)
+        private long lastWrittenPartitionId;
+        private TimeGuid lastWrittenTimeGuid;
+
+        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncColumn> syncTable) : base(eventTable)
         {
-            session = table.GetSession();
+            session = eventTable.GetSession();
+            syncHelper = new CasTimeSeriesSyncHelper(syncTable);
         }
 
         public override Timestamp Write(EventProto ev)
         {
             Event eventToWrite;
-            
+            UpdateResult updateResult;
+
             do
             {
-                eventToWrite = new Event(TimeGuid.NowGuid(), ev);
-            } while (!CompareAndUpdate(eventToWrite));
+                var guid = CreateSyncId();
+
+                updateResult = CompareAndUpdate(eventToWrite = new Event(guid, ev));
+
+                if (updateResult.State == UpdateState.PartitionClosed)
+                    lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
+
+                if (updateResult.State == UpdateState.OutdatedId)
+                    lastWrittenTimeGuid = updateResult.PartitionMaxGuid;
+
+            } while (updateResult.State != UpdateState.Success);
+
+            lastWrittenTimeGuid = eventToWrite.TimeGuid;
 
             return eventToWrite.Timestamp;
         }
 
-        private bool CompareAndUpdate(Event eventToWrite)
+        private TimeGuid CreateSyncId()
         {
-            var isFirstWrite = eventToWrite.SliceId != lastSliceId;
-            lastSliceId = eventToWrite.SliceId;
+            var nowGuid = TimeGuid.NowGuid();
 
-            if (isFirstWrite)
-                WriteMaxIdToPreviousSlice(eventToWrite);
+            if (lastWrittenTimeGuid != null && lastWrittenTimeGuid.GetTimestamp() >= nowGuid.GetTimestamp())
+                return lastWrittenTimeGuid.Increment();
 
-            return WriteEventToCurrentSlice(eventToWrite, isFirstWrite);
+            if (syncHelper.StartOfTimes.GetTimestamp() >= nowGuid.GetTimestamp())
+                return syncHelper.StartOfTimes.Increment();
+
+            return nowGuid;
         }
 
-        private bool WriteEventToCurrentSlice(Event eventToWrite, bool isFirstWrite)
+        private UpdateResult CompareAndUpdate(Event eventToWrite)
+        {
+            var isWritePartitionEmpty = eventToWrite.PartitionId != lastWrittenPartitionId;
+            lastWrittenPartitionId = eventToWrite.PartitionId;
+
+            if (isWritePartitionEmpty)
+                ClosePreviousPartitions(lastWrittenPartitionId);
+
+            return WriteEventToCurrentPartition(eventToWrite, isWritePartitionEmpty);
+        }
+
+        private UpdateResult WriteEventToCurrentPartition(Event e, bool isWritePartitionEmpty)
         {
             var updateStatement = session.Prepare(
-                $"UPDATE {table.Name} " +
+                $"UPDATE {eventTable.Name} " +
                 "SET user_id = ?, payload = ?, max_id = ? " +
-                "WHERE event_id = ? AND slice_id = ? " +
-                (isFirstWrite ? "IF max_id = NULL" : "IF max_id < ?")
+                "WHERE event_id = ? AND partition_id = ? " +
+                (isWritePartitionEmpty ? "IF max_id = NULL" : "IF max_id < ?")
             );
 
-            var e = eventToWrite;
-
-            return Execute(isFirstWrite
-                ? updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId)
-                : updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.SliceId, e.Id));
+            return ExecuteUpdate(isWritePartitionEmpty
+                ? updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId)
+                : updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id));
         }
 
-        private void WriteMaxIdToPreviousSlice(Event eventToWrite)
+        private void ClosePreviousPartitions(long currentPartitionId)
         {
-            var prevSliceId = eventToWrite.SliceId - Event.SliceDutation.Ticks;
+            var partitionIdToClose = currentPartitionId - Event.PartitionDutation.Ticks;
+            UpdateState updateState = UpdateState.Success;
 
-            var prevSliceUpdateStatement = session.Prepare(
-                $"UPDATE {table.Name} " +
-                "SET max_id = ? WHERE slice_id = ? " +
-                "IF max_id < ?"
-            ).Bind(eventToWrite.Id, prevSliceId, eventToWrite.Id);
+            var maxUuid = TimeGuid.MaxValue.ToTimeUuid();
 
-            Execute(prevSliceUpdateStatement);
+            while (updateState != UpdateState.PartitionClosed && partitionIdToClose >= syncHelper.PartitionIdOfStartOfTimes)
+            {
+                var updateStatement = session.Prepare(
+                    $"UPDATE {eventTable.Name} " +
+                    "SET max_id = ? WHERE partition_id = ? " +
+                    "IF max_id != ?"
+                ).Bind(maxUuid, partitionIdToClose, maxUuid);
+
+                updateState = ExecuteUpdate(updateStatement).State;
+                partitionIdToClose -= Event.PartitionDutation.Ticks;
+            }
         }
 
-        private bool Execute(IStatement statement)
+        private UpdateResult ExecuteUpdate(IStatement statement)
         {
-            return session.Execute(statement).GetRows().Select(x => x.GetValue<bool>("[applied]")).Single();
+            var execResult = session.Execute(statement).GetRows().Single();
+            var isApplied = execResult.GetValue<bool>("[applied]");
+
+            if (isApplied) return new UpdateResult {State = UpdateState.Success};
+
+            var partitionMaxGuid = execResult.GetValue<TimeUuid>("max_id").ToTimeGuid();
+
+            return new UpdateResult
+            {
+                State = partitionMaxGuid == TimeGuid.MaxValue ? UpdateState.PartitionClosed : UpdateState.OutdatedId,
+                PartitionMaxGuid = partitionMaxGuid
+            };
         }
     }
 }

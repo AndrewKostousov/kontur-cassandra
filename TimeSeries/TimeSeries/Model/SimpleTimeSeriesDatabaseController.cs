@@ -11,11 +11,11 @@ namespace CassandraTimeSeries.Model
         private const string keyspace = "TestingKeyspace";
 
         private Cluster cluster;
-        private ISession session;
+        protected ISession session;
 
         public Table<Event> Table { get; private set; }
 
-        public void SetUpSchema()
+        public virtual void SetUpSchema()
         {
             cluster = Cluster
                 .Builder()
