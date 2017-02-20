@@ -10,13 +10,13 @@ namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeries : SimpleTimeSeries
     {
-        class UpdateResult
+        class WriteExecutionResult
         {
-            public UpdateState State { get; set; }
+            public WriteExecutionState State { get; set; }
             public TimeGuid PartitionMaxGuid { get; set; }
         }
 
-        enum UpdateState
+        enum WriteExecutionState
         {
             Success,
             OutdatedId,
@@ -41,30 +41,30 @@ namespace CassandraTimeSeries.Model
         public override Timestamp Write(EventProto ev)
         {
             Event eventToWrite;
-            UpdateResult updateResult;
+            WriteExecutionResult writeExecutionResult;
 
-            int writeAttemptsMade = 0;
+            var writeAttemptsMade = 0;
 
             do
             {
-                updateResult = CompareAndUpdate(eventToWrite = new Event(CreateSyncId(), ev));
+                writeExecutionResult = CompareAndUpdate(eventToWrite = new Event(CreateSynchronizedId(), ev));
 
-                if (updateResult.State == UpdateState.PartitionClosed)
+                if (writeExecutionResult.State == WriteExecutionState.PartitionClosed)
                     lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
 
-                if (updateResult.State == UpdateState.OutdatedId)
-                    lastWrittenTimeGuid = updateResult.PartitionMaxGuid;
+                if (writeExecutionResult.State == WriteExecutionState.OutdatedId)
+                    lastWrittenTimeGuid = writeExecutionResult.PartitionMaxGuid;
 
                 if (++writeAttemptsMade >= writeAttemptsLimit) throw new WriteTimeoutException(writeAttemptsLimit);
 
-            } while (updateResult.State != UpdateState.Success);
+            } while (writeExecutionResult.State != WriteExecutionState.Success);
 
             lastWrittenTimeGuid = eventToWrite.TimeGuid;
 
             return eventToWrite.Timestamp;
         }
 
-        private TimeGuid CreateSyncId()
+        private TimeGuid CreateSynchronizedId()
         {
             var nowGuid = TimeGuid.NowGuid();
 
@@ -77,7 +77,7 @@ namespace CassandraTimeSeries.Model
             return nowGuid;
         }
 
-        private UpdateResult CompareAndUpdate(Event eventToWrite)
+        private WriteExecutionResult CompareAndUpdate(Event eventToWrite)
         {
             var isWritePartitionEmpty = eventToWrite.PartitionId != lastWrittenPartitionId;
             lastWrittenPartitionId = eventToWrite.PartitionId;
@@ -88,7 +88,7 @@ namespace CassandraTimeSeries.Model
             return WriteEventToCurrentPartition(eventToWrite, isWritePartitionEmpty);
         }
 
-        private UpdateResult WriteEventToCurrentPartition(Event e, bool isWritePartitionEmpty)
+        private WriteExecutionResult WriteEventToCurrentPartition(Event e, bool isWritePartitionEmpty)
         {
             var updateStatement = session.Prepare(
                 $"UPDATE {eventTable.Name} " +
@@ -97,7 +97,7 @@ namespace CassandraTimeSeries.Model
                 (isWritePartitionEmpty ? "IF max_id = NULL" : "IF max_id < ?")
             );
 
-            return ExecuteUpdate(isWritePartitionEmpty
+            return ExecuteUpdateStatement(isWritePartitionEmpty
                 ? updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId)
                 : updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id));
         }
@@ -105,11 +105,11 @@ namespace CassandraTimeSeries.Model
         private void ClosePreviousPartitions(long currentPartitionId)
         {
             var partitionIdToClose = currentPartitionId - Event.PartitionDutation.Ticks;
-            UpdateState updateState = UpdateState.Success;
+            WriteExecutionState writeExecutionState = WriteExecutionState.Success;
 
             var maxUuid = TimeGuid.MaxValue.ToTimeUuid();
 
-            while (updateState != UpdateState.PartitionClosed && partitionIdToClose >= syncHelper.PartitionIdOfStartOfTimes)
+            while (writeExecutionState != WriteExecutionState.PartitionClosed && partitionIdToClose >= syncHelper.PartitionIdOfStartOfTimes)
             {
                 var updateStatement = session.Prepare(
                     $"UPDATE {eventTable.Name} " +
@@ -117,23 +117,23 @@ namespace CassandraTimeSeries.Model
                     "IF max_id != ?"
                 ).Bind(maxUuid, partitionIdToClose, maxUuid);
 
-                updateState = ExecuteUpdate(updateStatement).State;
+                writeExecutionState = ExecuteUpdateStatement(updateStatement).State;
                 partitionIdToClose -= Event.PartitionDutation.Ticks;
             }
         }
 
-        private UpdateResult ExecuteUpdate(IStatement statement)
+        private WriteExecutionResult ExecuteUpdateStatement(IStatement statement)
         {
             var execResult = session.Execute(statement).GetRows().Single();
             var isApplied = execResult.GetValue<bool>("[applied]");
 
-            if (isApplied) return new UpdateResult {State = UpdateState.Success};
+            if (isApplied) return new WriteExecutionResult {State = WriteExecutionState.Success};
 
             var partitionMaxGuid = execResult.GetValue<TimeUuid>("max_id").ToTimeGuid();
 
-            return new UpdateResult
+            return new WriteExecutionResult
             {
-                State = partitionMaxGuid == TimeGuid.MaxValue ? UpdateState.PartitionClosed : UpdateState.OutdatedId,
+                State = partitionMaxGuid == TimeGuid.MaxValue ? WriteExecutionState.PartitionClosed : WriteExecutionState.OutdatedId,
                 PartitionMaxGuid = partitionMaxGuid
             };
         }
