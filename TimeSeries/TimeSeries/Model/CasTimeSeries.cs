@@ -23,6 +23,8 @@ namespace CassandraTimeSeries.Model
             PartitionClosed,
         }
 
+        private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
+
         private readonly CasTimeSeriesSyncHelper syncHelper;
         private readonly ISession session;
 
@@ -107,15 +109,13 @@ namespace CassandraTimeSeries.Model
             var partitionIdToClose = currentPartitionId - Event.PartitionDutation.Ticks;
             WriteExecutionState writeExecutionState = WriteExecutionState.Success;
 
-            var maxUuid = TimeGuid.MaxValue.ToTimeUuid();
-
             while (writeExecutionState != WriteExecutionState.PartitionClosed && partitionIdToClose >= syncHelper.PartitionIdOfStartOfTimes)
             {
                 var updateStatement = session.Prepare(
                     $"UPDATE {eventTable.Name} " +
                     "SET max_id = ? WHERE partition_id = ? " +
                     "IF max_id != ?"
-                ).Bind(maxUuid, partitionIdToClose, maxUuid);
+                ).Bind(ClosingTimeUuid, partitionIdToClose, ClosingTimeUuid);
 
                 writeExecutionState = ExecuteUpdateStatement(updateStatement).State;
                 partitionIdToClose -= Event.PartitionDutation.Ticks;
@@ -129,12 +129,12 @@ namespace CassandraTimeSeries.Model
 
             if (isApplied) return new WriteExecutionResult {State = WriteExecutionState.Success};
 
-            var partitionMaxGuid = execResult.GetValue<TimeUuid>("max_id").ToTimeGuid();
+            var partitionMaxTimeUuid = execResult.GetValue<TimeUuid>("max_id");
 
             return new WriteExecutionResult
             {
-                State = partitionMaxGuid == TimeGuid.MaxValue ? WriteExecutionState.PartitionClosed : WriteExecutionState.OutdatedId,
-                PartitionMaxGuid = partitionMaxGuid
+                State = partitionMaxTimeUuid == ClosingTimeUuid ? WriteExecutionState.PartitionClosed : WriteExecutionState.OutdatedId,
+                PartitionMaxGuid = partitionMaxTimeUuid.ToTimeGuid()
             };
         }
     }
