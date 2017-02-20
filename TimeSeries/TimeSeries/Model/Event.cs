@@ -9,7 +9,7 @@ namespace CassandraTimeSeries.Model
     [Table("time_series")]
     public class Event : EventProto
     {
-        public static TimeSpan PartitionDutation => TimeSpan.FromSeconds(0.5);
+        public static TimeSpan PartitionDutation => TimeSpan.FromMinutes(1);
 
         [PartitionKey]
         [Column("partition_id")]
