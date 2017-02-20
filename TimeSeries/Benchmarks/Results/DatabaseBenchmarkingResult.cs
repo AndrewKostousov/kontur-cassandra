@@ -33,9 +33,9 @@ namespace Benchmarks.Results
                 var writeStatistic = statistic.Item2;
 
                 if (readStatistic.WorkersCount != 0)
-                    statistics.Append("Read statistics:\n\n" + readStatistic.CreateReport());
+                    statistics.Append("=== Read statistics ===\r\n\r\n" + readStatistic.CreateReport());
                 if (writeStatistic.WorkersCount != 0)
-                    statistics.Append("Write statistics:\n\n" + writeStatistic.CreateReport());
+                    statistics.Append("=== Write statistics ===\r\n\r\n" + writeStatistic.CreateReport());
             }
 
             return statistics.ToString();

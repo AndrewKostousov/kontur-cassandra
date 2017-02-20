@@ -23,7 +23,7 @@ namespace Benchmarks.Results
         
         public string CreateReport()
         {
-            var thisResult = $"Benchmark execution time: {TotalExecutionTime}\n\n";
+            var thisResult = $"Benchmark execution time: {TotalExecutionTime}\r\n\r\n";
 
             if (AdditionalResult != null)
                 thisResult += AdditionalResult.CreateReport();

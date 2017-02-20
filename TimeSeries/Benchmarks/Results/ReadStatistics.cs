@@ -40,24 +40,23 @@ namespace Benchmarks.Results
 
         public string CreateReport()
         {
-            return $"Readers count: {WorkersCount}\n\n" +
-                   $"Average total latency: {AverageTotalLatency.TotalSeconds} s\n" +
-                   $"Average single read latency: {AverageOperationLatency.TotalMilliseconds} ms\n" +
-                   $"95% of reads were faster than {Latency95ThPercentile.TotalMilliseconds} ms\n" +
-                   $"99% of reads were faster than {Latency99ThPercentile.TotalMilliseconds} ms\n" +
-                   $"Average read throughput: {TotalReadThroughput} ev/s\n\n" +
+            return $"Readers count: {WorkersCount}\r\n\r\n" +
+                   $"Average single read latency: {AverageOperationLatency.TotalMilliseconds} ms\r\n" +
+                   $"95% of reads were faster than {Latency95ThPercentile.TotalMilliseconds} ms\r\n" +
+                   $"99% of reads were faster than {Latency99ThPercentile.TotalMilliseconds} ms\r\n" +
+                   $"Average read throughput: {TotalReadThroughput} ev/s\r\n\r\n" +
 
-                   $"Total reads count: {TotalOperationsCount}\n" +
-                   $"Average reads by single thread: {AverageOperationsPerThread}\n\n" +
+                   $"Total reads count: {TotalOperationsCount}\r\n" +
+                   $"Average reads by single thread: {AverageOperationsPerThread}\r\n\r\n" +
 
-                   $"Total events read: {TotalEventsRead}\n" +
-                   $"Average reads length: {AverageReadsLength} events\n" +
-                   $"95% of reads were shorter than {Reads95ThPercentile} events\n" +
-                   $"99% of reads were shorter than {Reads99ThPercentile} events\n\n" +
+                   $"Total events read: {TotalEventsRead}\r\n" +
+                   $"Average reads length: {AverageReadsLength} events/read\r\n" +
+                   $"95% of reads were shorter than {Reads95ThPercentile} events\r\n" +
+                   $"99% of reads were shorter than {Reads99ThPercentile} events\r\n\r\n" +
 
-                   $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\n" +
-                   $"95% of events were read earlier than {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n" +
-                   $"99% of events were read earlier than {Percentile99ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\n\n";
+                   $"Latency between write and read: {AverageLatencyBetweenWriteAndRead.TotalMilliseconds} ms\r\n" +
+                   $"95% of events were read earlier than {Percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\r\n" +
+                   $"99% of events were read earlier than {Percentile99ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written\r\n\r\n";
         }
     }
 }

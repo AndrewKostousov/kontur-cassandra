@@ -7,7 +7,7 @@ namespace Benchmarks.Runners
 {
     class ConsoleBenchmarkRunner : IBenchmarkRunner
     {
-        readonly string separator = "\n".PadLeft(100, '=') + "\n";
+        readonly string separator = "\r\n".PadLeft(100, '=');
 
         private string pathToLog = "log.txt";
 
@@ -24,18 +24,20 @@ namespace Benchmarks.Runners
 
         private void RunSingleBenchmark(BenchmarksFixture fixture)
         {
-            Action<string> log = message =>
+            Console.Write(separator + $"\r\nPreparing fixture: {fixture.Name}\r\n\r\n{separator}");
+
+            File.AppendAllText(pathToLog, $"{separator}\r\n   {fixture.Name}\r\n\r\n{separator}");
+
+            fixture.BenchmarkSetupStarted += b => Console.Write($"\r\nSetting up: {b.Name} ... ");
+            fixture.IterationStarted += (b, i) => Console.Write($"Done!\r\n\r\nRunning benchmark: {b.Name} ... ");
+
+            fixture.BenchmarkFinished += (b, r) =>
             {
-                File.AppendAllText(pathToLog, message);
-                Console.Write(message);
+                var report = r.CreateReport();
+
+                Console.Write($"Done!\r\n\r\n{report}");
+                File.AppendAllText(pathToLog, "\r\n" + report);
             };
-
-
-            log(separator + $"Preparing fixture: {fixture.Name}\n\n");
-
-            fixture.BenchmarkSetupStarted += b => log(separator + $"Setting up: {b.Name} ... ");
-            fixture.IterationStarted += (b, i) => log($"Done!\nRunning benchmark: {b.Name} ... ");
-            fixture.BenchmarkFinished += (b, r) => log($"Done!\n\n{r.CreateReport()}\n");
 
             fixture.Run();
         }
