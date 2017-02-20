@@ -29,7 +29,7 @@ namespace CassandraTimeSeries.Model
         private long lastWrittenPartitionId;
         private TimeGuid lastWrittenTimeGuid;
 
-        private int writeAttemptsLimit;
+        private readonly int writeAttemptsLimit;
 
         public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncColumn> syncTable, int writeAttemptsLimit=100) : base(eventTable)
         {
