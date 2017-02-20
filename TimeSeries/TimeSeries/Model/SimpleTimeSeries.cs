@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Apache.Cassandra;
+using Cassandra;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
@@ -43,34 +44,28 @@ namespace CassandraTimeSeries.Model
 
         public List<Event> ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count = 1000)
         {
-            try
-            {
-                var start = startExclusive?.ToTimeUuid();
-                var end = endInclusive?.ToTimeUuid();
+            var start = startExclusive?.ToTimeUuid();
+            var end = endInclusive?.ToTimeUuid();
 
-                if (!start.HasValue && !end.HasValue)
-                    return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
+            if (!start.HasValue && !end.HasValue)
+                return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
 
-                if (!start.HasValue)
-                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
+            if (!start.HasValue)
+                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
 
-                if (!end.HasValue)
-                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
+            if (!end.HasValue)
+                return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
 
-                var slices = TimeSlicer
-                    .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
-                    .Select(s => s.Ticks);
+            var slices = TimeSlicer
+                .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
+                .Select(s => s.Ticks);
 
-                return eventTable
-                    .Where(e => slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
-                    .Take(count)
-                    .Execute()
-                    .ToList();
-            }
-            catch (TimeoutException)
-            {
-                return new List<Event>();
-            }
+            return eventTable
+                .Where(e => slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
+                .Take(count)
+                .Execute()
+                .Where(e => e.Id.ToGuid() != Guid.Empty)
+                .ToList();
         }
 
         private List<Event> GetFromTableAndSort(int count, Expression<Func<Event, bool>> query)
@@ -79,6 +74,7 @@ namespace CassandraTimeSeries.Model
                 .AllowFiltering()
                 .Where(query)
                 .Execute()
+                .Where(e => e.Id.ToGuid() != Guid.Empty)
                 .OrderBy(x => x.Id)
                 .Take(count)
                 .ToList();
