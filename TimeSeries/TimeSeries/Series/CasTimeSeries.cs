@@ -68,7 +68,7 @@ namespace CassandraTimeSeries.Model
                     lastWrittenTimeGuid = statementExecutionResult.PartitionMaxGuid;
 
                 if (++writeAttemptsMade >= writeAttemptsLimit)
-                    throw new ApplicationException("Cannot write event: limit exceeded for write attempts.");
+                    throw new ApplicationException("Cannot write event: limit is exceeded for write attempts.");
 
             } while (statementExecutionResult.State != ExecutionState.Success);
 
