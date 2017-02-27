@@ -29,9 +29,10 @@ namespace CassandraTimeSeries.Model
             {
                 eventTable.Insert(eventToWrite).Execute();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                throw new ApplicationException("Cannot write event: please, check database connection");
+                Logger.Log(exception);
+                return null;
             }
 
             return eventToWrite.Timestamp;
@@ -77,9 +78,10 @@ namespace CassandraTimeSeries.Model
                     .Where(e => e.Id.ToGuid() != Guid.Empty)
                     .ToList();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                throw new ApplicationException("Cannot read events: please, check database connection.");
+                Logger.Log(exception);
+                return null;
             }
         }
 

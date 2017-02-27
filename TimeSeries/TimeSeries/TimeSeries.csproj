@@ -80,6 +80,8 @@
     <Compile Include="Interfaces\IDatabaseController.cs" />
     <Compile Include="Series\AllBoxEventSeriesDatabaseController.cs" />
     <Compile Include="Series\AllBoxEventSeriesWrapper.cs" />
+    <Compile Include="Series\LastWrittenDataHelper.cs" />
+    <Compile Include="Series\StatementExecutionResult.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Series\CasTimeSeriesDatabaseController.cs" />
     <Compile Include="Series\SimpleTimeSeriesDatabaseController.cs" />

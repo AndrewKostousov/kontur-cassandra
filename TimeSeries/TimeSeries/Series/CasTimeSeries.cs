@@ -2,42 +2,26 @@
 using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
-using CassandraTimeSeries.Utils;
+using CassandraTimeSeries.Series;
 using Commons;
-using Commons.Logging;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeries : SimpleTimeSeries
     {
-        private class StatementExecutionResult
-        {
-            public ExecutionState State { get; set; }
-            public TimeGuid PartitionMaxGuid { get; set; }
-        }
-
-        private enum ExecutionState
-        {
-            Success,
-            OutdatedId,
-            PartitionClosed,
-        }
-
         private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
 
+        private readonly LastWrittenDataHelper lastWrittenData;
         private readonly CasTimeSeriesSyncHelper syncHelper;
         private readonly ISession session;
-
-        private long lastWrittenPartitionId;
-        private TimeGuid lastWrittenTimeGuid;
 
         private readonly uint writeAttemptsLimit;
 
         public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, uint writeAttemptsLimit=100) : base(eventTable)
         {
             session = eventTable.GetSession();
-            syncHelper = new CasTimeSeriesSyncHelper(syncTable);
+            lastWrittenData = new LastWrittenDataHelper(syncHelper = new CasTimeSeriesSyncHelper(syncTable));
             this.writeAttemptsLimit = writeAttemptsLimit;
         }
 
@@ -50,53 +34,40 @@ namespace CassandraTimeSeries.Model
 
             do
             {
-                eventToWrite = new Event(CreateSynchronizedId(), ev);
+                eventToWrite = new Event(lastWrittenData.CreateSynchronizedId(), ev);
 
                 try
                 {
                     statementExecutionResult = CompareAndUpdate(eventToWrite);
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
-                    throw new ApplicationException("Cannot write event: please, check database connection.");
+                    Logger.Log(exception);
+                    return null;
                 }
 
-                if (statementExecutionResult.State == ExecutionState.PartitionClosed)
-                    lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
-
-                if (statementExecutionResult.State == ExecutionState.OutdatedId)
-                    lastWrittenTimeGuid = statementExecutionResult.PartitionMaxGuid;
-
+                lastWrittenData.UpdateLastWrittenTimeGuid(statementExecutionResult, eventToWrite);
+                
                 if (++writeAttemptsMade >= writeAttemptsLimit)
-                    throw new ApplicationException("Cannot write event: limit is exceeded for write attempts.");
+                {
+                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
+                    return null;
+                }
 
             } while (statementExecutionResult.State != ExecutionState.Success);
 
-            lastWrittenTimeGuid = eventToWrite.TimeGuid;
+            lastWrittenData.UpdateLastWrittenTimeGuid(eventToWrite.TimeGuid);
 
             return eventToWrite.Timestamp;
         }
 
-        private TimeGuid CreateSynchronizedId()
-        {
-            var nowGuid = TimeGuid.NowGuid();
-
-            if (lastWrittenTimeGuid != null && lastWrittenTimeGuid.GetTimestamp() >= nowGuid.GetTimestamp())
-                return lastWrittenTimeGuid.Increment();
-
-            if (syncHelper.StartOfTimes.GetTimestamp() >= nowGuid.GetTimestamp())
-                return syncHelper.StartOfTimes.Increment();
-
-            return nowGuid;
-        }
-
         private StatementExecutionResult CompareAndUpdate(Event eventToWrite)
         {
-            var isWritingToEmptyPartition = eventToWrite.PartitionId != lastWrittenPartitionId;
-            lastWrittenPartitionId = eventToWrite.PartitionId;
+            var isWritingToEmptyPartition = eventToWrite.PartitionId != lastWrittenData.PartitionId;
+            lastWrittenData.UpdateLastWrittenPartitionId(eventToWrite.PartitionId);
 
             if (isWritingToEmptyPartition)
-                ClosePreviousPartitions(lastWrittenPartitionId);
+                ClosePreviousPartitions(lastWrittenData.PartitionId);
 
             return WriteEventToCurrentPartition(eventToWrite, isWritingToEmptyPartition);
         }
