@@ -1,27 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cassandra.Data.Linq;
-using CassandraTimeSeries.Model;
+﻿using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Series
 {
-    class LastWrittenDataHelper
+    class CasLastWrittenData
     {
         public long PartitionId { get; private set; }
         public TimeGuid TimeGuid { get; private set; }
-
-        private readonly CasTimeSeriesSyncHelper syncHelper;
-
-        public LastWrittenDataHelper(CasTimeSeriesSyncHelper syncHelper)
-        {
-            this.syncHelper = syncHelper;
-        }
 
         public void UpdateLastWrittenPartitionId(long lastWrittenPartitionId)
         {
@@ -42,7 +29,7 @@ namespace CassandraTimeSeries.Series
                 TimeGuid = compareAndUpdateResult.PartitionMaxGuid;
         }
 
-        public TimeGuid CreateSynchronizedId()
+        public TimeGuid CreateSynchronizedId(CasTimeSeriesSyncHelper syncHelper)
         {
             var nowGuid = TimeGuid.NowGuid();
 

@@ -12,7 +12,7 @@ namespace CassandraTimeSeries.Model
     {
         private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
 
-        private readonly LastWrittenDataHelper lastWrittenData;
+        private readonly CasLastWrittenData lastWrittenData;
         private readonly CasTimeSeriesSyncHelper syncHelper;
         private readonly ISession session;
 
@@ -21,7 +21,8 @@ namespace CassandraTimeSeries.Model
         public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, uint writeAttemptsLimit=100) : base(eventTable)
         {
             session = eventTable.GetSession();
-            lastWrittenData = new LastWrittenDataHelper(syncHelper = new CasTimeSeriesSyncHelper(syncTable));
+            lastWrittenData = new CasLastWrittenData();
+            syncHelper = new CasTimeSeriesSyncHelper(syncTable);
             this.writeAttemptsLimit = writeAttemptsLimit;
         }
 
@@ -34,7 +35,7 @@ namespace CassandraTimeSeries.Model
 
             do
             {
-                eventToWrite = new Event(lastWrittenData.CreateSynchronizedId(), ev);
+                eventToWrite = new Event(lastWrittenData.CreateSynchronizedId(syncHelper), ev);
 
                 try
                 {
