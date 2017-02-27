@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class TimeSeriesTestSequential : CommonTimeSeriesTestSequential
+    public class SimpleTimeSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
         protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
@@ -14,7 +14,7 @@ namespace CassandraTimeSeries.UnitTesting
     }
 
     [TestFixture]
-    public class TimeSeriesTestParallel : CommonTimeSeriesTestParallel
+    public class SimpleTimeSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
         protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
@@ -22,7 +22,7 @@ namespace CassandraTimeSeries.UnitTesting
     }
 
     [TestFixture]
-    public class TimeSeriesTestWrite : CommonTimeSeriesTestWrite
+    public class SimpleTimeSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
         protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);

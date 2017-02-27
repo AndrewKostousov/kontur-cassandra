@@ -15,7 +15,7 @@ namespace Benchmarks.ReadWrite
         public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
         public List<int> ReadsLength { get; } = new List<int>();
         public double AverageReadThroughput => ReadsLength.Sum()/this.OperationalTime().TotalSeconds;
-        public Dictionary<TimeUuid, Timestamp> Timing = new Dictionary<TimeUuid, Timestamp>();
+        public Dictionary<TimeUuid, Timestamp> Timing { get; } = new Dictionary<TimeUuid, Timestamp>();
 
         public int TotalEventsRead => ReadsLength.Sum();
 
@@ -26,11 +26,12 @@ namespace Benchmarks.ReadWrite
         {
             var sw = Stopwatch.StartNew();
             var events = base.ReadNext();
-            var currentTime = Timestamp.Now;
 
             Latency.Add(sw.Elapsed);
             ReadsLength.Add(events.Count);
-            
+
+            var currentTime = Timestamp.Now;
+
             foreach (var ev in events)
                 Timing.Add(ev.Id, currentTime);
 

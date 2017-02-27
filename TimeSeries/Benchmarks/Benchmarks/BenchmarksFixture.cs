@@ -1,83 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Benchmarks.Reflection;
 
 namespace Benchmarks.Benchmarks
 {
-    class BenchmarksFixture
+    public abstract class BenchmarksFixture
     {
-        public string Name { get; }
+        public abstract string Name { get; }
 
-        [From(typeof(BenchmarkClassSetUpAttribute))]
-        public Action ClassSetup { get; set; }
+        protected virtual void ClassSetUp() { }
+        protected virtual void ClassTearDown() { }
 
-        [From(typeof(BenchmarkClassTearDownAttribute))]
-        public Action ClassTeardown { get; set; }
+        protected abstract IEnumerable<Benchmark> GetBenchmarks();
 
-        [From(typeof(BenchmarkSetUpAttribute))]
-        public Action Setup { get; set; }
-
-        [From(typeof(BenchmarkTearDownAttribute))]
-        public Action Teardown { get; set; }
-        
-        [From(typeof(BenchmarkMethodAttribute))]
-        public IEnumerable<Benchmark> Benchmarks { get; } = new List<Benchmark>();
-        
-        public List<Func<IBenchmarkingResult>> AdditionalResults { get; } = new List<Func<IBenchmarkingResult>>();
-
+        public event Action<Benchmark> BenchmarkSetup;
         public event Action<Benchmark> BenchmarkStarted;
-        public event Action<Benchmark> BenchmarkSetupStarted;
-        public event Action<Benchmark> BenchmarkTeardownStarted;
-        public event Action<Benchmark, int> IterationStarted;
-        public event Action<Benchmark, int> IterationFinished;
         public event Action<Benchmark, IBenchmarkingResult> BenchmarkFinished;
+        public event Action<Benchmark> BenchmarkTeardown;
 
-        public BenchmarksFixture(string name)
+        public void Run()
         {
-            Name = name;
+            ClassSetUp();
+
+            GetBenchmarks().ToList().ForEach(RunSingleBenchmark);
+
+            ClassTearDown();
         }
 
-        public List<IBenchmarkingResult> Run()
+        private void RunSingleBenchmark(Benchmark benchmark)
         {
-            ClassSetup?.Invoke();
+            BenchmarkSetup?.Invoke(benchmark);
 
-            var result = Benchmarks
-                .Select(ConnectGlobalHandlers)
-                .Select(RunSingleBenchmark)
-                .ToList();
+            benchmark.SetUp();
 
-            ClassTeardown?.Invoke();
-
-            return result;
-        }
-
-        private IBenchmarkingResult RunSingleBenchmark(Benchmark benchmark)
-        {
             BenchmarkStarted?.Invoke(benchmark);
 
-            var result = benchmark.Run().Aggregate((r1, r2) => r1.Update(r2));
+            var result = benchmark.Run();
 
             BenchmarkFinished?.Invoke(benchmark, result);
-            return result;
-        }
 
-        private Benchmark ConnectGlobalHandlers(Benchmark benchmark)
-        {
-            benchmark.IterationStarted += i => {
-                BenchmarkSetupStarted?.Invoke(benchmark);
-                Setup?.Invoke();
-                IterationStarted?.Invoke(benchmark, i); 
-            };
+            benchmark.TearDown();
 
-            benchmark.IterationFinished += i =>
-            {
-                BenchmarkTeardownStarted?.Invoke(benchmark);
-                Teardown?.Invoke();
-                IterationFinished?.Invoke(benchmark, i);
-            };
-
-            return benchmark;
+            BenchmarkTeardown?.Invoke(benchmark);
         }
     }
 }

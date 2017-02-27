@@ -8,78 +8,73 @@ using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using CassandraTimeSeries.Utils;
+using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
-    [BenchmarkClass]
-    public abstract class BaseTimeSeriesBenchmark
+    public abstract class BaseTimeSeriesBenchmark : BenchmarksFixture
     {
         protected abstract IDatabaseController Database { get; }
-
-        protected ITimeSeries Series { get; private set; }
-        private ReadersWritersPool pool;
-
-        private List<BenchmarkEventReader> readers;
-        private List<BenchmarkEventWriter> writers;
-
-        private readonly ReaderSettings readerSettings;
-        private readonly WriterSettings writerSettings;
-
-        protected abstract int ReadersCount { get; }
-        protected abstract int WritersCount { get; }
-
-        protected int CurrentIteration { get; private set; }
-
-        protected BaseTimeSeriesBenchmark()
-        {
-            readerSettings = new ReaderSettings();
-            writerSettings = new WriterSettings();
-        }
-
         protected abstract ITimeSeries TimeSeriesFactory();
 
-        [BenchmarkSetUp]
-        public virtual void SetUp()
-        {
-            readers = Enumerable.Range(0, ReadersCount)
-                .Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), readerSettings))
-                .ToList();
+        private ITimeSeries series;
 
-            writers = Enumerable.Range(0, WritersCount)
-                .Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), writerSettings))
-                .ToList();
+        private readonly ReaderSettings readerSettings = new ReaderSettings();
+        private readonly WriterSettings writerSettings = new WriterSettings();
 
-            pool = new ReadersWritersPool(readers, writers);
+        protected virtual int ReadersCount { get; } = 4;
+        protected virtual int WritersCount { get; } = 4;
+        protected virtual int PreloadedEventsCount { get; } = 5000;
 
-            Database.ResetSchema();
-        }
-
-        [BenchmarkClassSetUp]
-        public void ClassSetUp()
+        protected override void ClassSetUp()
         {
             Database.SetUpSchema();
-            Series = TimeSeriesFactory();
+            series = TimeSeriesFactory();
         }
         
-        [BenchmarkClassTearDown]
-        public void ClassTearDown()
+        protected override void ClassTearDown()
         {
             Database.TearDownSchema();
         }
-        
-        [BenchmarkMethod(executionsCount:1, result:nameof(Result))]
-        public void TimeSeries()
-        {
-            pool.Start();
-            Thread.Sleep(5*1000);
-            pool.Stop();
 
-            CurrentIteration++;
+        protected override IEnumerable<Benchmark> GetBenchmarks()
+        {
+            return new[]
+            {
+                new Benchmark("Read and write", () => SetUp(ReadersCount, WritersCount), RunGenericBenchmark), 
+                new Benchmark("Read only", () => {SetUp(ReadersCount, 0); FillEvents(); }, RunGenericBenchmark),
+                new Benchmark("Write only", () => SetUp(0, WritersCount), RunGenericBenchmark), 
+            };
         }
 
-        public IBenchmarkingResult Result()
+        private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> pool;
+
+        private void SetUp(int readersCount, int writersCount)
         {
-            return new DatabaseBenchmarkingResult(readers, writers);
+            Database.ResetSchema();
+            pool = InitReadersWritersPool(readersCount, writersCount);
+        }
+
+        private void FillEvents()
+        {
+            for (var i = 0; i < PreloadedEventsCount; ++i)
+                series.WriteWithoutSync(new Event(TimeGuid.NowGuid(), new EventProto()));
+        }
+
+        private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> InitReadersWritersPool(int readersCount, int writersCount)
+        {
+            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), readerSettings)).ToList();
+            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), writerSettings)).ToList();
+            return new ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter>(readers, writers);
+        }
+
+        private IBenchmarkingResult RunGenericBenchmark()
+        {
+            pool.Start();
+            Thread.Sleep(5 * 1000);
+            pool.Stop();
+
+            return new DatabaseBenchmarkingResult(pool.Readers, pool.Writers);
         }
     }
 }

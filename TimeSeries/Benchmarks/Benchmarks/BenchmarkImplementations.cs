@@ -1,60 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Benchmarks.Reflection;
-using CassandraTimeSeries.Interfaces;
+﻿using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 
 namespace Benchmarks.Benchmarks
 {
-    [BenchmarkClass]
-    public class SimpleSeriesReadAndWriteBenchmark : ReadAndWriteBenchmark
+    // ReSharper disable once UnusedMember.Global
+    public class SimpleSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark
     {
+        public override string Name => $"{nameof(SimpleTimeSeries)} benchmark";
+
         protected override IDatabaseController Database => controller;
         protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
-    [BenchmarkClass]
-    public class SimpleSeriesReadOnlyBenchmark : ReadOnlyBenchmark
+    // ReSharper disable once UnusedMember.Global
+    public class CasSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
-    }
+        public override string Name => $"{nameof(CasTimeSeries)} benchmark";
 
-    [BenchmarkClass]
-    public class SimpleSeriesWriteOnlyBenchmark : WriteOnlyBenchmark
-    {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table);
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
-    }
-
-    [BenchmarkClass]
-    public class CasSeriesReadAndWriteBenchmark : ReadAndWriteBenchmark
-    {
         protected override IDatabaseController Database => controller;
         protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
         private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
-
-    [BenchmarkClass]
-    public class CasSeriesReadOnlyBenchmark : ReadOnlyBenchmark
-    {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
-    }
-
-    [BenchmarkClass]
-    public class CasSeriesWriteOnlyBenchmark : WriteOnlyBenchmark
-    {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
-    }
-
 }

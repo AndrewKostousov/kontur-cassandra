@@ -3,29 +3,34 @@ using System.Linq;
 
 namespace CassandraTimeSeries.ReadWrite
 {
-    public class ReadersWritersPool
+    public class ReadersWritersPool<TReader, TWriter>
+        where TReader : EventReader 
+        where TWriter : EventWriter
     {
         private readonly WorkersPool readersPool;
         private readonly WorkersPool writersPool;
         private bool isAlive;
 
-        public ReadersWritersPool(IEnumerable<EventReader> readers, IEnumerable<EventWriter> writers)
-        {
-            var readersList = readers.ToList();
-            var writersList = writers.ToList();
+        public IReadOnlyList<TReader> Readers { get; }
+        public IReadOnlyList<TWriter> Writers { get; }
 
-            readersPool = new WorkersPool(readersList.Count, i =>
+        public ReadersWritersPool(IReadOnlyList<TReader> readers, IReadOnlyList<TWriter> writers)
+        {
+            Readers = readers;
+            Writers = writers;
+
+            readersPool = new WorkersPool(readers.Count, i =>
             {
-                readersList[i].ReadFirst();
+                readers[i].ReadFirst();
 
                 while (isAlive)
-                    readersList[i].ReadNext();
+                    readers[i].ReadNext();
             });
 
-            writersPool = new WorkersPool(writersList.Count, i =>
+            writersPool = new WorkersPool(writers.Count, i =>
             {
                 while (isAlive)
-                    writersList[i].WriteNext();
+                    writers[i].WriteNext();
             });
         }
 

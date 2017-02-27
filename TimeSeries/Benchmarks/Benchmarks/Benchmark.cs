@@ -1,49 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Benchmarks.Results;
 
 namespace Benchmarks.Benchmarks
 {
     public class Benchmark
     {
-        public int IterationsCount { get; }
         public string Name { get; }
 
-        private Action OnRun;
-        public Func<IBenchmarkingResult> AdditionalResult { get; }
+        private readonly Action setUp;
+        private readonly Func<IBenchmarkingResult> run;
+        private readonly Action tearDown;
 
-        public event Action<int> IterationStarted;
-        public event Action<int> IterationFinished;
-
-        public Benchmark(string name, int iterationsCount, Action onRun, Func<IBenchmarkingResult> additionalResult=null)
+        public Benchmark(string name, Func<IBenchmarkingResult> run, Action tearDown = null) : this(name, null, run, tearDown) { }
+        
+        public Benchmark(string name, Action setUp, Func<IBenchmarkingResult> run, Action tearDown = null)
         {
-            OnRun = onRun;
-            IterationsCount = iterationsCount;
+            if (run == null)
+                throw new ArgumentException($"Illegal argument '{nameof(run)}': expected delegate, got null.");
+
             Name = name;
-            AdditionalResult = additionalResult;
+
+            this.setUp = setUp;
+            this.run = run;
+            this.tearDown = tearDown;
         }
 
-        public IEnumerable<IBenchmarkingResult> Run()
+        public void SetUp() => setUp?.Invoke();
+
+        public IBenchmarkingResult Run()
         {
-            for (var i = 0; i < IterationsCount; ++i)
-            {
-                IterationStarted?.Invoke(i);
-                yield return RunIteration();
-                IterationFinished?.Invoke(i);
-            }
+            return run.Invoke();
         }
 
-        private IBenchmarkingResult RunIteration()
-        {
-            return new BenchmarkingResult(DoRun(), AdditionalResult?.Invoke());
-        }
-
-        private TimeSpan DoRun()
-        {
-            var sw = Stopwatch.StartNew();
-            OnRun();
-            return sw.Elapsed;
-        }
+        public void TearDown() => tearDown?.Invoke();
     }
 }

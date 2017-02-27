@@ -8,48 +8,27 @@ namespace Benchmarks.Results
 {
     class DatabaseBenchmarkingResult : IBenchmarkingResult
     {
-        public List<ReadStatistics> ReadStatistics { get; }
-        public List<WriteStatistics> WriteStatistics { get; }
+        private readonly ReadStatistics readStatistics;
+        private readonly WriteStatistics writeStatistics;
 
-        public DatabaseBenchmarkingResult(List<BenchmarkEventReader> readers, List<BenchmarkEventWriter> writers)
+        public DatabaseBenchmarkingResult(IReadOnlyList<BenchmarkEventReader> readers, IReadOnlyList<BenchmarkEventWriter> writers)
         {
-            ReadStatistics = new List<ReadStatistics> {new ReadStatistics(readers)};
-            WriteStatistics = new List<WriteStatistics> {new WriteStatistics(writers)};
-        }
-
-        private DatabaseBenchmarkingResult(List<ReadStatistics> reads, List<WriteStatistics> writes)
-        {
-            ReadStatistics = reads;
-            WriteStatistics = writes;
+            readStatistics = new ReadStatistics(readers);
+            writeStatistics = new WriteStatistics(writers);
         }
 
         public string CreateReport()
         {
             var statistics = new StringBuilder();
 
-            foreach (var statistic in ReadStatistics.Zip(WriteStatistics, Tuple.Create))
-            {
-                var readStatistic = statistic.Item1;
-                var writeStatistic = statistic.Item2;
+            var nl = Environment.NewLine;
 
-                if (readStatistic.WorkersCount != 0)
-                    statistics.Append("=== Read statistics ===\r\n\r\n" + readStatistic.CreateReport());
-                if (writeStatistic.WorkersCount != 0)
-                    statistics.Append("=== Write statistics ===\r\n\r\n" + writeStatistic.CreateReport());
-            }
+            if (readStatistics.WorkersCount != 0)
+                statistics.Append($"Read statistics:{nl}{nl}" + readStatistics.CreateReport());
+            if (writeStatistics.WorkersCount != 0)
+                statistics.Append($"Write statistics:{nl}{nl}" + writeStatistics.CreateReport());
 
             return statistics.ToString();
-        }
-
-        public IBenchmarkingResult Update(IBenchmarkingResult otherResult)
-        {
-            var other = otherResult as DatabaseBenchmarkingResult;
-            if (other == null)
-                return this;
-            
-            return new DatabaseBenchmarkingResult(
-                ReadStatistics.Union(other.ReadStatistics).ToList(), 
-                WriteStatistics.Union(other.WriteStatistics).ToList());
         }
     }
 }

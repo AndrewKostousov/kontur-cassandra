@@ -7,9 +7,9 @@ namespace Benchmarks.Runners
 {
     class ConsoleBenchmarkRunner : IBenchmarkRunner
     {
-        readonly string separator = "\r\n".PadLeft(100, '=');
-
-        private string pathToLog = "results.txt";
+        private static readonly string NewLine = Environment.NewLine;
+        private readonly string separator = NewLine.PadLeft(100, '=');
+        private readonly string pathToLog = "results.txt";
 
         public void RunAll(IEnumerable<BenchmarksFixture> benchmarks)
         {
@@ -18,25 +18,31 @@ namespace Benchmarks.Runners
             foreach (var fixture in benchmarks)
                 RunSingleBenchmark(fixture);
 
-            Console.WriteLine(separator + "All benchmarks done! Press any key to exit.");
+            Console.WriteLine($"{separator}All benchmarks done! Press any key to exit.");
             Console.ReadKey();
         }
 
         private void RunSingleBenchmark(BenchmarksFixture fixture)
         {
-            Console.Write(separator + $"\r\nPreparing fixture: {fixture.Name}\r\n\r\n{separator}");
+            Func<string, string> makeRectangle = s => $"{separator}{NewLine}{s}{NewLine}{NewLine}{separator}";
 
-            File.AppendAllText(pathToLog, $"{separator}\r\n   {fixture.Name}\r\n\r\n{separator}");
+            Console.Write(makeRectangle($"Running fixture: {fixture.Name}"));
+            File.AppendAllText(pathToLog, makeRectangle($"   {fixture.Name}"));
 
-            fixture.BenchmarkSetupStarted += b => Console.Write($"\r\nSetting up: {b.Name} ... ");
-            fixture.IterationStarted += (b, i) => Console.Write($"Done!\r\n\r\nRunning benchmark: {b.Name} ... ");
+            fixture.BenchmarkSetup += b => Console.Write($"{NewLine}Setting up: {b.Name} ... ");
+
+            fixture.BenchmarkStarted += b =>
+            {
+                Console.Write($"Done!{NewLine}{NewLine}Running benchmark: {b.Name} ... ");
+                File.AppendAllText(pathToLog, $"{NewLine}== {b.Name} ".PadRight(100, '=') + NewLine);
+            };
 
             fixture.BenchmarkFinished += (b, r) =>
             {
                 var report = r.CreateReport();
 
-                Console.Write($"Done!\r\n\r\n{report}");
-                File.AppendAllText(pathToLog, "\r\n" + report);
+                Console.Write($"Done!{NewLine}{NewLine}{report}");
+                File.AppendAllText(pathToLog, NewLine + report);
             };
 
             fixture.Run();
