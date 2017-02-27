@@ -22,7 +22,6 @@ namespace CassandraTimeSeries.Model
             Success,
             OutdatedId,
             PartitionClosed,
-            ExceptionThrown,
         }
 
         private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
@@ -57,10 +56,9 @@ namespace CassandraTimeSeries.Model
                 {
                     statementExecutionResult = CompareAndUpdate(eventToWrite);
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
-                    Logger.Log(exception);
-                    statementExecutionResult = new StatementExecutionResult {State = ExecutionState.ExceptionThrown};
+                    throw new ApplicationException("Cannot write event: please, check database connection.");
                 }
 
                 if (statementExecutionResult.State == ExecutionState.PartitionClosed)
@@ -70,10 +68,7 @@ namespace CassandraTimeSeries.Model
                     lastWrittenTimeGuid = statementExecutionResult.PartitionMaxGuid;
 
                 if (++writeAttemptsMade >= writeAttemptsLimit)
-                {
-                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
-                    return null;
-                }
+                    throw new ApplicationException("Cannot write event: limit exceeded for write attempts.");
 
             } while (statementExecutionResult.State != ExecutionState.Success);
 
