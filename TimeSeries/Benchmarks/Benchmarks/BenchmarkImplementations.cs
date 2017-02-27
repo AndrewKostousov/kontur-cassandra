@@ -22,4 +22,13 @@ namespace Benchmarks.Benchmarks
         protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.SyncTable);
         private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
+
+    // ReSharper disable once UnusedMember.Global
+    //public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark
+    //{
+    //    public override string Name => $"{nameof(AllBoxEventSeriesBenchmark)} benchmark";
+    //    protected override IDatabaseController Database => controller;
+    //    protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+    //    private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
+    //}
 }
