@@ -9,7 +9,7 @@ namespace Benchmarks.Runners
     {
         readonly string separator = "\r\n".PadLeft(100, '=');
 
-        private string pathToLog = "log.txt";
+        private string pathToLog = "results.txt";
 
         public void RunAll(IEnumerable<BenchmarksFixture> benchmarks)
         {

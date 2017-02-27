@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
@@ -57,8 +56,9 @@ namespace CassandraTimeSeries.Model
                 {
                     statementExecutionResult = CompareAndUpdate(eventToWrite);
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
+                    Logger.Log(exception);
                     statementExecutionResult = new StatementExecutionResult {State = ExecutionState.ExceptionThrown};
                 }
 

@@ -66,6 +66,10 @@
     <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
       <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.1.0.0\lib\netstandard1.1\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework, Version=3.6.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.3.6.0\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -76,6 +80,8 @@
     <Compile Include="Interfaces\IDatabaseController.cs" />
     <Compile Include="Model\AllBoxEventSeriesDatabaseController.cs" />
     <Compile Include="Model\AllBoxEventSeriesWrapper.cs" />
+    <Compile Include="Model\Logger.cs" />
+    <Compile Include="Model\TimeSeriesException.cs" />
     <Compile Include="Model\CasTimeSeriesDatabaseController.cs" />
     <Compile Include="Model\SimpleTimeSeriesDatabaseController.cs" />
     <Compile Include="Model\EventProto.cs" />
