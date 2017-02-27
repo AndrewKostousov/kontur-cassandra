@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
@@ -10,17 +11,18 @@ namespace CassandraTimeSeries.Model
 {
     public class CasTimeSeries : SimpleTimeSeries
     {
-        class WriteExecutionResult
+        private class StatementExecutionResult
         {
-            public WriteExecutionState State { get; set; }
+            public ExecutionState State { get; set; }
             public TimeGuid PartitionMaxGuid { get; set; }
         }
 
-        enum WriteExecutionState
+        private enum ExecutionState
         {
             Success,
             OutdatedId,
             PartitionClosed,
+            ExceptionThrown,
         }
 
         private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
@@ -31,9 +33,9 @@ namespace CassandraTimeSeries.Model
         private long lastWrittenPartitionId;
         private TimeGuid lastWrittenTimeGuid;
 
-        private readonly int writeAttemptsLimit;
+        private readonly uint writeAttemptsLimit;
 
-        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, int writeAttemptsLimit=100) : base(eventTable)
+        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, uint writeAttemptsLimit=100) : base(eventTable)
         {
             session = eventTable.GetSession();
             syncHelper = new CasTimeSeriesSyncHelper(syncTable);
@@ -43,23 +45,33 @@ namespace CassandraTimeSeries.Model
         public override Timestamp Write(EventProto ev)
         {
             Event eventToWrite;
-            WriteExecutionResult writeExecutionResult;
+            StatementExecutionResult statementExecutionResult;
 
             var writeAttemptsMade = 0;
 
             do
             {
-                writeExecutionResult = CompareAndUpdate(eventToWrite = new Event(CreateSynchronizedId(), ev));
+                eventToWrite = new Event(CreateSynchronizedId(), ev);
 
-                if (writeExecutionResult.State == WriteExecutionState.PartitionClosed)
+                try
+                {
+                    statementExecutionResult = CompareAndUpdate(eventToWrite);
+                }
+                catch (Exception e)
+                {
+                    statementExecutionResult = new StatementExecutionResult {State = ExecutionState.ExceptionThrown};
+                }
+
+                if (statementExecutionResult.State == ExecutionState.PartitionClosed)
                     lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
 
-                if (writeExecutionResult.State == WriteExecutionState.OutdatedId)
-                    lastWrittenTimeGuid = writeExecutionResult.PartitionMaxGuid;
+                if (statementExecutionResult.State == ExecutionState.OutdatedId)
+                    lastWrittenTimeGuid = statementExecutionResult.PartitionMaxGuid;
 
-                if (++writeAttemptsMade >= writeAttemptsLimit) throw new WriteTimeoutException(writeAttemptsLimit);
+                if (++writeAttemptsMade >= writeAttemptsLimit)
+                    throw new WriteTimeoutException(writeAttemptsLimit);
 
-            } while (writeExecutionResult.State != WriteExecutionState.Success);
+            } while (statementExecutionResult.State != ExecutionState.Success);
 
             lastWrittenTimeGuid = eventToWrite.TimeGuid;
 
@@ -79,61 +91,69 @@ namespace CassandraTimeSeries.Model
             return nowGuid;
         }
 
-        private WriteExecutionResult CompareAndUpdate(Event eventToWrite)
+        private StatementExecutionResult CompareAndUpdate(Event eventToWrite)
         {
-            var isWritePartitionEmpty = eventToWrite.PartitionId != lastWrittenPartitionId;
+            var isWritingToEmptyPartition = eventToWrite.PartitionId != lastWrittenPartitionId;
             lastWrittenPartitionId = eventToWrite.PartitionId;
 
-            if (isWritePartitionEmpty)
+            if (isWritingToEmptyPartition)
                 ClosePreviousPartitions(lastWrittenPartitionId);
 
-            return WriteEventToCurrentPartition(eventToWrite, isWritePartitionEmpty);
+            return WriteEventToCurrentPartition(eventToWrite, isWritingToEmptyPartition);
         }
 
-        private WriteExecutionResult WriteEventToCurrentPartition(Event e, bool isWritePartitionEmpty)
+        private StatementExecutionResult WriteEventToCurrentPartition(Event e, bool isWritingToEmptyPartition)
         {
-            var updateStatement = session.Prepare(
+            return ExecuteStatement(CreateWriteEventStatement(e, isWritingToEmptyPartition));
+        }
+
+        private IStatement CreateWriteEventStatement(Event e, bool isWritingToEmptyPartition)
+        {
+            var writeEventStatement = session.Prepare(
                 $"UPDATE {eventTable.Name} " +
                 "SET user_id = ?, payload = ?, max_id = ? " +
                 "WHERE event_id = ? AND partition_id = ? " +
-                (isWritePartitionEmpty ? "IF max_id = NULL" : "IF max_id < ?")
+                (isWritingToEmptyPartition ? "IF max_id = NULL" : "IF max_id < ?")
             );
 
-            return ExecuteUpdateStatement(isWritePartitionEmpty
-                ? updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId)
-                : updateStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id));
+            return isWritingToEmptyPartition
+                ? writeEventStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId)
+                : writeEventStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id);
         }
 
         private void ClosePreviousPartitions(long currentPartitionId)
         {
-            var partitionIdToClose = currentPartitionId - Event.PartitionDutation.Ticks;
-            WriteExecutionState writeExecutionState = WriteExecutionState.Success;
+            var idOfPartitionToClose = currentPartitionId - Event.PartitionDutation.Ticks;
+            var executionState = ExecutionState.Success;
 
-            while (writeExecutionState != WriteExecutionState.PartitionClosed && partitionIdToClose >= syncHelper.PartitionIdOfStartOfTimes)
+            while (executionState != ExecutionState.PartitionClosed && idOfPartitionToClose >= syncHelper.PartitionIdOfStartOfTimes)
             {
-                var updateStatement = session.Prepare(
-                    $"UPDATE {eventTable.Name} " +
-                    "SET max_id = ? WHERE partition_id = ? " +
-                    "IF max_id != ?"
-                ).Bind(ClosingTimeUuid, partitionIdToClose, ClosingTimeUuid);
-
-                writeExecutionState = ExecuteUpdateStatement(updateStatement).State;
-                partitionIdToClose -= Event.PartitionDutation.Ticks;
+                executionState = ExecuteStatement(CreateClosePartitionStatement(idOfPartitionToClose)).State;
+                idOfPartitionToClose -= Event.PartitionDutation.Ticks;
             }
         }
 
-        private WriteExecutionResult ExecuteUpdateStatement(IStatement statement)
+        private IStatement CreateClosePartitionStatement(long idOfPartitionToClose)
         {
-            var execResult = session.Execute(statement).GetRows().Single();
-            var isApplied = execResult.GetValue<bool>("[applied]");
+            return session.Prepare(
+                $"UPDATE {eventTable.Name} " +
+                "SET max_id = ? WHERE partition_id = ? " +
+                "IF max_id != ?"
+            ).Bind(ClosingTimeUuid, idOfPartitionToClose, ClosingTimeUuid);
+        }
 
-            if (isApplied) return new WriteExecutionResult {State = WriteExecutionState.Success};
+        private StatementExecutionResult ExecuteStatement(IStatement statement)
+        {
+            var statementExecutionResult = session.Execute(statement).GetRows().Single();
+            var isUpdateApplied = statementExecutionResult.GetValue<bool>("[applied]");
 
-            var partitionMaxTimeUuid = execResult.GetValue<TimeUuid>("max_id");
+            if (isUpdateApplied) return new StatementExecutionResult {State = ExecutionState.Success};
 
-            return new WriteExecutionResult
+            var partitionMaxTimeUuid = statementExecutionResult.GetValue<TimeUuid>("max_id");
+
+            return new StatementExecutionResult
             {
-                State = partitionMaxTimeUuid == ClosingTimeUuid ? WriteExecutionState.PartitionClosed : WriteExecutionState.OutdatedId,
+                State = partitionMaxTimeUuid == ClosingTimeUuid ? ExecutionState.PartitionClosed : ExecutionState.OutdatedId,
                 PartitionMaxGuid = partitionMaxTimeUuid.ToTimeGuid()
             };
         }
