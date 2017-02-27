@@ -4,6 +4,7 @@ using Cassandra;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Utils;
 using Commons;
+using Commons.Logging;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
@@ -69,7 +70,10 @@ namespace CassandraTimeSeries.Model
                     lastWrittenTimeGuid = statementExecutionResult.PartitionMaxGuid;
 
                 if (++writeAttemptsMade >= writeAttemptsLimit)
-                    throw new WriteTimeoutException(writeAttemptsLimit);
+                {
+                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
+                    return null;
+                }
 
             } while (statementExecutionResult.State != ExecutionState.Success);
 
