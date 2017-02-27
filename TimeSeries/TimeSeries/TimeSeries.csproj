@@ -78,17 +78,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IDatabaseController.cs" />
-    <Compile Include="Model\AllBoxEventSeriesDatabaseController.cs" />
-    <Compile Include="Model\AllBoxEventSeriesWrapper.cs" />
-    <Compile Include="Model\Logger.cs" />
-    <Compile Include="Model\TimeSeriesException.cs" />
-    <Compile Include="Model\CasTimeSeriesDatabaseController.cs" />
-    <Compile Include="Model\SimpleTimeSeriesDatabaseController.cs" />
-    <Compile Include="Model\EventProto.cs" />
-    <Compile Include="Model\CasTimeSeries.cs" />
-    <Compile Include="Model\CasTimeSeriesSyncData.cs" />
-    <Compile Include="Model\CasTimeSeriesSyncHelper.cs" />
-    <Compile Include="Model\WriteTimeoutException.cs" />
+    <Compile Include="Series\AllBoxEventSeriesDatabaseController.cs" />
+    <Compile Include="Series\AllBoxEventSeriesWrapper.cs" />
+    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Series\CasTimeSeriesDatabaseController.cs" />
+    <Compile Include="Series\SimpleTimeSeriesDatabaseController.cs" />
+    <Compile Include="Series\EventProto.cs" />
+    <Compile Include="Series\CasTimeSeries.cs" />
+    <Compile Include="Series\CasTimeSeriesSyncData.cs" />
+    <Compile Include="Series\CasTimeSeriesSyncHelper.cs" />
+    <Compile Include="Utils\WriteTimeoutException.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />
     <Compile Include="ReadWrite\EventWriter.cs" />
     <Compile Include="ReadWrite\ReaderSettings.cs" />
@@ -97,9 +96,9 @@
     <Compile Include="ReadWrite\WriterSettings.cs" />
     <Compile Include="Utils\TableExtensions.cs" />
     <Compile Include="Interfaces\ITimeSeries.cs" />
-    <Compile Include="Model\Event.cs" />
+    <Compile Include="Series\Event.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\SimpleTimeSeries.cs" />
+    <Compile Include="Series\SimpleTimeSeries.cs" />
     <Compile Include="Utils\TimeGuidExtensions.cs" />
     <Compile Include="Utils\TimeSlices.cs" />
   </ItemGroup>
