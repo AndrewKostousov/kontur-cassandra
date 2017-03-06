@@ -103,7 +103,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             foreach (var eventsReadBySingleReader in readEvents.Values)
             {
-                eventsReadBySingleReader.ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
+                eventsReadBySingleReader.Select(x => x.Proto).ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
                 eventsReadBySingleReader.Select(x => x.Timestamp).ShouldBeExactly(allWrittenEvents.Select(x => x.Item1));
             }
         }

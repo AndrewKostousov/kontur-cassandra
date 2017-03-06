@@ -73,157 +73,157 @@ namespace CassandraTimeSeries.UnitTesting
         [Test]
         public void Read_ByTimestamp_FromSingleSlice()
         {
-            Series.ReadRange(t01, t03).Cast<EventProto>().ShouldBeExactly(e02, e03);
+            Series.ReadRange(t01, t03).ShouldBeExactly(e02, e03);
         }
 
         [Test]
         public void Read_ByTimeGuid_FromSingleSlice()
         {
-            Series.ReadRange(e01.TimeGuid, e03.TimeGuid).Cast<EventProto>().ShouldBeExactly(e02, e03);
+            Series.ReadRange(e01.TimeGuid, e03.TimeGuid).ShouldBeExactly(e02, e03);
         }
 
         [Test]
         public void Read_ByTimestamp_FromManySlices()
         {
-            Series.ReadRange(t01, t21).Cast<EventProto>().ShouldBeExactly(e02, e03, e11, e21);
+            Series.ReadRange(t01, t21).ShouldBeExactly(e02, e03, e11, e21);
         }
 
         [Test]
         public void Read_ByTimeGuid_FromManySlices()
         {
-            Series.ReadRange(e01.TimeGuid, e21.TimeGuid).Cast<EventProto>().ShouldBeExactly(e02, e03, e11, e21);
+            Series.ReadRange(e01.TimeGuid, e21.TimeGuid).ShouldBeExactly(e02, e03, e11, e21);
         }
 
         [Test]
         public void Read_ByTimestamp_StartIsGreaterThanEnd()
         {
-            Series.ReadRange(t10, t00).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(t10, t00).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimeGuid_StartIsGreaterThanEnd()
         {
-            Series.ReadRange(e11.TimeGuid, e00.TimeGuid).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(e11.TimeGuid, e00.TimeGuid).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimestamp_StartEqualsToEnd()
         {
-            Series.ReadRange(t01, t01).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(t01, t01).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimeGuid_StartEqualsToEnd()
         {
-            Series.ReadRange(e01.TimeGuid, e01.TimeGuid).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(e01.TimeGuid, e01.TimeGuid).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimestamp_StartEqualsToEnd_AndLieOnSliceBorder()
         {
-            Series.ReadRange(t30, t30).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(t30, t30).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimeGuid_StartEqualsToEnd_AndLieOnSliceBorder()
         {
-            Series.ReadRange(e30.TimeGuid, e30.TimeGuid).Cast<EventProto>().Should().BeEmpty();
+            Series.ReadRange(e30.TimeGuid, e30.TimeGuid).Should().BeEmpty();
         }
 
         [Test]
         public void Read_ByTimestamp_LastElementOnSliceBorder()
         {
-            Series.ReadRange(t21, t30).Cast<EventProto>().ShouldBeExactly(e30);
+            Series.ReadRange(t21, t30).ShouldBeExactly(e30);
         }
 
         [Test]
         public void Read_ByTimeGuid_LastElementOnSliceBorder()
         {
-            Series.ReadRange(e21.TimeGuid, e30.TimeGuid).Cast<EventProto>().ShouldBeExactly(e30);
+            Series.ReadRange(e21.TimeGuid, e30.TimeGuid).ShouldBeExactly(e30);
         }
 
         [Test]
         public void Read_ByTimestamp_FirstElementOnSliceBorder()
         {
-            Series.ReadRange(t00, t01).Cast<EventProto>().ShouldBeExactly(e01);
+            Series.ReadRange(t00, t01).ShouldBeExactly(e01);
         }
 
         [Test]
         public void Read_ByTimeGuid_FirstElementOnSliceBorder()
         {
-            Series.ReadRange(e00.TimeGuid, e01.TimeGuid).Cast<EventProto>().ShouldBeExactly(e01);
+            Series.ReadRange(e00.TimeGuid, e01.TimeGuid).ShouldBeExactly(e01);
         }
 
         [Test]
         public void ReadCount_ByTimestamp_FromSingleSlice()
         {
-            Series.ReadRange(t00, t03, 2).Cast<EventProto>().ShouldBeExactly(e01, e02);
+            Series.ReadRange(t00, t03, 2).ShouldBeExactly(e01, e02);
         }
 
         [Test]
         public void ReadCount_ByTimeGuid_FromSingleSlice()
         {
-            Series.ReadRange(e00.TimeGuid, e03.TimeGuid, 2).Cast<EventProto>().ShouldBeExactly(e01, e02);
+            Series.ReadRange(e00.TimeGuid, e03.TimeGuid, 2).ShouldBeExactly(e01, e02);
         }
 
         [Test]
         public void ReadCount_ByTimestamp_FromManySlices()
         {
-            Series.ReadRange(t01, t21, 3).Cast<EventProto>().ShouldBeExactly(e02, e03, e11);
+            Series.ReadRange(t01, t21, 3).ShouldBeExactly(e02, e03, e11);
         }
 
         [Test]
         public void ReadCount_ByTimeGuid_FromManySlices()
         {
-            Series.ReadRange(e01.TimeGuid, e21.TimeGuid, 3).Cast<EventProto>().ShouldBeExactly(e02, e03, e11);
+            Series.ReadRange(e01.TimeGuid, e21.TimeGuid, 3).ShouldBeExactly(e02, e03, e11);
         }
 
         [Test]
         public void Read_ByTimestamp_StartIsNull()
         {
-            Series.ReadRange(null, t03).Cast<EventProto>().ShouldBeExactly(e00, e01, e02, e03);
+            Series.ReadRange(null, t03).ShouldBeExactly(e00, e01, e02, e03);
         }
 
         [Test]
         public void Read_ByTimeGuid_StartIsNull()
         {
-            Series.ReadRange(null, e03.TimeGuid).Cast<EventProto>().ShouldBeExactly(e00, e01, e02, e03);
+            Series.ReadRange(null, e03.TimeGuid).ShouldBeExactly(e00, e01, e02, e03);
         }
 
         [Test]
         public void Read_ByTimestamp_EndIsNull()
         {
-            Series.ReadRange(t11, null).Cast<EventProto>().ShouldBeExactly(e21, e30);
+            Series.ReadRange(t11, null).ShouldBeExactly(e21, e30);
         }
 
         [Test]
         public void Read_ByTimeGuid_EndIsNull()
         {
-            Series.ReadRange(e11.TimeGuid, null).Cast<EventProto>().ShouldBeExactly(e21, e30);
+            Series.ReadRange(e11.TimeGuid, null).ShouldBeExactly(e21, e30);
         }
 
         [Test]
         public void Read_ByTimestamp_ReadAll()
         {
-            Series.ReadRange((Timestamp)null, null).Cast<EventProto>().ShouldBeExactly(e00, e01, e02, e03, e11, e21, e30);
+            Series.ReadRange((Timestamp)null, null).ShouldBeExactly(e00, e01, e02, e03, e11, e21, e30);
         }
 
         [Test]
         public void Read_ByTimeGuid_ReadAll()
         {
-            Series.ReadRange((TimeGuid)null, null).Cast<EventProto>().ShouldBeExactly(e00, e01, e02, e03, e11, e21, e30);
+            Series.ReadRange((TimeGuid)null, null).ShouldBeExactly(e00, e01, e02, e03, e11, e21, e30);
         }
 
         [Test]
         public void ReadCount_ByTimestamp_ReadAll()
         {
-            Series.ReadRange((Timestamp)null, null, 3).Cast<EventProto>().ShouldBeExactly(e00, e01, e02);
+            Series.ReadRange((Timestamp)null, null, 3).ShouldBeExactly(e00, e01, e02);
         }
 
         [Test]
         public void ReadCount_ByTimeGuid_ReadAll()
         {
-            Series.ReadRange((TimeGuid)null, null, 3).Cast<EventProto>().ShouldBeExactly(e00, e01, e02);
+            Series.ReadRange((TimeGuid)null, null, 3).ShouldBeExactly(e00, e01, e02);
         }
     }
 }

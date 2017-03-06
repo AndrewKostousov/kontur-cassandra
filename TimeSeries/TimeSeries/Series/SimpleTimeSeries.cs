@@ -73,8 +73,8 @@ namespace CassandraTimeSeries.Model
                 EventIds = new[] {ev.Id},
                 LastEventId = ev.Id,
                 PartitionId = ev.PartitionId,
-                Payloads = new[] {ev.Payload},
-                UserIds = new[] {ev.UserId},
+                Payloads = new[] {ev.Proto.Payload},
+                UserIds = new[] {ev.Proto.UserId},
             }).Execute();
         }
 

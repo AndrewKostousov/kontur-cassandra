@@ -1,57 +1,20 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using Cassandra;
-using Cassandra.Mapping.Attributes;
 using Commons;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
-    [Table("bulk_time_series")]
-    public class EventsCollection : IEnumerable<Event>
-    {
-        [PartitionKey]
-        [Column("partition_id")]
-        public long PartitionId { get; set; }
-
-        [ClusteringKey]
-        [Column("last_event_id")]
-        public TimeUuid LastEventId { get; set; }
-
-        [StaticColumn]
-        [Column("max_id_in_partition")]
-        public TimeUuid MaxIdInPartition { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
-
-        [Column("event_ids")]
-        public TimeUuid[] EventIds { get; set; }
-
-        [Column("user_ids")]
-        public Guid[] UserIds { get; set; }
-
-        [Column("payloads")]
-        public byte[][] Payloads { get; set; }
-
-        public IEnumerator<Event> GetEnumerator()
-        {
-            for (var i = 0; i < EventIds.Length; ++i)
-                yield return new Event(EventIds[i].ToTimeGuid(), new EventProto(UserIds[i], Payloads[i]));
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-    }
-
-    public class Event : EventProto
+    public class Event
     {
         public static TimeSpan PartitionDutation => TimeSpan.FromMinutes(1);
-        public long PartitionId { get; set; }        
+        public long PartitionId { get; set; }
         public TimeUuid Id { get; set; }
         public TimeUuid MaxId { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
         public Timestamp Timestamp => TimeGuid.GetTimestamp();
         public TimeGuid TimeGuid => Id.ToTimeGuid();
+
+        public EventProto Proto { get; set; }
 
         public Event() { }
 
@@ -59,13 +22,12 @@ namespace CassandraTimeSeries.Model
         {
             Id = id.ToTimeUuid();
             PartitionId = id.GetTimestamp().Floor(PartitionDutation).Ticks;
-            Payload = proto.Payload;
-            UserId = proto.UserId;
+            Proto = proto;
         }
 
         public override string ToString()
         {
-            return $"Event {Id} at {Timestamp}, user_id: {UserId}";
+            return $"Event {Id} at {Timestamp}";
         }
     }
 }

@@ -81,6 +81,7 @@
     <Compile Include="Series\AllBoxEventSeriesDatabaseController.cs" />
     <Compile Include="Series\AllBoxEventSeriesWrapper.cs" />
     <Compile Include="Series\CasSynchronizationHelper.cs" />
+    <Compile Include="Series\EventsCollection.cs" />
     <Compile Include="Series\StatementExecutionResult.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Series\CasTimeSeriesDatabaseController.cs" />

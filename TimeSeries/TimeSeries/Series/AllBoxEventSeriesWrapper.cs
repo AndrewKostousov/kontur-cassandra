@@ -63,9 +63,9 @@ namespace CassandraTimeSeries.Model
 
         public void WriteWithoutSync(Event ev)
         {
-            if (ev.Payload == null) throw new ArgumentException("Event payload cannot be null");
+            if (ev.Proto.Payload == null) throw new ArgumentException("Event payload cannot be null");
 
-            series.WriteEventsWithNoSynchronization(new BoxEvent(ev.UserId, ev.Timestamp, ev.Payload));
+            series.WriteEventsWithNoSynchronization(new BoxEvent(ev.Proto.UserId, ev.Timestamp, ev.Proto.Payload));
 
             if (lastGoodEventTicks < ev.Timestamp.Ticks)
                 ticksHolder.SetLastGoodEventTicks(lastGoodEventTicks = ev.Timestamp.Ticks);
