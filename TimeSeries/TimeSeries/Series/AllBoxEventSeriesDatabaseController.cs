@@ -13,6 +13,7 @@ namespace CassandraTimeSeries.Model
         public void SetUpSchema()
         {
             environment.RunBeforeAnyTests();
+            ResetSchema();
         }
 
         public void ResetSchema()

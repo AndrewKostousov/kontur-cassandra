@@ -24,11 +24,11 @@ namespace Benchmarks.Benchmarks
     }
 
     // ReSharper disable once UnusedMember.Global
-    //public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark
-    //{
-    //    public override string Name => $"{nameof(AllBoxEventSeriesBenchmark)} benchmark";
-    //    protected override IDatabaseController Database => controller;
-    //    protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
-    //    private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
-    //}
+    public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark
+    {
+        public override string Name => $"{nameof(AllBoxEventSeriesWrapper)} benchmark";
+        protected override IDatabaseController Database => controller;
+        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+        private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
+    }
 }

@@ -58,8 +58,6 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     return new Thread(() =>
                     {
-                        var a = writers.Count;
-
                         readEvents[reader].Add(reader.ReadFirst());
 
                         while (keepReadersAlive)
@@ -103,7 +101,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             foreach (var eventsReadBySingleReader in readEvents.Values)
             {
-                eventsReadBySingleReader.Select(x => new EventProto(x.UserId, x.Payload)).ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
+                eventsReadBySingleReader.ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
                 eventsReadBySingleReader.Select(x => x.Timestamp).ShouldBeExactly(allWrittenEvents.Select(x => x.Item1));
             }
         }

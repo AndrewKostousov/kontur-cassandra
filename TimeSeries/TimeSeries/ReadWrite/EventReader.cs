@@ -30,12 +30,12 @@ namespace CassandraTimeSeries.ReadWrite
 
         public virtual List<Event> ReadNext()
         {
-            var events = series.ReadRange(lastEvent.Id.ToTimeGuid(), null, Settings.EventsToRead);
+            var events = series.ReadRange(lastEvent.Timestamp, null, Settings.EventsToRead);
 
             if (events.Count != 0)
             {
-                var maxId = events.Max(x => x.Id);
-                lastEvent = events.First(x => x.Id == maxId);
+                var maxTimestamp = events.Max(x => x.Timestamp);
+                lastEvent = events.First(x => x.Timestamp == maxTimestamp);
             }
 
             Thread.Sleep(Settings.MillisecondsSleep);

@@ -9,7 +9,7 @@ namespace CassandraTimeSeries.ReadWrite
     public class EventWriter
     {
         public WriterSettings Settings { get; }
-        private ITimeSeries series;
+        private readonly ITimeSeries series;
 
         public EventWriter(ITimeSeries series, WriterSettings settings)
         {
