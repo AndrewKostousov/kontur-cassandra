@@ -5,10 +5,8 @@ using CassandraTimeSeries.Interfaces;
 using Commons;
 using Commons.TimeBasedUuid;
 using EdiTimeline;
-using EdiTimeline.CassandraHelpers;
 using GroBuf;
 using GroBuf.DataMembersExtracters;
-using SKBKontur.Cassandra.CassandraClient.Abstractions;
 using SKBKontur.Cassandra.CassandraClient.Clusters;
 
 namespace CassandraTimeSeries.Model

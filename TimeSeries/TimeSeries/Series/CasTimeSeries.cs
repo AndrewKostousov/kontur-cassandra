@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
@@ -12,61 +13,52 @@ namespace CassandraTimeSeries.Model
     {
         private static readonly TimeUuid ClosingTimeUuid = TimeGuid.MaxValue.ToTimeUuid();
 
-        private readonly CasLastWrittenData lastWrittenData;
-        private readonly CasTimeSeriesSyncHelper syncHelper;
+        private readonly CasSynchronizationHelper syncHelper;
         private readonly ISession session;
 
-        private readonly uint writeAttemptsLimit;
-
-        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> syncTable, uint writeAttemptsLimit=100) : base(eventTable)
+        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
+            : base(eventTable, operationsTimeoutMilliseconds)
         {
             session = eventTable.GetSession();
-            lastWrittenData = new CasLastWrittenData();
-            syncHelper = new CasTimeSeriesSyncHelper(syncTable);
-            this.writeAttemptsLimit = writeAttemptsLimit;
+            syncHelper = new CasSynchronizationHelper(new CasStartOfTimesHelper(synchronizationTable));
         }
 
         public override Timestamp Write(EventProto ev)
         {
-            Event eventToWrite;
-            StatementExecutionResult statementExecutionResult;
+            var sw = Stopwatch.StartNew();
 
-            var writeAttemptsMade = 0;
-
-            do
+            while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
             {
-                if (writeAttemptsMade++ >= writeAttemptsLimit)
-                {
-                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
-                    return null;
-                }
-
-                eventToWrite = new Event(lastWrittenData.CreateSynchronizedId(syncHelper), ev);
+                var eventToWrite = new Event(syncHelper.CreateSynchronizedId(), ev);
+                StatementExecutionResult statementExecutionResult;
 
                 try
                 {
                     statementExecutionResult = CompareAndUpdate(eventToWrite);
                 }
-                catch (Exception exception)
+                catch (DriverException exception)
                 {
                     Logger.Log(exception);
-                    return null;
+                    if (!ShouldRetryAfter(exception)) throw;
+                    continue;
                 }
 
-                lastWrittenData.UpdateLastWrittenTimeGuid(statementExecutionResult, eventToWrite);
+                syncHelper.UpdateLastWrittenTimeGuid(statementExecutionResult, eventToWrite);
 
-            } while (statementExecutionResult.State != ExecutionState.Success);
+                if (statementExecutionResult.State == ExecutionState.Success)
+                    return eventToWrite.Timestamp;
+            }
 
-            return eventToWrite.Timestamp;
+            throw new OperationTimeoutException(OperationsTimeoutMilliseconds, ev);
         }
 
         private StatementExecutionResult CompareAndUpdate(Event eventToWrite)
         {
-            var isWritingToEmptyPartition = eventToWrite.PartitionId != lastWrittenData.PartitionId;
-            lastWrittenData.UpdateLastWrittenPartitionId(eventToWrite.PartitionId);
+            var isWritingToEmptyPartition = eventToWrite.PartitionId != syncHelper.IdOfLastWrittenPartition;
+            syncHelper.UpdateIdOfLastWrittenPartition(eventToWrite.PartitionId);
 
             if (isWritingToEmptyPartition)
-                ClosePreviousPartitions(lastWrittenData.PartitionId);
+                CloseAllPartitionsBefore(syncHelper.IdOfLastWrittenPartition);
 
             return WriteEventToCurrentPartition(eventToWrite, isWritingToEmptyPartition);
         }
@@ -90,9 +82,9 @@ namespace CassandraTimeSeries.Model
                 : writeEventStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id);
         }
 
-        private void ClosePreviousPartitions(long currentPartitionId)
+        private void CloseAllPartitionsBefore(long exclusiveLastPartitionId)
         {
-            var idOfPartitionToClose = currentPartitionId - Event.PartitionDutation.Ticks;
+            var idOfPartitionToClose = exclusiveLastPartitionId - Event.PartitionDutation.Ticks;
             var executionState = ExecutionState.Success;
 
             while (executionState != ExecutionState.PartitionClosed && idOfPartitionToClose >= syncHelper.PartitionIdOfStartOfTimes)

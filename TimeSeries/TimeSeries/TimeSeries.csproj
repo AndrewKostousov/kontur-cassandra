@@ -80,7 +80,7 @@
     <Compile Include="Interfaces\IDatabaseController.cs" />
     <Compile Include="Series\AllBoxEventSeriesDatabaseController.cs" />
     <Compile Include="Series\AllBoxEventSeriesWrapper.cs" />
-    <Compile Include="Series\CasLastWrittenData.cs" />
+    <Compile Include="Series\CasSynchronizationHelper.cs" />
     <Compile Include="Series\StatementExecutionResult.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Series\CasTimeSeriesDatabaseController.cs" />
@@ -88,8 +88,8 @@
     <Compile Include="Series\EventProto.cs" />
     <Compile Include="Series\CasTimeSeries.cs" />
     <Compile Include="Series\CasTimeSeriesSyncData.cs" />
-    <Compile Include="Series\CasTimeSeriesSyncHelper.cs" />
-    <Compile Include="Utils\WriteTimeoutException.cs" />
+    <Compile Include="Series\CasStartOfTimesHelper.cs" />
+    <Compile Include="Utils\OperationTimeoutException.cs" />
     <Compile Include="ReadWrite\EventReader.cs" />
     <Compile Include="ReadWrite\EventWriter.cs" />
     <Compile Include="ReadWrite\ReaderSettings.cs" />

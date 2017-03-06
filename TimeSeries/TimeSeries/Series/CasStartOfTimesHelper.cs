@@ -6,13 +6,13 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
 {
-    public class CasTimeSeriesSyncHelper
+    public class CasStartOfTimesHelper
     {
         private readonly Table<CasTimeSeriesSyncData> syncTable;
 
         private TimeGuid startOfTimes;
 
-        public CasTimeSeriesSyncHelper(Table<CasTimeSeriesSyncData> syncTable)
+        public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable)
         {
             this.syncTable = syncTable;
         }

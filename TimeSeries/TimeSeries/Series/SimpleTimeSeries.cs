@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Apache.Cassandra;
@@ -15,27 +16,39 @@ namespace CassandraTimeSeries.Model
     public class SimpleTimeSeries : ITimeSeries
     {
         protected readonly Table<Event> eventTable;
+        protected readonly uint OperationsTimeoutMilliseconds;
 
-        public SimpleTimeSeries(Table<Event> eventTable)
+        public SimpleTimeSeries(Table<Event> eventTable, uint operationsTimeoutMilliseconds = 1000)
         {
             this.eventTable = eventTable;
+            OperationsTimeoutMilliseconds = operationsTimeoutMilliseconds;
         }
 
         public virtual Timestamp Write(EventProto ev)
         {
             var eventToWrite = new Event(TimeGuid.NowGuid(), ev);
+            var sw = Stopwatch.StartNew();
 
-            try
+            while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
             {
-                eventTable.Insert(eventToWrite).Execute();
-            }
-            catch (Exception exception)
-            {
-                Logger.Log(exception);
-                return null;
+                try
+                {
+                    eventTable.Insert(eventToWrite).Execute();
+                    return eventToWrite.Timestamp;
+                }
+                catch (DriverException ex)
+                {
+                    Logger.Log(ex);
+                    if (!ShouldRetryAfter(ex)) throw;
+                }
             }
 
-            return eventToWrite.Timestamp;
+            throw new OperationTimeoutException(OperationsTimeoutMilliseconds, eventToWrite);
+        }
+
+        protected static bool ShouldRetryAfter(DriverException ex)
+        {
+            return ex is QueryValidationException || ex is RequestInvalidException || ex is InvalidTypeException;
         }
 
         public void WriteWithoutSync(Event ev)
@@ -56,33 +69,43 @@ namespace CassandraTimeSeries.Model
             var start = startExclusive?.ToTimeUuid();
             var end = endInclusive?.ToTimeUuid();
 
-            try
+            var sw = Stopwatch.StartNew();
+
+            while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
             {
-                if (!start.HasValue && !end.HasValue)
-                    return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
+                try
+                {
+                    if (!start.HasValue && !end.HasValue)
+                        return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
 
-                if (!start.HasValue)
-                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
+                    if (!start.HasValue)
+                        return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
 
-                if (!end.HasValue)
-                    return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
+                    if (!end.HasValue)
+                        return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
 
-                var slices = TimeSlicer
-                    .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
-                    .Select(s => s.Ticks);
+                    var slices = TimeSlicer
+                        .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
+                        .Select(s => s.Ticks);
 
-                return eventTable
-                    .Where(e => slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 && e.Id.CompareTo(end.Value) <= 0)
-                    .Take(count)
-                    .Execute()
-                    .Where(e => e.Id.ToGuid() != Guid.Empty)
-                    .ToList();
+                    return eventTable
+                        .Where(
+                            e =>
+                                slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 &&
+                                e.Id.CompareTo(end.Value) <= 0)
+                        .Take(count)
+                        .Execute()
+                        .Where(e => e.Id.ToGuid() != Guid.Empty)
+                        .ToList();
+                }
+                catch (DriverException ex)
+                {
+                    Logger.Log(ex);
+                    if (!ShouldRetryAfter(ex)) throw;
+                }
             }
-            catch (Exception exception)
-            {
-                Logger.Log(exception);
-                return null;
-            }
+
+            throw new OperationTimeoutException(OperationsTimeoutMilliseconds);
         }
 
         private List<Event> GetFromTableAndSort(int count, Expression<Func<Event, bool>> query)
