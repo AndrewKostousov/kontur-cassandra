@@ -15,11 +15,6 @@ namespace CassandraTimeSeries.Series
             PartitionId = lastWrittenPartitionId;
         }
 
-        public void UpdateLastWrittenTimeGuid(TimeGuid lastWrittenTimeGuid)
-        {
-            TimeGuid = lastWrittenTimeGuid;
-        }
-
         public void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult, Event eventToWrite)
         {
             if (compareAndUpdateResult.State == ExecutionState.PartitionClosed)
@@ -27,6 +22,9 @@ namespace CassandraTimeSeries.Series
 
             if (compareAndUpdateResult.State == ExecutionState.OutdatedId)
                 TimeGuid = compareAndUpdateResult.PartitionMaxGuid;
+
+            if (compareAndUpdateResult.State == ExecutionState.Success)
+                TimeGuid = eventToWrite.TimeGuid;
         }
 
         public TimeGuid CreateSynchronizedId(CasTimeSeriesSyncHelper syncHelper)

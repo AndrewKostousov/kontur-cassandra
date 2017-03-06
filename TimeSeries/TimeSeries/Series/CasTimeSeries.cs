@@ -35,6 +35,12 @@ namespace CassandraTimeSeries.Model
 
             do
             {
+                if (writeAttemptsMade++ >= writeAttemptsLimit)
+                {
+                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
+                    return null;
+                }
+
                 eventToWrite = new Event(lastWrittenData.CreateSynchronizedId(syncHelper), ev);
 
                 try
@@ -48,16 +54,8 @@ namespace CassandraTimeSeries.Model
                 }
 
                 lastWrittenData.UpdateLastWrittenTimeGuid(statementExecutionResult, eventToWrite);
-                
-                if (++writeAttemptsMade >= writeAttemptsLimit)
-                {
-                    Logger.Log(new WriteTimeoutException(writeAttemptsLimit));
-                    return null;
-                }
 
             } while (statementExecutionResult.State != ExecutionState.Success);
-
-            lastWrittenData.UpdateLastWrittenTimeGuid(eventToWrite.TimeGuid);
 
             return eventToWrite.Timestamp;
         }
