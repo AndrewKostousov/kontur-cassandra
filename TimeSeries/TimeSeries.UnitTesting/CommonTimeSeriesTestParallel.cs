@@ -70,7 +70,7 @@ namespace CassandraTimeSeries.UnitTesting
             {
                 return new Thread(() =>
                 {
-                    for (int i = 0; i < 100; ++i)
+                    for (int i = 0; i < 10; ++i)
                     {
                         var eventProtos = Enumerable.Range(0, 10).Select(_ => new EventProto()).ToArray();
                         var timestamps = writer.WriteNext(eventProtos);

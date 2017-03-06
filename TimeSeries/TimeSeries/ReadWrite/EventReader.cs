@@ -28,11 +28,11 @@ namespace CassandraTimeSeries.ReadWrite
             return lastEvent;
         }
 
-        public virtual List<Event> ReadNext()
+        public virtual Event[] ReadNext()
         {
             var events = series.ReadRange(lastEvent.Timestamp, null, Settings.EventsToRead);
 
-            if (events.Count != 0)
+            if (events.Length != 0)
             {
                 var maxTimestamp = events.Max(x => x.Timestamp);
                 lastEvent = events.First(x => x.Timestamp == maxTimestamp);

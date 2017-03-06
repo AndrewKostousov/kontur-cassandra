@@ -9,7 +9,7 @@ namespace Benchmarks.Benchmarks
         public override string Name => $"{nameof(SimpleTimeSeries)} benchmark";
 
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table, controller.BulkTable);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
@@ -19,7 +19,7 @@ namespace Benchmarks.Benchmarks
         public override string Name => $"{nameof(CasTimeSeries)} benchmark";
 
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.Table, controller.BulkTable, controller.SyncTable);
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable);
         private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 

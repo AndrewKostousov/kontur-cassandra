@@ -16,25 +16,25 @@ namespace CassandraTimeSeries.Model
         private readonly CasSynchronizationHelper syncHelper;
         private readonly ISession session;
 
-        public CasTimeSeries(Table<Event> eventTable, Table<EventsCollection> bulkTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
-            : base(eventTable, bulkTable, operationsTimeoutMilliseconds)
+        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
+            : base(eventsTable, operationsTimeoutMilliseconds)
         {
-            session = eventTable.GetSession();
+            session = eventsTable.GetSession();
             syncHelper = new CasSynchronizationHelper(new CasStartOfTimesHelper(synchronizationTable));
         }
 
-        public override Timestamp Write(EventProto ev)
+        public override Timestamp[] Write(params EventProto[] events)
         {
             var sw = Stopwatch.StartNew();
 
             while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
             {
-                var eventToWrite = new Event(syncHelper.CreateSynchronizedId(), ev);
+                var eventsToWrite = PackIntoCollection(events, syncHelper.CreateSynchronizedId);
                 StatementExecutionResult statementExecutionResult;
 
                 try
                 {
-                    statementExecutionResult = CompareAndUpdate(eventToWrite);
+                    statementExecutionResult = CompareAndUpdate(eventsToWrite);
                 }
                 catch (DriverException exception)
                 {
@@ -43,16 +43,16 @@ namespace CassandraTimeSeries.Model
                     continue;
                 }
 
-                syncHelper.UpdateLastWrittenTimeGuid(statementExecutionResult, eventToWrite);
+                syncHelper.UpdateLastWrittenTimeGuid(statementExecutionResult, eventsToWrite);
 
                 if (statementExecutionResult.State == ExecutionState.Success)
-                    return eventToWrite.Timestamp;
+                    return eventsToWrite.Select(x => x.Timestamp).ToArray();
             }
 
-            throw new OperationTimeoutException(OperationsTimeoutMilliseconds, ev);
+            throw new OperationTimeoutException(OperationsTimeoutMilliseconds);
         }
 
-        private StatementExecutionResult CompareAndUpdate(Event eventToWrite)
+        private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite)
         {
             var isWritingToEmptyPartition = eventToWrite.PartitionId != syncHelper.IdOfLastWrittenPartition;
             syncHelper.UpdateIdOfLastWrittenPartition(eventToWrite.PartitionId);
@@ -63,23 +63,23 @@ namespace CassandraTimeSeries.Model
             return WriteEventToCurrentPartition(eventToWrite, isWritingToEmptyPartition);
         }
 
-        private StatementExecutionResult WriteEventToCurrentPartition(Event e, bool isWritingToEmptyPartition)
+        private StatementExecutionResult WriteEventToCurrentPartition(EventsCollection e, bool isWritingToEmptyPartition)
         {
             return ExecuteStatement(CreateWriteEventStatement(e, isWritingToEmptyPartition));
         }
 
-        private IStatement CreateWriteEventStatement(Event e, bool isWritingToEmptyPartition)
+        private IStatement CreateWriteEventStatement(EventsCollection e, bool isWritingToEmptyPartition)
         {
             var writeEventStatement = session.Prepare(
-                $"UPDATE {eventTable.Name} " +
-                "SET user_id = ?, payload = ?, max_id = ? " +
-                "WHERE event_id = ? AND partition_id = ? " +
-                (isWritingToEmptyPartition ? "IF max_id = NULL" : "IF max_id < ?")
+                $"UPDATE {eventsTable.Name} " +
+                "SET user_ids = ?, payloads = ?, max_id_in_partition = ?, event_ids = ? " +
+                "WHERE last_event_id = ? AND partition_id = ? " +
+                (isWritingToEmptyPartition ? "IF max_id_in_partition = NULL" : "IF max_id_in_partition < ?")
             );
 
             return isWritingToEmptyPartition
-                ? writeEventStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId)
-                : writeEventStatement.Bind(e.UserId, e.Payload, e.Id, e.Id, e.PartitionId, e.Id);
+                ? writeEventStatement.Bind(e.UserIds, e.Payloads, e.LastEventId, e.EventIds, e.LastEventId, e.PartitionId)
+                : writeEventStatement.Bind(e.UserIds, e.Payloads, e.LastEventId, e.EventIds, e.LastEventId, e.PartitionId, e.LastEventId);
         }
 
         private void CloseAllPartitionsBefore(long exclusiveLastPartitionId)
@@ -97,9 +97,9 @@ namespace CassandraTimeSeries.Model
         private IStatement CreateClosePartitionStatement(long idOfPartitionToClose)
         {
             return session.Prepare(
-                $"UPDATE {eventTable.Name} " +
-                "SET max_id = ? WHERE partition_id = ? " +
-                "IF max_id != ?"
+                $"UPDATE {eventsTable.Name} " +
+                "SET max_id_in_partition = ? WHERE partition_id = ? " +
+                "IF max_id_in_partition != ?"
             ).Bind(ClosingTimeUuid, idOfPartitionToClose, ClosingTimeUuid);
         }
 
@@ -110,7 +110,7 @@ namespace CassandraTimeSeries.Model
 
             if (isUpdateApplied) return new StatementExecutionResult {State = ExecutionState.Success};
 
-            var partitionMaxTimeUuid = statementExecutionResult.GetValue<TimeUuid>("max_id");
+            var partitionMaxTimeUuid = statementExecutionResult.GetValue<TimeUuid>("max_id_in_partition");
 
             return new StatementExecutionResult
             {

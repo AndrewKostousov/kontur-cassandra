@@ -9,7 +9,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class SimpleTimeSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table, controller.BulkTable);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
@@ -17,7 +17,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class SimpleTimeSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table, controller.BulkTable);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
@@ -25,7 +25,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class SimpleTimeSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.Table, controller.BulkTable);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable);
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 }

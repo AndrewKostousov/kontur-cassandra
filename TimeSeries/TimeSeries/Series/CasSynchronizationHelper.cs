@@ -25,7 +25,7 @@ namespace CassandraTimeSeries.Series
             IdOfLastWrittenPartition = lastWrittenPartitionId;
         }
 
-        public void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult, Event eventToWrite)
+        public void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult, EventsCollection eventToWrite)
         {
             if (compareAndUpdateResult.State == ExecutionState.PartitionClosed)
                 TimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
@@ -34,7 +34,7 @@ namespace CassandraTimeSeries.Series
                 TimeGuid = compareAndUpdateResult.PartitionMaxGuid;
 
             if (compareAndUpdateResult.State == ExecutionState.Success)
-                TimeGuid = eventToWrite.TimeGuid;
+                TimeGuid = eventToWrite.LastEventId.ToTimeGuid();
         }
 
         public TimeGuid CreateSynchronizedId()

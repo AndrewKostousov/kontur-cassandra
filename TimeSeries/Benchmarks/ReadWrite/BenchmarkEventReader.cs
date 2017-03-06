@@ -22,13 +22,13 @@ namespace Benchmarks.ReadWrite
         public BenchmarkEventReader(ITimeSeries series, ReaderSettings settings) 
             : base(series, settings) { }
 
-        public override List<Event> ReadNext()
+        public override Event[] ReadNext()
         {
             var sw = Stopwatch.StartNew();
             var events = base.ReadNext();
 
             Latency.Add(sw.Elapsed);
-            ReadsLength.Add(events.Count);
+            ReadsLength.Add(events.Length);
 
             var currentTime = Timestamp.Now;
 

@@ -20,8 +20,8 @@ namespace CassandraTimeSeries.Model
         public TimeUuid LastEventId { get; set; }
 
         [StaticColumn]
-        [Column("max_event_id")]
-        public TimeUuid MaxEventId { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
+        [Column("max_id_in_partition")]
+        public TimeUuid MaxIdInPartition { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
 
         [Column("event_ids")]
         public TimeUuid[] EventIds { get; set; }
@@ -44,25 +44,13 @@ namespace CassandraTimeSeries.Model
         }
     }
 
-    [Table("time_series")]
     public class Event : EventProto
     {
         public static TimeSpan PartitionDutation => TimeSpan.FromMinutes(1);
-
-        [PartitionKey]
-        [Column("partition_id")]
-        public long PartitionId { get; set; }
-        
-        [ClusteringKey]
-        [Column("event_id")]
+        public long PartitionId { get; set; }        
         public TimeUuid Id { get; set; }
-
-        [StaticColumn]
-        [Column("max_id")]
         public TimeUuid MaxId { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
-
         public Timestamp Timestamp => TimeGuid.GetTimestamp();
-
         public TimeGuid TimeGuid => Id.ToTimeGuid();
 
         public Event() { }

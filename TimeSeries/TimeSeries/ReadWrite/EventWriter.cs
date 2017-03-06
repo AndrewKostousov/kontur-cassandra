@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
@@ -19,22 +20,14 @@ namespace CassandraTimeSeries.ReadWrite
             this.series = series;
         }
 
-        public virtual List<Timestamp> WriteNext(params EventProto[] evs)
+        public virtual Timestamp[] WriteNext(params EventProto[] events)
         {
-            if (evs.Length == 0) throw new ArgumentException();
+            if (events.Length == 0)
+                events = Enumerable.Range(0, Settings.DefaultBulkSize).Select(x => new EventProto()).ToArray();
 
-            var timestamp = series.Write(evs);
+            var timestamp = series.Write(events);
             Thread.Sleep(Settings.MillisecondsSleep);
             return timestamp;
-        }
-
-        public virtual Timestamp WriteNext(EventProto ev = null)
-        {
-            if (ev == null) ev = new EventProto(); 
-
-            var writtenEventTimestamp = series.Write(ev);
-            Thread.Sleep(Settings.MillisecondsSleep);
-            return writtenEventTimestamp;
         }
     }
 }

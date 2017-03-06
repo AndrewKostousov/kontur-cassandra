@@ -7,10 +7,9 @@ namespace CassandraTimeSeries.Interfaces
 {
     public interface ITimeSeries
     {
-        Timestamp Write(EventProto ev);
-        List<Timestamp> Write(params EventProto[] ev);
+        Timestamp[] Write(params EventProto[] events);
         void WriteWithoutSync(Event ev);
-        List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count=1000);
-        List<Event> ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count=1000);
+        Event[] ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count=1000);
+        Event[] ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count=1000);
     }
 }

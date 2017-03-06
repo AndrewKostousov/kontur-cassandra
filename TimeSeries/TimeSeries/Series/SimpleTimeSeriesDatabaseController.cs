@@ -13,8 +13,7 @@ namespace CassandraTimeSeries.Model
         private Cluster cluster;
         protected ISession session;
 
-        public Table<Event> Table { get; private set; }
-        public Table<EventsCollection> BulkTable { get; private set; }
+        public Table<EventsCollection> EventsTable { get; private set; }
 
         public virtual void SetUpSchema()
         {
@@ -33,23 +32,16 @@ namespace CassandraTimeSeries.Model
 
             session.ChangeKeyspace(keyspace);
 
-            Table = new Table<Event>(session);
+            EventsTable = new Table<EventsCollection>(session);
 
-            Table.CreateIfNotExists();
-            Table.Drop();
-            Table.Create();
-
-            BulkTable = new Table<EventsCollection>(session);
-
-            BulkTable.CreateIfNotExists();
-            BulkTable.Drop();
-            BulkTable.Create();
+            EventsTable.CreateIfNotExists();
+            EventsTable.Drop();
+            EventsTable.Create();
         }
 
         public void ResetSchema()
         {
-            Table.Truncate();
-            BulkTable.Truncate();
+            EventsTable.Truncate();
         }
 
         public void TearDownSchema()
