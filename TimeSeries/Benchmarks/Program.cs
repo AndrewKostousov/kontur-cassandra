@@ -6,10 +6,10 @@ namespace Benchmarks
 {
     static class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var benchmarks = new BenchmarkFinder().GetBenchmarks(Assembly.GetExecutingAssembly());
-            new ConsoleBenchmarkRunner().RunAll(benchmarks);
+            new BenchmarksRunner(new ConsoleBenchmarksLogger(), new FileBenchmarksLogger()).RunAll(benchmarks);
         }
     }
 }
