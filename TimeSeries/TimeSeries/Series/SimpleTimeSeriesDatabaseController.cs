@@ -14,6 +14,7 @@ namespace CassandraTimeSeries.Model
         protected ISession session;
 
         public Table<Event> Table { get; private set; }
+        public Table<EventsCollection> BulkTable { get; private set; }
 
         public virtual void SetUpSchema()
         {
@@ -37,11 +38,18 @@ namespace CassandraTimeSeries.Model
             Table.CreateIfNotExists();
             Table.Drop();
             Table.Create();
+
+            BulkTable = new Table<EventsCollection>(session);
+
+            BulkTable.CreateIfNotExists();
+            BulkTable.Drop();
+            BulkTable.Create();
         }
 
         public void ResetSchema()
         {
             Table.Truncate();
+            BulkTable.Truncate();
         }
 
         public void TearDownSchema()

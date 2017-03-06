@@ -17,5 +17,11 @@ namespace CassandraTimeSeries.UnitTesting
             for (var i = 0; i < 3; ++i)
                 Series.Write(new EventProto());
         }
+
+        [Test]
+        public void Write_BulkWrite()
+        {
+            Series.Write(new EventProto(), new EventProto(), new EventProto());
+        }
     }
 }

@@ -72,8 +72,10 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     for (int i = 0; i < 100; ++i)
                     {
-                        var eventProto = new EventProto();
-                        writtenEvents[writer].Add(Tuple.Create(writer.WriteNext(eventProto), eventProto));
+                        var eventProtos = Enumerable.Range(0, 10).Select(_ => new EventProto()).ToArray();
+                        var timestamps = writer.WriteNext(eventProtos);
+
+                        writtenEvents[writer].AddRange(eventProtos.Select((p, n) => Tuple.Create(timestamps[n], p)));
                     }
                 });
             }).ToList();

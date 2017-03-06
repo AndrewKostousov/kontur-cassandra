@@ -16,8 +16,8 @@ namespace CassandraTimeSeries.Model
         private readonly CasSynchronizationHelper syncHelper;
         private readonly ISession session;
 
-        public CasTimeSeries(Table<Event> eventTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
-            : base(eventTable, operationsTimeoutMilliseconds)
+        public CasTimeSeries(Table<Event> eventTable, Table<EventsCollection> bulkTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
+            : base(eventTable, bulkTable, operationsTimeoutMilliseconds)
         {
             session = eventTable.GetSession();
             syncHelper = new CasSynchronizationHelper(new CasStartOfTimesHelper(synchronizationTable));

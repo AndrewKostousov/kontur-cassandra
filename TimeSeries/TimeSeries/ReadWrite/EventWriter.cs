@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using Commons;
@@ -15,6 +17,15 @@ namespace CassandraTimeSeries.ReadWrite
         {
             Settings = settings;
             this.series = series;
+        }
+
+        public virtual List<Timestamp> WriteNext(params EventProto[] evs)
+        {
+            if (evs.Length == 0) throw new ArgumentException();
+
+            var timestamp = series.Write(evs);
+            Thread.Sleep(Settings.MillisecondsSleep);
+            return timestamp;
         }
 
         public virtual Timestamp WriteNext(EventProto ev = null)

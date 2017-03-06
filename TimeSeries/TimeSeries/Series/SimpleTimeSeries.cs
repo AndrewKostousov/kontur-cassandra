@@ -16,12 +16,34 @@ namespace CassandraTimeSeries.Model
     public class SimpleTimeSeries : ITimeSeries
     {
         protected readonly Table<Event> eventTable;
+        private readonly Table<EventsCollection> bulkTable;
         protected readonly uint OperationsTimeoutMilliseconds;
 
-        public SimpleTimeSeries(Table<Event> eventTable, uint operationsTimeoutMilliseconds = 1000)
+        public SimpleTimeSeries(Table<Event> eventTable, Table<EventsCollection> bulkTable,  uint operationsTimeoutMilliseconds = 10000)
         {
             this.eventTable = eventTable;
+            this.bulkTable = bulkTable;
             OperationsTimeoutMilliseconds = operationsTimeoutMilliseconds;
+        }
+
+        public virtual List<Timestamp> Write(params EventProto[] events)
+        {
+            var eventIds = events.Select(x => TimeGuid.NowGuid()).ToArray();
+            var lastEventId = eventIds.Last();
+            var timestamp = lastEventId.GetTimestamp();
+
+            var eventsCollection = new EventsCollection
+            {
+                LastEventId = lastEventId.ToTimeUuid(),
+                PartitionId = timestamp.Floor(Event.PartitionDutation).Ticks,
+                EventIds = eventIds.Select(x => x.ToTimeUuid()).ToArray(),
+                Payloads = events.Select(x => x.Payload).ToArray(),
+                UserIds = events.Select(x => x.UserId).ToArray()
+            };
+
+            bulkTable.Insert(eventsCollection).Execute();
+
+            return eventIds.Select(x => x.GetTimestamp()).ToList();
         }
 
         public virtual Timestamp Write(EventProto ev)
@@ -53,7 +75,14 @@ namespace CassandraTimeSeries.Model
 
         public void WriteWithoutSync(Event ev)
         {
-            eventTable.Insert(ev).Execute();
+            bulkTable.Insert(new EventsCollection
+            {
+                EventIds = new[] {ev.Id},
+                LastEventId = ev.Id,
+                PartitionId = ev.PartitionId,
+                Payloads = new[] {ev.Payload},
+                UserIds = new[] {ev.UserId},
+            }).Execute();
         }
 
         public List<Event> ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)
@@ -73,51 +102,50 @@ namespace CassandraTimeSeries.Model
 
             while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
             {
-                try
-                {
+                //try
+                //{
                     if (!start.HasValue && !end.HasValue)
-                        return eventTable.Execute().OrderBy(ev => ev.Id).Take(count).ToList();
+                        return ExtractEvents(bulkTable.Execute()).Take(count).ToList();
 
                     if (!start.HasValue)
-                        return GetFromTableAndSort(count, ev => ev.Id.CompareTo(end.Value) <= 0);
+                        return ExtractEvents(bulkTable.AllowFiltering().Where(ev => ev.LastEventId.CompareTo(end.Value) <= 0).Execute()).Take(count).ToList();
 
                     if (!end.HasValue)
-                        return GetFromTableAndSort(count, ev => ev.Id.CompareTo(start.Value) > 0);
+                        return ExtractEventsAndFilter(bulkTable.AllowFiltering().Where(ev => ev.LastEventId.CompareTo(start.Value) >= 0).Execute(), startExclusive, count);
 
                     var slices = TimeSlicer
                         .Slice(startExclusive.GetTimestamp(), endInclusive.GetTimestamp(), Event.PartitionDutation)
-                        .Select(s => s.Ticks);
+                        .Select(s => s.Ticks)
+                        .ToArray();
 
-                    return eventTable
-                        .Where(
-                            e =>
-                                slices.Contains(e.PartitionId) && e.Id.CompareTo(start.Value) > 0 &&
-                                e.Id.CompareTo(end.Value) <= 0)
-                        .Take(count)
-                        .Execute()
-                        .Where(e => e.Id.ToGuid() != Guid.Empty)
-                        .ToList();
-                }
-                catch (DriverException ex)
-                {
-                    Logger.Log(ex);
-                    if (!ShouldRetryAfter(ex)) throw;
-                }
+                    return ExtractEventsAndFilter(bulkTable
+                        .Where(e => slices.Contains(e.PartitionId) && e.LastEventId.CompareTo(start.Value) >= 0 && e.LastEventId.CompareTo(end.Value) <= 0)
+                        .Execute(), startExclusive, count);
+                //}
+                //catch (DriverException ex)
+                //{
+                //    Logger.Log(ex);
+                //    if (!ShouldRetryAfter(ex)) throw;
+                //}
             }
 
             throw new OperationTimeoutException(OperationsTimeoutMilliseconds);
         }
 
-        private List<Event> GetFromTableAndSort(int count, Expression<Func<Event, bool>> query)
+        private List<Event> ExtractEventsAndFilter(IEnumerable<EventsCollection> eventsCollection, TimeGuid startExclusive, int count)
         {
-            return eventTable
-                .AllowFiltering()
-                .Where(query)
-                .Execute()
-                .Where(e => e.Id.ToGuid() != Guid.Empty)
-                .OrderBy(x => x.Id)
+            return ExtractEvents(eventsCollection)
+                .Where(x => x.Id.ToTimeGuid() > startExclusive)
                 .Take(count)
                 .ToList();
+        }
+
+        private IEnumerable<Event> ExtractEvents(IEnumerable<EventsCollection> eventsCollections)
+        {
+            return eventsCollections
+                .Where(e => e.LastEventId.ToGuid() != Guid.Empty)
+                .OrderBy(x => x.LastEventId)
+                .SelectMany(x => x);
         }
     }
 }

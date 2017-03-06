@@ -42,6 +42,11 @@ namespace CassandraTimeSeries.Model
             return timestamp;
         }
 
+        public List<Timestamp> Write(params EventProto[] ev)
+        {
+            throw new NotImplementedException();
+        }
+
         public void WriteWithoutSync(Event ev)
         {
             if (ev.Payload == null) throw new ArgumentException("Event payload cannot be null");
