@@ -4,6 +4,7 @@ using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
 using CassandraTimeSeries.Series;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 
@@ -16,18 +17,19 @@ namespace CassandraTimeSeries.Model
         private readonly CasSynchronizationHelper syncHelper;
         private readonly ISession session;
 
-        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable, uint operationsTimeoutMilliseconds=10000) 
-            : base(eventsTable, operationsTimeoutMilliseconds)
+        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable, 
+                             TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds=10000) 
+            : base(eventsTable, partitioner, operationalTimeoutMilliseconds)
         {
             session = eventsTable.GetSession();
-            syncHelper = new CasSynchronizationHelper(new CasStartOfTimesHelper(synchronizationTable));
+            syncHelper = new CasSynchronizationHelper(synchronizationTable, partitioner);
         }
 
         public override Timestamp[] Write(params EventProto[] events)
         {
             var sw = Stopwatch.StartNew();
 
-            while (sw.ElapsedMilliseconds < OperationsTimeoutMilliseconds)
+            while (sw.ElapsedMilliseconds < OperationalTimeoutMilliseconds)
             {
                 var eventsToWrite = PackIntoCollection(events, syncHelper.CreateSynchronizedId);
                 StatementExecutionResult statementExecutionResult;
@@ -39,7 +41,7 @@ namespace CassandraTimeSeries.Model
                 catch (DriverException exception)
                 {
                     Logger.Log(exception);
-                    if (!ShouldRetryAfter(exception)) throw;
+                    if (IsCriticalError(exception)) throw;
                     continue;
                 }
 
@@ -49,7 +51,7 @@ namespace CassandraTimeSeries.Model
                     return eventsToWrite.Select(x => x.Timestamp).ToArray();
             }
 
-            throw new OperationTimeoutException(OperationsTimeoutMilliseconds);
+            throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
         }
 
         private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite)
@@ -84,13 +86,13 @@ namespace CassandraTimeSeries.Model
 
         private void CloseAllPartitionsBefore(long exclusiveLastPartitionId)
         {
-            var idOfPartitionToClose = exclusiveLastPartitionId - Event.PartitionDutation.Ticks;
+            var idOfPartitionToClose = exclusiveLastPartitionId - Partitioner.PartitionDuration.Ticks;
             var executionState = ExecutionState.Success;
 
             while (executionState != ExecutionState.PartitionClosed && idOfPartitionToClose >= syncHelper.PartitionIdOfStartOfTimes)
             {
                 executionState = ExecuteStatement(CreateClosePartitionStatement(idOfPartitionToClose)).State;
-                idOfPartitionToClose -= Event.PartitionDutation.Ticks;
+                idOfPartitionToClose -= Partitioner.PartitionDuration.Ticks;
             }
         }
 

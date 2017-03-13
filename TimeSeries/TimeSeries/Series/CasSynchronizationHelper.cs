@@ -1,4 +1,5 @@
-﻿using CassandraTimeSeries.Model;
+﻿using Cassandra.Data.Linq;
+using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
@@ -7,6 +8,7 @@ namespace CassandraTimeSeries.Series
 {
     class CasSynchronizationHelper
     {
+        private readonly TimeLinePartitioner partitioner;
         public long IdOfLastWrittenPartition { get; private set; }
         public TimeGuid TimeGuid { get; private set; }
 
@@ -15,9 +17,10 @@ namespace CassandraTimeSeries.Series
         public long PartitionIdOfStartOfTimes => startOfTimesHelper.PartitionIdOfStartOfTimes;
         public TimeGuid StartOfTimes => startOfTimesHelper.StartOfTimes;
 
-        public CasSynchronizationHelper(CasStartOfTimesHelper startOfTimesHelper)
+        public CasSynchronizationHelper(Table<CasTimeSeriesSyncData> synchronizationTable, TimeLinePartitioner partitioner)
         {
-            this.startOfTimesHelper = startOfTimesHelper;
+            this.partitioner = partitioner;
+            startOfTimesHelper = new CasStartOfTimesHelper(synchronizationTable, partitioner);
         }
 
         public void UpdateIdOfLastWrittenPartition(long lastWrittenPartitionId)
@@ -28,7 +31,7 @@ namespace CassandraTimeSeries.Series
         public void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult, EventsCollection eventToWrite)
         {
             if (compareAndUpdateResult.State == ExecutionState.PartitionClosed)
-                TimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Event.PartitionDutation);
+                TimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + partitioner.PartitionDuration);
 
             if (compareAndUpdateResult.State == ExecutionState.OutdatedId)
                 TimeGuid = compareAndUpdateResult.PartitionMaxGuid;

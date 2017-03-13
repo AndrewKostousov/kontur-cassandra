@@ -103,7 +103,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Series\SimpleTimeSeries.cs" />
     <Compile Include="Utils\TimeGuidExtensions.cs" />
-    <Compile Include="Utils\TimeSlices.cs" />
+    <Compile Include="Utils\TimeLinePartitioner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
+using CassandraTimeSeries.Utils;
 using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
@@ -9,7 +10,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class AllBoxEventSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
         private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
     }
 
@@ -17,7 +18,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class AllBoxEventSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
         private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
     }
 
@@ -25,7 +26,7 @@ namespace CassandraTimeSeries.UnitTesting
     public class AllBoxEventSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
         private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
     }
 }

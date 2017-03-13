@@ -15,15 +15,5 @@ namespace CassandraTimeSeries.UnitTesting
         {
             subject.ShouldAllBeEquivalentTo(expectation, options => options.WithStrictOrderingFor(x => x));
         }
-
-        public static void ShouldBeExactly(this IEnumerable<Event> subject, params Event[] expectation)
-        {
-            subject.ShouldBeExactly((IEnumerable<Event>)expectation);
-        }
-
-        public static void ShouldBeExactly(this IEnumerable<Event> subject, IEnumerable<Event> expectation)
-        {
-            subject.ShouldAllBeEquivalentTo(expectation, options => options.WithStrictOrderingFor(x => x).Excluding(e => e.MaxId));
-        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 
@@ -9,17 +10,18 @@ namespace CassandraTimeSeries.Model
     public class CasStartOfTimesHelper
     {
         private readonly Table<CasTimeSeriesSyncData> syncTable;
-
+        private readonly TimeLinePartitioner partitioner;
         private TimeGuid startOfTimes;
 
-        public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable)
+        public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable, TimeLinePartitioner partitioner)
         {
             this.syncTable = syncTable;
+            this.partitioner = partitioner;
         }
 
         public TimeGuid StartOfTimes => startOfTimes ?? (startOfTimes = TryUpdateStartOfTime());
 
-        public long PartitionIdOfStartOfTimes => StartOfTimes.GetTimestamp().Floor(Event.PartitionDutation).Ticks;
+        public long PartitionIdOfStartOfTimes => StartOfTimes.GetTimestamp().Floor(partitioner.PartitionDuration).Ticks;
 
         private TimeGuid TryUpdateStartOfTime()
         {

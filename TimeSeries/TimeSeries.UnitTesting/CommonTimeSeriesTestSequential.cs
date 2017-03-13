@@ -38,20 +38,22 @@ namespace CassandraTimeSeries.UnitTesting
         public override void OneTimeSetUp()
         {
             base.OneTimeSetUp();
-            
-            t00 = Timestamp.Now.Floor(Event.PartitionDutation);
 
-            t10 = t00 + Event.PartitionDutation;
-            t20 = t00 + Event.PartitionDutation.Multiply(2);
-            t30 = t00 + Event.PartitionDutation.Multiply(3);
+            var partitionDuration = Series.Partitioner.PartitionDuration;
 
-            t01 = t00 + Event.PartitionDutation.Divide(4);
-            t02 = t00 + Event.PartitionDutation.Divide(2);
-            t03 = t00 + Event.PartitionDutation.Divide(4).Multiply(3);
+            t00 = Timestamp.Now.Floor(partitionDuration);
 
-            t11 = t10 + Event.PartitionDutation.Divide(2);
+            t10 = t00 + partitionDuration;
+            t20 = t00 + partitionDuration.Multiply(2);
+            t30 = t00 + partitionDuration.Multiply(3);
 
-            t21 = t20 + Event.PartitionDutation.Divide(2);
+            t01 = t00 + partitionDuration.Divide(4);
+            t02 = t00 + partitionDuration.Divide(2);
+            t03 = t00 + partitionDuration.Divide(4).Multiply(3);
+
+            t11 = t10 + partitionDuration.Divide(2);
+
+            t21 = t20 + partitionDuration.Divide(2);
             
             e00 = EventAt(t00);
             e01 = EventAt(t01);

@@ -58,7 +58,10 @@ namespace Benchmarks.Benchmarks
         private void FillEvents()
         {
             for (var i = 0; i < PreloadedEventsCount; ++i)
-                series.WriteWithoutSync(new Event(TimeGuid.NowGuid(), new EventProto()));
+            {
+                var id = TimeGuid.NowGuid();
+                series.WriteWithoutSync(new Event(id, new EventProto()));
+            }
         }
 
         private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> InitReadersWritersPool(int readersCount, int writersCount)

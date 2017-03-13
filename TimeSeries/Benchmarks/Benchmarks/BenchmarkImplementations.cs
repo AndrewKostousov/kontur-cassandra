@@ -1,6 +1,7 @@
 ﻿using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
+using CassandraTimeSeries.Utils;
 
 namespace Benchmarks.Benchmarks
 {
@@ -10,7 +11,7 @@ namespace Benchmarks.Benchmarks
         public override string Name => $"{nameof(SimpleTimeSeries)}";
 
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable);
+        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable, new TimeLinePartitioner());
         private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
     }
 
@@ -20,7 +21,7 @@ namespace Benchmarks.Benchmarks
         public override string Name => $"{nameof(CasTimeSeries)} with single write";
 
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable);
+        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable, new TimeLinePartitioner());
         private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
     }
 
@@ -28,8 +29,9 @@ namespace Benchmarks.Benchmarks
     public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark
     {
         public override string Name => $"{nameof(AllBoxEventSeriesWrapper)} with single write";
+
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster);
+        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
         private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
     }
 

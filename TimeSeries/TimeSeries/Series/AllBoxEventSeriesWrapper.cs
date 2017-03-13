@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CassandraTimeSeries.Interfaces;
+using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 using EdiTimeline;
@@ -13,13 +14,15 @@ namespace CassandraTimeSeries.Model
 {
     public class AllBoxEventSeriesWrapper : ITimeSeries
     {
+        public TimeLinePartitioner Partitioner { get; }
+
         private readonly AllBoxEventSeries series;
         private readonly BoxEventsReader reader;
         private readonly AllBoxEventSeriesWriter writer;
         private readonly AllBoxEventSeriesTicksHolder ticksHolder;
         private long lastGoodEventTicks;
 
-        public AllBoxEventSeriesWrapper(ICassandraCluster cluster)
+        public AllBoxEventSeriesWrapper(ICassandraCluster cluster, TimeLinePartitioner partitioner)
         {
             var serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
 
@@ -30,24 +33,12 @@ namespace CassandraTimeSeries.Model
 
             reader= new BoxEventsReader(series);
             writer = new AllBoxEventSeriesWriter(series);
+
+            Partitioner = partitioner;
         }
 
         public Timestamp[] Write(params EventProto[] events)
         {
-            //var queue = events
-            //    .Select(ev => new AllBoxEventSeriesWriterQueueItem(new ProtoBoxEvent(ev.UserId, ev.Payload), new Promise<Timestamp>()))
-            //    .ToList();
-
-            //series.WriteEventsInAnyOrder(queue);
-
-            //var timestamps = queue.Select(x => x.EventTimestamp.Result).ToArray();
-            //var maxTimestampTicks = timestamps.Max(x => x.Ticks);
-
-            //if (lastGoodEventTicks < maxTimestampTicks)
-            //    lastGoodEventTicks = maxTimestampTicks;
-
-            //return timestamps;
-
             return events.Select(Write).ToArray();
         }
 
@@ -90,7 +81,9 @@ namespace CassandraTimeSeries.Model
         private Event[] ReadRange(AllBoxEventSeriesRange range, int count)
         {
             return reader
-                .ReadEvents(range, count, x => x.Select(e => new Event(TimeGuid.MinForTimestamp(e.EventTimestamp), new EventProto(e.EventId, e.Payload))).ToArray())
+                .ReadEvents(range, count, x => x
+                    .Select(e => new Event(TimeGuid.MinForTimestamp(e.EventTimestamp), new EventProto(e.EventId, e.Payload)))
+                    .ToArray())
                 .ToArray();
         }
     }

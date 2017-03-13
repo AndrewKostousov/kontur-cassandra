@@ -80,7 +80,7 @@
     <Compile Include="SimpleTimeSeriesTest.cs" />
     <Compile Include="TimeSeriesTestBase.cs" />
     <Compile Include="CommonTimeSeriesTestSequential.cs" />
-    <Compile Include="TimeSlicingTest.cs" />
+    <Compile Include="TimeLinePartitionerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
