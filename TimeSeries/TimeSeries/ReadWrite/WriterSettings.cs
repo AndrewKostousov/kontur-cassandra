@@ -3,6 +3,6 @@
     public class WriterSettings
     {
         public int MillisecondsSleep { get; set; } = 0;
-        public int DefaultBulkSize { get; set; } = 10;
+        public int BulkSize { get; set; } = 1;
     }
 }

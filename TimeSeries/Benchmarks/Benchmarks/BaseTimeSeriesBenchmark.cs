@@ -19,8 +19,8 @@ namespace Benchmarks.Benchmarks
 
         private ITimeSeries series;
 
-        private readonly ReaderSettings readerSettings = new ReaderSettings();
-        private readonly WriterSettings writerSettings = new WriterSettings();
+        protected virtual ReaderSettings ReaderSettings { get; } = new ReaderSettings();
+        protected virtual WriterSettings WriterSettings { get; } = new WriterSettings();
 
         protected virtual int ReadersCount { get; } = 4;
         protected virtual int WritersCount { get; } = 4;
@@ -63,8 +63,8 @@ namespace Benchmarks.Benchmarks
 
         private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> InitReadersWritersPool(int readersCount, int writersCount)
         {
-            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), readerSettings)).ToList();
-            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), writerSettings)).ToList();
+            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), ReaderSettings)).ToList();
+            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), WriterSettings)).ToList();
             return new ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter>(readers, writers);
         }
 
