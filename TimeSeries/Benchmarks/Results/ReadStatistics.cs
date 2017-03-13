@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Benchmarks.ReadWrite;
 using Commons;
 using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Results
 {
+    [DataContract]
+    [Serializable]
     class ReadStatistics : WorkerStatistics
     {
         private readonly int reads95ThPercentile;

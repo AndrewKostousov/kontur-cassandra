@@ -9,7 +9,12 @@ namespace Benchmarks
         static void Main()
         {
             var benchmarks = new BenchmarkFinder().GetBenchmarks(Assembly.GetExecutingAssembly());
-            new BenchmarksRunner(new ConsoleBenchmarksLogger(), new FileBenchmarksLogger()).RunAll(benchmarks);
+
+            new BenchmarksRunner(
+                new ConsoleBenchmarksLogger(), 
+                new FileBenchmarksLogger(),
+                new JsonBenchmarkLogger()
+            ).RunAll(benchmarks);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Benchmarks.Runners
         public virtual void LogFixtureBegan(BenchmarksFixture fixture) { }
         public virtual void LogBenchmarkSetup(BenchmarksFixture fixture, Benchmark benchmark) { }
         public virtual void LogBenchmarkStarted(BenchmarksFixture fixture, Benchmark benchmark) { }
-        public virtual void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, string result) { }
+        public virtual void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result) { }
         public virtual void LogBenchmarkTearDown(BenchmarksFixture fixture, Benchmark benchmark) { }
         public virtual void LogAllFixturesFinished() { }
     }

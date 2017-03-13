@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Benchmarks.ReadWrite;
 
 namespace Benchmarks.Results
 {
+    [DataContract]
+    [Serializable]
     class WriteStatistics : WorkerStatistics
     {
         private readonly double totalWriteThroughput;

@@ -27,7 +27,7 @@ namespace Benchmarks.Runners
 
             fixture.BenchmarkStarted += b => loggers.ForEach(lgr => lgr.LogBenchmarkStarted(fixture, b));
 
-            fixture.BenchmarkFinished += (b, r) => loggers.ForEach(lgr => lgr.LogBenchmarkFinished(fixture, b, r.CreateReport()));
+            fixture.BenchmarkFinished += (b, r) => loggers.ForEach(lgr => lgr.LogBenchmarkFinished(fixture, b, r));
 
             fixture.BenchmarkTeardown += b => loggers.ForEach(lgr => lgr.LogBenchmarkTearDown(fixture, b));
 

@@ -14,8 +14,8 @@ namespace Benchmarks.Runners
         public override void LogBenchmarkStarted(BenchmarksFixture fixture, Benchmark benchmark) => 
             Console.Write($"Done!{NewLine}{NewLine}Running benchmark: {benchmark.Name} ... ");
 
-        public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, string result) => 
-            Console.Write($"Done!{NewLine}{NewLine}{result}");
+        public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result) => 
+            Console.Write($"Done!{NewLine}{NewLine}{result.CreateReport()}");
 
         public override void LogAllFixturesFinished()
         {
