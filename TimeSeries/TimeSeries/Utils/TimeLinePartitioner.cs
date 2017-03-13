@@ -16,9 +16,9 @@ namespace CassandraTimeSeries.Utils
             PartitionDuration = partitionDuration ?? DefaultPartitionDuration;
         }
 
-        public long GetPartition(TimeGuid id)
+        public long GetPartition(Timestamp timestamp)
         {
-            return id.GetTimestamp().Floor(PartitionDuration).Ticks;
+            return timestamp.Floor(PartitionDuration).Ticks;
         }
 
         public IEnumerable<Timestamp> SplitIntoPartitions(Timestamp from, Timestamp to)
