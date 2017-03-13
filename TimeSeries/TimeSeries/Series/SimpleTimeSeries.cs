@@ -56,7 +56,7 @@ namespace CassandraTimeSeries.Model
             return new EventsCollection
             {
                 LastEventId = lastEventId.ToTimeUuid(),
-                PartitionId = Partitioner.GetPartition(lastEventId.GetTimestamp()),
+                PartitionId = Partitioner.CreatePartitionId(lastEventId.GetTimestamp()),
                 EventIds = eventIds.Select(x => x.ToTimeUuid()).ToArray(),
                 Payloads = eventProtos.Select(x => x.Payload).ToArray(),
                 UserIds = eventProtos.Select(x => x.UserId).ToArray()
@@ -74,7 +74,7 @@ namespace CassandraTimeSeries.Model
             {
                 EventIds = new[] {ev.Id},
                 LastEventId = ev.Id,
-                PartitionId = Partitioner.GetPartition(ev.TimeGuid.GetTimestamp()),
+                PartitionId = Partitioner.CreatePartitionId(ev.TimeGuid.GetTimestamp()),
                 Payloads = new[] {ev.Proto.Payload},
                 UserIds = new[] {ev.Proto.UserId},
             }).Execute();

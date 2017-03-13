@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
-using CassandraTimeSeries.Utils;
 using Commons;
-using Commons.TimeBasedUuid;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -14,6 +12,8 @@ namespace CassandraTimeSeries.UnitTesting
 {
     public abstract class CommonTimeSeriesTestParallel : TimeSeriesTestBase
     {
+        protected virtual bool ShouldFailWithManyWriters { get; } = false;
+
         [SetUp]
         public void ResetDatabaseSchema()
         {
@@ -23,35 +23,41 @@ namespace CassandraTimeSeries.UnitTesting
         [Test]
         public void ReadAndWrite_InParallel_SingleReader_SingleWriter()
         {
-            DoTestParallel(readersCount: 1, writersCount: 1);
+            DoTestParallel(readersCount: 1, writersCount: 1, shouldFail: false);
         }
 
         [Test]
         public void ReadAndWrite_InParallel_SingleReader_ManyWriters()
         {
-            DoTestParallel(readersCount: 1, writersCount: 4);
+            DoTestParallel(readersCount: 1, writersCount: 4, shouldFail: ShouldFailWithManyWriters);
         }
 
         [Test]
         public void ReadAndWrite_InParallel_ManyReaders_SingleWriter()
         {
-            DoTestParallel(readersCount: 4, writersCount: 1);
+            DoTestParallel(readersCount: 4, writersCount: 1, shouldFail: false);
         }
 
         [Test]
         public void ReadAndWrite_InParallel_ManyReaders_ManyWriters()
         {
-            DoTestParallel(readersCount: 4, writersCount: 4);
+            DoTestParallel(readersCount: 4, writersCount: 4, shouldFail: ShouldFailWithManyWriters);
         }
 
-        private void DoTestParallel(int readersCount, int writersCount)
+        private void DoTestParallel(int readersCount, int writersCount, bool shouldFail)
         {
-            var readers = Enumerable.Range(0, readersCount).Select(_ => new EventReader(TimeSeriesFactory(), new ReaderSettings())).ToList();
-            var writers = Enumerable.Range(0, writersCount).Select(_ => new EventWriter(TimeSeriesFactory(), new WriterSettings())).ToList();
+            var readers =
+                Enumerable.Range(0, readersCount)
+                    .Select(_ => new EventReader(TimeSeriesFactory(), new ReaderSettings()))
+                    .ToList();
+            var writers =
+                Enumerable.Range(0, writersCount)
+                    .Select(_ => new EventWriter(TimeSeriesFactory(), new WriterSettings()))
+                    .ToList();
 
             var writtenEvents = writers.ToDictionary(r => r, r => new List<Tuple<Timestamp, EventProto>>());
             var readEvents = readers.ToDictionary(r => r, r => new List<Event>());
-            
+
             var keepReadersAlive = true;
 
             var readersThreads = readers.Select(reader =>
@@ -96,12 +102,29 @@ namespace CassandraTimeSeries.UnitTesting
             foreach (var reader in readersThreads)
                 reader.Join();
 
-            var allWrittenEvents = writtenEvents
-                .SelectMany(x => x.Value)
-                .OrderBy(x => x.Item1.Ticks)
-                .ToArray();
+            var allWrittenEvents = writtenEvents.SelectMany(x => x.Value).OrderBy(x => x.Item1.Ticks).ToList();
 
-            foreach (var eventsReadBySingleReader in readEvents.Values)
+            if (shouldFail)
+                AssertNotAllEventsWereRead(allWrittenEvents, readEvents.Values);
+            else
+                AssertAllEventsWereRead(allWrittenEvents, readEvents.Values);
+        }
+
+        private void AssertNotAllEventsWereRead(List<Tuple<Timestamp, EventProto>> allWrittenEvents, IEnumerable<List<Event>> readByThread)
+        {
+            var allReadIds = readByThread
+                .Select(r => new HashSet<Guid>(r.Select(x => x.Proto.UserId)))
+                .ToList();
+
+            var eventsNotReadByReaders = allWrittenEvents
+                .Where(x => allReadIds.Any(s => !s.Contains(x.Item2.UserId)));
+
+            eventsNotReadByReaders.Should().NotBeEmpty();
+        }
+
+        private void AssertAllEventsWereRead(List<Tuple<Timestamp, EventProto>> allWrittenEvents, IEnumerable<List<Event>> readByThread)
+        {
+            foreach (var eventsReadBySingleReader in readByThread)
             {
                 eventsReadBySingleReader.Select(x => x.Proto).ShouldBeExactly(allWrittenEvents.Select(x => x.Item2));
                 eventsReadBySingleReader.Select(x => x.Timestamp).ShouldBeExactly(allWrittenEvents.Select(x => x.Item1));

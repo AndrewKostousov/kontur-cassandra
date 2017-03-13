@@ -21,7 +21,7 @@ namespace CassandraTimeSeries.Model
 
         public TimeGuid StartOfTimes => startOfTimes ?? (startOfTimes = TryUpdateStartOfTime());
 
-        public long PartitionIdOfStartOfTimes => StartOfTimes.GetTimestamp().Floor(partitioner.PartitionDuration).Ticks;
+        public long PartitionIdOfStartOfTimes => partitioner.CreatePartitionId(startOfTimes.GetTimestamp());
 
         private TimeGuid TryUpdateStartOfTime()
         {

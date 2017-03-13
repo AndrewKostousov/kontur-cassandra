@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Commons;
-using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Utils
 {
@@ -16,7 +15,7 @@ namespace CassandraTimeSeries.Utils
             PartitionDuration = partitionDuration ?? DefaultPartitionDuration;
         }
 
-        public long GetPartition(Timestamp timestamp)
+        public long CreatePartitionId(Timestamp timestamp)
         {
             return timestamp.Floor(PartitionDuration).Ticks;
         }
