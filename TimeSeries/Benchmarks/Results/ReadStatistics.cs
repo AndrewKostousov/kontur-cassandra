@@ -23,7 +23,7 @@ namespace Benchmarks.Results
 
         [DataMember] public List<List<int>> ReadsLength { get; }
 
-        [DataMember] public List<List<long>> WriteToReadLatency { get; }
+        [DataMember] public List<List<int>> WriteToReadLatency { get; }
 
         public ReadStatistics(IReadOnlyList<BenchmarkEventReader> readers) : base(readers)
         {
@@ -36,7 +36,7 @@ namespace Benchmarks.Results
                 .ToList();
 
             WriteToReadLatency = writeToReadLatency
-                .Select(x => x.Select(z => z.Ticks).ToList())
+                .Select(x => x.Select(z => z.Milliseconds).ToList())
                 .ToList();
 
             if (readers.Count == 0) return;
