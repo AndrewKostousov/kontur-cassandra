@@ -31,12 +31,11 @@ namespace CassandraTimeSeries.Model
         {
             var sw = Stopwatch.StartNew();
 
+            var eventsToWrite = PackIntoCollection(events, syncHelper.CreateSynchronizedId);
             StatementExecutionResult statementExecutionResult = null;
 
             while (sw.ElapsedMilliseconds < OperationalTimeoutMilliseconds)
             {
-                var eventsToWrite = PackIntoCollection(events, syncHelper.CreateSynchronizedId);
-
                 try
                 {
                     statementExecutionResult = CompareAndUpdate(eventsToWrite, statementExecutionResult);
@@ -52,6 +51,8 @@ namespace CassandraTimeSeries.Model
 
                 if (statementExecutionResult.State == ExecutionState.Success)
                     return eventsToWrite.Select(x => x.Timestamp).ToArray();
+
+                eventsToWrite = UpdateEventCollectionIds(eventsToWrite, syncHelper.CreateSynchronizedId);
             }
 
             throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
@@ -121,6 +122,7 @@ namespace CassandraTimeSeries.Model
         private StatementExecutionResult ExecuteStatement(IStatement statement)
         {
             var statementExecutionResult = session.Execute(statement).GetRows().Single();
+
             var isUpdateApplied = statementExecutionResult.GetValue<bool>("[applied]");
 
             if (isUpdateApplied) return new StatementExecutionResult {State = ExecutionState.Success};

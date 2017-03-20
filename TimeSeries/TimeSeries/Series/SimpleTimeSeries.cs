@@ -50,17 +50,25 @@ namespace CassandraTimeSeries.Model
 
         protected EventsCollection PackIntoCollection(EventProto[] eventProtos, Func<TimeGuid> createGuid)
         {
-            var eventIds = eventProtos.Select(x => createGuid()).ToArray();
-            var lastEventId = eventIds.Last();
-
-            return new EventsCollection
+            var collection = new EventsCollection
             {
-                LastEventId = lastEventId.ToTimeUuid(),
-                PartitionId = Partitioner.CreatePartitionId(lastEventId.GetTimestamp()),
-                EventIds = eventIds.Select(x => x.ToTimeUuid()).ToArray(),
                 Payloads = eventProtos.Select(x => x.Payload).ToArray(),
                 UserIds = eventProtos.Select(x => x.UserId).ToArray()
             };
+
+            return UpdateEventCollectionIds(collection, createGuid);
+        }
+
+        protected EventsCollection UpdateEventCollectionIds(EventsCollection oldCollection, Func<TimeGuid> createGuid)
+        {
+            var eventIds = oldCollection.UserIds.Select(_ => createGuid()).ToArray();
+            var lastEventId = eventIds.Last();
+
+            oldCollection.EventIds = eventIds.Select(x => x.ToTimeUuid()).ToArray();
+            oldCollection.LastEventId = lastEventId.ToTimeUuid();
+            oldCollection.PartitionId = Partitioner.CreatePartitionId(lastEventId.GetTimestamp());
+
+            return oldCollection;
         }
 
         protected static bool IsCriticalError(DriverException ex)
