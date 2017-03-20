@@ -7,10 +7,11 @@ namespace Benchmarks.Runners
     {
         private static string FormatFileNameFor(BenchmarksFixture fixture)
         {
-            const string resultsFilePrefix = "results for ";
-            const string resultsFilePostfix = ".txt";
+            const string directoryName = "Results";
 
-            return resultsFilePrefix + fixture.Name + resultsFilePostfix;
+            Directory.CreateDirectory(directoryName);
+
+            return $"{directoryName}\\{fixture.Name}.txt";
         }
 
         public override void LogFixtureBegan(BenchmarksFixture fixture) =>

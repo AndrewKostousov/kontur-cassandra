@@ -11,19 +11,18 @@ namespace Benchmarks.Results
     class DatabaseBenchmarkingResult : IBenchmarkingResult
     {
         [DataContract]
-        [Serializable]
         internal class SerializableStatistics
         {
-            [DataMember] public ReadStatistics Read;
-            [DataMember] public WriteStatistics Write;
+            [DataMember] public ReadStatistics Readers;
+            [DataMember] public WriteStatistics Writers;
         }
 
         private readonly SerializableStatistics statistics = new SerializableStatistics();
 
         public DatabaseBenchmarkingResult(IReadOnlyList<BenchmarkEventReader> readers, IReadOnlyList<BenchmarkEventWriter> writers)
         {
-            statistics.Read = new ReadStatistics(readers);
-            statistics.Write = new WriteStatistics(writers);
+            statistics.Readers = new ReadStatistics(readers);
+            statistics.Writers = new WriteStatistics(writers);
         }
 
         public void SerializeJson(Stream stream)
@@ -37,10 +36,10 @@ namespace Benchmarks.Results
 
             var nl = Environment.NewLine;
 
-            if (statistics.Read.WorkersCount != 0)
-                statisticsString.Append($"Read statistics:{nl}{nl}" + statistics.Read.CreateReport());
-            if (statistics.Write.WorkersCount != 0)
-                statisticsString.Append($"Write statistics:{nl}{nl}" + statistics.Write.CreateReport());
+            if (statistics.Readers.WorkersCount != 0)
+                statisticsString.Append($"Read statistics:{nl}{nl}" + statistics.Readers.CreateReport());
+            if (statistics.Writers.WorkersCount != 0)
+                statisticsString.Append($"Write statistics:{nl}{nl}" + statistics.Writers.CreateReport());
 
             return statisticsString.ToString();
         }

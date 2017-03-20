@@ -12,7 +12,11 @@ namespace Benchmarks.Runners
     {
         private static string FormatFileNameFor(BenchmarksFixture fixture, Benchmark benchmark)
         {
-            return $"rawdata-{fixture.Name}-{benchmark.Name}.json";
+            var directoryName = $"Raw data\\{fixture.Name}";
+
+            Directory.CreateDirectory(directoryName);
+
+            return $"{directoryName}\\{benchmark.Name}.json";
         }
 
         public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result)

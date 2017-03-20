@@ -7,13 +7,16 @@ using Benchmarks.ReadWrite;
 namespace Benchmarks.Results
 {
     [DataContract]
-    [Serializable]
     class WriteStatistics : WorkerStatistics
     {
         private readonly double totalWriteThroughput;
 
+        [DataMember] public List<List<int>> WritesLength { get; }
+
         public WriteStatistics(IReadOnlyList<BenchmarkEventWriter> writers) : base(writers)
         {
+            WritesLength = writers.Select(x => x.WritesLength).ToList();
+
             totalWriteThroughput = writers.Select(x => x.AverageWriteThroughput).Sum();
         }
 

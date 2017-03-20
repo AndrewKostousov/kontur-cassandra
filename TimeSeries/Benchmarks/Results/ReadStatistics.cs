@@ -9,7 +9,6 @@ using Commons.TimeBasedUuid;
 namespace Benchmarks.Results
 {
     [DataContract]
-    [Serializable]
     class ReadStatistics : WorkerStatistics
     {
         private readonly int reads95ThPercentile;
@@ -22,8 +21,24 @@ namespace Benchmarks.Results
         private readonly TimeSpan percentile95ThBetweenWriteAndRead;
         private readonly TimeSpan percentile99ThBetweenWriteAndRead;
 
+        [DataMember] public List<List<int>> ReadsLength { get; }
+
+        [DataMember] public List<List<long>> WriteToReadLatency { get; }
+
         public ReadStatistics(IReadOnlyList<BenchmarkEventReader> readers) : base(readers)
         {
+            ReadsLength = readers.Select(r => r.ReadsLength).ToList();
+            
+            var writeToReadLatency = readers
+                .Select(r => r.Timing
+                    .Select(kv => kv.Value - kv.Key.ToTimeGuid().GetTimestamp())
+                    .ToList())
+                .ToList();
+
+            WriteToReadLatency = writeToReadLatency
+                .Select(x => x.Select(z => z.Ticks).ToList())
+                .ToList();
+
             if (readers.Count == 0) return;
 
             totalEventsRead = readers.Select(x => x.TotalEventsRead).Sum();
@@ -32,9 +47,7 @@ namespace Benchmarks.Results
             reads99ThPercentile = readers.SelectMany(x => x.ReadsLength).Percentile(99);
             totalReadThroughput = readers.Select(x => x.AverageReadThroughput).Sum();
 
-            var latencyBetweenWriteAndRead = readers
-                .SelectMany(x => x.Timing.Select(kv => kv.Value - kv.Key.ToTimeGuid().GetTimestamp()))
-                .ToList();
+            var latencyBetweenWriteAndRead = writeToReadLatency.SelectMany(x => x).ToList();
 
             averageLatencyBetweenWriteAndRead = latencyBetweenWriteAndRead.Average();
             percentile95ThBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(95);

@@ -8,7 +8,6 @@ using Commons;
 namespace Benchmarks.Results
 {
     [DataContract]
-    [Serializable]
     abstract class WorkerStatistics
     {
         public TimeSpan AverageOperationLatency { get; }
@@ -21,12 +20,11 @@ namespace Benchmarks.Results
         public double AverageOperationsPerThread { get; }
         public double TotalThroughput { get; }
 
-        [DataMember]
-        public List<List<int>> Latency { get; }
+        [DataMember] public List<List<int>> Latency { get; }
 
         public WorkerStatistics(IReadOnlyList<IBenchmarkWorker> workers)
         {
-            Latency = new List<List<int>>();
+            Latency = workers.Select(x => x.Latency.Select(z => z.Milliseconds).ToList()).ToList();
 
             if (workers.Count == 0) return;
 
@@ -39,8 +37,6 @@ namespace Benchmarks.Results
             TotalOperationsCount = workers.Sum(x => x.TotalOperationsCount());
             AverageOperationsPerThread = workers.Select(x => x.TotalOperationsCount()).Average();
             TotalThroughput = workers.Select(x => x.AverageThroughput()).Sum();
-
-            Latency = workers.Select(x => x.Latency.Select(z => z.Milliseconds).ToList()).ToList();
         }
     }
 }
