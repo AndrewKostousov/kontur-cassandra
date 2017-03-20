@@ -21,7 +21,11 @@ namespace Benchmarks.Runners
 
         public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result)
         {
-            result.SerializeJson(File.OpenWrite(FormatFileNameFor(fixture, benchmark)));
+            var fileToWrite = FormatFileNameFor(fixture, benchmark);
+
+            File.Delete(fileToWrite);
+
+            result.SerializeJson(File.OpenWrite(fileToWrite));
         }
     }
 }
