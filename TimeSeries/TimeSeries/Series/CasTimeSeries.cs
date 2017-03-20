@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Cassandra;
@@ -7,6 +8,7 @@ using CassandraTimeSeries.Series;
 using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
+using JetBrains.Annotations;
 
 namespace CassandraTimeSeries.Model
 {
@@ -29,14 +31,15 @@ namespace CassandraTimeSeries.Model
         {
             var sw = Stopwatch.StartNew();
 
+            StatementExecutionResult statementExecutionResult = null;
+
             while (sw.ElapsedMilliseconds < OperationalTimeoutMilliseconds)
             {
                 var eventsToWrite = PackIntoCollection(events, syncHelper.CreateSynchronizedId);
-                StatementExecutionResult statementExecutionResult;
 
                 try
                 {
-                    statementExecutionResult = CompareAndUpdate(eventsToWrite);
+                    statementExecutionResult = CompareAndUpdate(eventsToWrite, statementExecutionResult);
                 }
                 catch (DriverException exception)
                 {
@@ -54,15 +57,25 @@ namespace CassandraTimeSeries.Model
             throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
         }
 
-        private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite)
+        private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite, [CanBeNull] StatementExecutionResult lastUpdateResult)
         {
-            var isWritingToEmptyPartition = eventToWrite.PartitionId != syncHelper.IdOfLastWrittenPartition;
+            var lastWrittenPartitionId = syncHelper.IdOfLastWrittenPartition;
             syncHelper.UpdateIdOfLastWrittenPartition(eventToWrite.PartitionId);
 
-            if (isWritingToEmptyPartition)
-                CloseAllPartitionsBefore(syncHelper.IdOfLastWrittenPartition);
+            if (ShouldCloseOutdatedPartitions(eventToWrite.PartitionId, lastWrittenPartitionId, lastUpdateResult))
+                CloseAllPartitionsBefore(eventToWrite.PartitionId);
 
-            return WriteEventToCurrentPartition(eventToWrite, isWritingToEmptyPartition);
+            return WriteEventToCurrentPartition(eventToWrite, eventToWrite.PartitionId != lastWrittenPartitionId);
+        }
+
+        private bool ShouldCloseOutdatedPartitions(long partitionId, long lastWrittenPartitionId, [CanBeNull] StatementExecutionResult lastUpdateResult)
+        {
+            var partitionDelta = partitionId - lastWrittenPartitionId;
+            var isWritingToEmptyPartition = partitionDelta != 0;
+            var isJumpedOverExactlyOnePartition = partitionDelta <= Partitioner.PartitionDuration.Ticks;
+            var lastPartitionIsNotAlreadyClosed = lastUpdateResult != null && lastUpdateResult.State != ExecutionState.PartitionClosed;
+
+            return isWritingToEmptyPartition && isJumpedOverExactlyOnePartition && lastPartitionIsNotAlreadyClosed;
         }
 
         private StatementExecutionResult WriteEventToCurrentPartition(EventsCollection e, bool isWritingToEmptyPartition)
