@@ -9,9 +9,14 @@ namespace CassandraTimeSeries.Utils
 {
     static class TimeGuidExtensions
     {
-        public static TimeGuid Increment(this TimeGuid timeGuid)
+        public static TimeGuid AddMilliseconds(this TimeGuid timeGuid, int milliseconds)
         {
-            return new TimeGuid(timeGuid.GetTimestamp().AddMilliseconds(1), timeGuid.GetClockSequence(), timeGuid.GetNode());
+            return TimeGuid.NewGuid(timeGuid.GetTimestamp().AddMilliseconds(milliseconds), timeGuid.GetClockSequence());
+        }
+
+        public static TimeGuid AddTicks(this TimeGuid timeGuid, long ticks)
+        {
+            return TimeGuid.NewGuid(timeGuid.GetTimestamp().AddTicks(ticks), timeGuid.GetClockSequence());
         }
     }
 }

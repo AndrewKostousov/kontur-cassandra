@@ -45,10 +45,10 @@ namespace CassandraTimeSeries.Series
             var nowGuid = TimeGuid.NowGuid();
 
             if (LastWrittenTimeGuid != null && LastWrittenTimeGuid.GetTimestamp() >= nowGuid.GetTimestamp())
-                return LastWrittenTimeGuid.Increment();
+                return LastWrittenTimeGuid.AddMilliseconds(1);
 
             if (StartOfTimes.GetTimestamp() >= nowGuid.GetTimestamp())
-                return StartOfTimes.Increment();
+                return StartOfTimes.AddMilliseconds(1);
 
             return nowGuid;
         }
