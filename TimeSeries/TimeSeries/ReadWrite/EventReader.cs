@@ -3,6 +3,7 @@ using System.Threading;
 using CassandraTimeSeries.Model;
 using System.Collections.Generic;
 using CassandraTimeSeries.Interfaces;
+using Commons;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
@@ -11,8 +12,8 @@ namespace CassandraTimeSeries.ReadWrite
     {
         public ReaderSettings Settings { get; }
 
-        private ITimeSeries series;
-        private Event lastEvent;
+        private readonly ITimeSeries series;
+        private Timestamp lastTimestamp;
 
         public EventReader(ITimeSeries series, ReaderSettings settings)
         {
@@ -20,23 +21,24 @@ namespace CassandraTimeSeries.ReadWrite
             this.series = series;
         }
 
-        public virtual Event ReadFirst()
+        public virtual Event[] ReadFirst()
         {
-            while (lastEvent == null)
-                lastEvent = series.ReadRange((TimeGuid) null, null, 1).FirstOrDefault();
+            Event[] events = null;
 
-            return lastEvent;
+            while (events == null || events.Length == 0)
+                 events = series.ReadRange((TimeGuid) null, null);
+
+            lastTimestamp = events.Max(x => x.Timestamp);
+
+            return events;
         }
 
         public virtual Event[] ReadNext()
         {
-            var events = series.ReadRange(lastEvent.Timestamp, null, Settings.EventsToRead);
+            var events = series.ReadRange(lastTimestamp, null, Settings.EventsToRead);
 
             if (events.Length != 0)
-            {
-                var maxTimestamp = events.Max(x => x.Timestamp);
-                lastEvent = events.First(x => x.Timestamp == maxTimestamp);
-            }
+                lastTimestamp = events.Max(x => x.Timestamp);
 
             Thread.Sleep(Settings.MillisecondsSleep);
             return events;

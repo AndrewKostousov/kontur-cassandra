@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 using Commons;
@@ -8,48 +10,72 @@ using Commons.TimeBasedUuid;
 using EdiTimeline;
 using GroBuf;
 using GroBuf.DataMembersExtracters;
+using NUnit.Framework;
 using SKBKontur.Cassandra.CassandraClient.Clusters;
 
 namespace CassandraTimeSeries.Model
 {
     public class EdiTimeSeriesWrapper : ITimeSeries
     {
+        private class EdiTimeSeriesSettings : IAllBoxEventSeriesSettings
+        {
+            public int MinBatchSizeForRead => 100;
+            public TimeSpan PartitionDuration { get; }
+            public TimeSpan NotCommittedEventsTtl => TimeSpan.FromSeconds(60);
+
+            public EdiTimeSeriesSettings(TimeSpan partitionDuration)
+            {
+                PartitionDuration = partitionDuration;
+            }
+        }
+
         public TimeLinePartitioner Partitioner { get; }
 
         private readonly AllBoxEventSeries series;
         private readonly BoxEventsReader reader;
-        private readonly AllBoxEventSeriesWriter writer;
         private readonly AllBoxEventSeriesTicksHolder ticksHolder;
         private long lastGoodEventTicks;
+        private readonly uint operationalTimeoutMilliseconds;
 
-        public EdiTimeSeriesWrapper(ICassandraCluster cluster, TimeLinePartitioner partitioner)
+        public EdiTimeSeriesWrapper(ICassandraCluster cluster, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
         {
+            Partitioner = partitioner;
+            this.operationalTimeoutMilliseconds = operationalTimeoutMilliseconds;
+
             var serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
 
             ticksHolder = new AllBoxEventSeriesTicksHolder(serializer, cluster);
-            ticksHolder.SetEventSeriesExclusiveStartTicks(Timestamp.Now.AddDays(-1).Ticks);
+            ticksHolder.SetEventSeriesExclusiveStartTicks(Timestamp.Now.AddMinutes(-1).Ticks);
 
-            series = new AllBoxEventSeries(new AllBoxEventSeriesSettings(), serializer, ticksHolder, cluster);
-
-            reader= new BoxEventsReader(series);
-            writer = new AllBoxEventSeriesWriter(series);
-
-            Partitioner = partitioner;
+            series = new AllBoxEventSeries(new EdiTimeSeriesSettings(Partitioner.PartitionDuration), serializer, ticksHolder, cluster);
+            reader = new BoxEventsReader(series);
         }
 
         public Timestamp[] Write(params EventProto[] events)
         {
-            return events.Select(Write).ToArray();
-        }
+            var eventsToWrite = events
+                .Select(e => new AllBoxEventSeriesWriterQueueItem(new ProtoBoxEvent(e.UserId, e.Payload), new Promise<Timestamp>()))
+                .ToList();
 
-        private Timestamp Write(EventProto ev)
-        {
-            var timestamp = writer.Write(new ProtoBoxEvent(ev.UserId, ev.Payload));
+            var sw = Stopwatch.StartNew();
 
-            if (lastGoodEventTicks < timestamp.Ticks)
-                lastGoodEventTicks = timestamp.Ticks;
+            var timestamps = new List<Timestamp>();
 
-            return timestamp;
+            while (eventsToWrite.Count > 0 && sw.ElapsedMilliseconds < operationalTimeoutMilliseconds)
+            {
+                series.WriteEventsInAnyOrder(eventsToWrite);
+
+                timestamps.AddRange(eventsToWrite.Select(e => e.EventTimestamp.Result).Where(r => r != null));
+
+                eventsToWrite = eventsToWrite
+                    .Where(e => e.EventTimestamp.Result == null)
+                    .Select(e => new AllBoxEventSeriesWriterQueueItem(e.ProtoBoxEvent, new Promise<Timestamp>()))
+                    .ToList();
+            }
+
+            if (eventsToWrite.Count > 0) throw new OperationTimeoutException(operationalTimeoutMilliseconds);
+
+            return timestamps.ToArray();
         }
 
         public void WriteWithoutSync(Event ev)
@@ -82,8 +108,7 @@ namespace CassandraTimeSeries.Model
         {
             return reader
                 .ReadEvents(range, count, x => x
-                    .Select(e => new Event(TimeGuid.MinForTimestamp(e.EventTimestamp), new EventProto(e.EventId, e.Payload)))
-                    .ToArray())
+                    .Select(e => new Event(TimeGuid.MinForTimestamp(e.EventTimestamp),  new EventProto(e.EventId, e.Payload))).ToArray())
                 .ToArray();
         }
     }

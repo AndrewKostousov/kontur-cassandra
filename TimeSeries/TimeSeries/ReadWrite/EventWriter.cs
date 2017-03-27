@@ -14,10 +14,13 @@ namespace CassandraTimeSeries.ReadWrite
         public WriterSettings Settings { get; }
         private readonly ITimeSeries series;
 
+        private readonly Random random;
+
         public EventWriter(ITimeSeries series, WriterSettings settings)
         {
             Settings = settings;
             this.series = series;
+            random = new Random();
         }
 
         public virtual Timestamp[] WriteNext(params EventProto[] events)
@@ -32,7 +35,7 @@ namespace CassandraTimeSeries.ReadWrite
 
         private EventProto CreateEventProto()
         {
-            return new EventProto(new byte[Settings.PayloadLength]);
+            return new EventProto(random.NextBytes(Settings.PayloadLength));
         }
     }
 }

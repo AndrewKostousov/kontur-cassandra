@@ -64,7 +64,7 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     return new Thread(() =>
                     {
-                        readEvents[reader].Add(reader.ReadFirst());
+                        readEvents[reader].AddRange(reader.ReadFirst());
 
                         while (keepReadersAlive)
                             readEvents[reader].AddRange(reader.ReadNext());
@@ -79,9 +79,9 @@ namespace CassandraTimeSeries.UnitTesting
                     for (int i = 0; i < 10; ++i)
                     {
                         var eventProtos = Enumerable.Range(0, 10).Select(_ => new EventProto()).ToArray();
-                        var timestamps = writer.WriteNext(eventProtos);
+                        var timestamp = writer.WriteNext(eventProtos);
 
-                        writtenEvents[writer].AddRange(eventProtos.Select((p, n) => Tuple.Create(timestamps[n], p)));
+                        writtenEvents[writer].AddRange(eventProtos.Select((p, n) => Tuple.Create(timestamp[n], p)));
                     }
                 });
             }).ToList();

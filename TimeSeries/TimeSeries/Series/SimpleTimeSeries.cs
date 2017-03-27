@@ -7,6 +7,7 @@ using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 using Commons;
+using Commons.Logging;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model
@@ -27,7 +28,7 @@ namespace CassandraTimeSeries.Model
 
         public virtual Timestamp[] Write(params EventProto[] events)
         {
-            var eventsToWrite = PackIntoCollection(events, TimeGuid.NowGuid);
+            var eventsToWrite = PackIntoCollection(events);
 
             var sw = Stopwatch.StartNew();
 
@@ -36,56 +37,29 @@ namespace CassandraTimeSeries.Model
                 try
                 {
                     eventsTable.Insert(eventsToWrite).Execute();
-                    return eventsToWrite.Select(x => x.Timestamp).ToArray();
+                    return eventsToWrite.Select(_ => eventsToWrite.TimeGuid.GetTimestamp()).ToArray();
                 }
                 catch (DriverException ex)
                 {
-                    Logger.Log(ex);
-                    if (IsCriticalError(ex)) throw;
+                    Log.For(this).Error(ex, "Cassandra driver exception occured during write.");
+                    if (ex.IsCritical()) throw;
                 }
             }
 
             throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
         }
 
-        protected EventsCollection PackIntoCollection(EventProto[] eventProtos, Func<TimeGuid> createGuid)
+        private EventsCollection PackIntoCollection(IEnumerable<EventProto> eventProtos)
         {
-            var collection = new EventsCollection
-            {
-                Payloads = eventProtos.Select(x => x.Payload).ToArray(),
-                UserIds = eventProtos.Select(x => x.UserId).ToArray()
-            };
+            var id = TimeGuid.NowGuid();
+            var partitionId = Partitioner.CreatePartitionId(id.GetTimestamp());
 
-            return UpdateEventCollectionIds(collection, createGuid);
-        }
-
-        protected EventsCollection UpdateEventCollectionIds(EventsCollection oldCollection, Func<TimeGuid> createGuid)
-        {
-            var eventIds = oldCollection.UserIds.Select(_ => createGuid()).ToArray();
-            var lastEventId = eventIds.Last();
-
-            oldCollection.EventIds = eventIds.Select(x => x.ToTimeUuid()).ToArray();
-            oldCollection.LastEventId = lastEventId.ToTimeUuid();
-            oldCollection.PartitionId = Partitioner.CreatePartitionId(lastEventId.GetTimestamp());
-
-            return oldCollection;
-        }
-
-        protected static bool IsCriticalError(DriverException ex)
-        {
-            return ex is QueryValidationException || ex is RequestInvalidException || ex is InvalidTypeException;
+            return new EventsCollection(id, partitionId, eventProtos);
         }
 
         public void WriteWithoutSync(Event ev)
         {
-            eventsTable.Insert(new EventsCollection
-            {
-                EventIds = new[] {ev.Id},
-                LastEventId = ev.Id,
-                PartitionId = Partitioner.CreatePartitionId(ev.TimeGuid.GetTimestamp()),
-                Payloads = new[] {ev.Proto.Payload},
-                UserIds = new[] {ev.Proto.UserId},
-            }).Execute();
+            eventsTable.Insert(new EventsCollection(ev.Id, Partitioner.CreatePartitionId(ev.TimeGuid.GetTimestamp()), ev.Proto)).Execute();
         }
 
         public Event[] ReadRange(Timestamp startExclusive, Timestamp endInclusive, int count = 1000)
@@ -111,34 +85,36 @@ namespace CassandraTimeSeries.Model
                         return ExtractEvents(eventsTable.Execute()).Take(count).ToArray();
 
                     if (!start.HasValue)
-                        return ExtractEvents(eventsTable.AllowFiltering().Where(ev => ev.LastEventId.CompareTo(end.Value) <= 0).Execute()).Take(count).ToArray();
+                        return ExtractEvents(eventsTable.AllowFiltering().Where(ev => ev.TimeUuid.CompareTo(end.Value) <= 0).Execute()).Take(count).ToArray();
 
                     if (!end.HasValue)
-                        return ExtractEventsAndFilter(eventsTable.AllowFiltering().Where(ev => ev.LastEventId.CompareTo(start.Value) >= 0).Execute(), startExclusive, count);
+                        return ExtractEventsAndFilter(eventsTable.AllowFiltering().Where(ev => ev.TimeUuid.CompareTo(start.Value) >= 0).Execute(), startExclusive, count);
 
                     var slices = Partitioner
                         .SplitIntoPartitions(startExclusive.GetTimestamp(), endInclusive.GetTimestamp())
                         .Select(s => s.Ticks)
                         .ToArray();
 
+                    if (slices.Length == 0) return new Event[0];
+
                     return ExtractEventsAndFilter(eventsTable
-                        .Where(e => slices.Contains(e.PartitionId) && e.LastEventId.CompareTo(start.Value) >= 0 && e.LastEventId.CompareTo(end.Value) <= 0)
+                        .Where(e => slices.Contains(e.PartitionId) && e.TimeUuid.CompareTo(start.Value) >= 0 && e.TimeUuid.CompareTo(end.Value) <= 0)
                         .Execute(), startExclusive, count);
                 }
                 catch (DriverException ex)
                 {
-                    Logger.Log(ex);
-                    if (IsCriticalError(ex)) throw;
+                    Log.For(this).Error(ex, "Cassandra driver exception occured during write.");
+                    if (ex.IsCritical()) throw;
                 }
             }
 
             throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
         }
 
-        private Event[] ExtractEventsAndFilter(IEnumerable<EventsCollection> eventsCollection, TimeGuid startExclusive, int count)
+        private Event[] ExtractEventsAndFilter(IEnumerable<EventsCollection> eventsCollections, TimeGuid startExclusive, int count)
         {
-            return ExtractEvents(eventsCollection)
-                .Where(x => x.Id.ToTimeGuid() > startExclusive)
+            return ExtractEvents(eventsCollections)
+                .Where(e => e.TimeGuid > startExclusive)
                 .Take(count)
                 .ToArray();
         }
@@ -146,9 +122,9 @@ namespace CassandraTimeSeries.Model
         private IEnumerable<Event> ExtractEvents(IEnumerable<EventsCollection> eventsCollections)
         {
             return eventsCollections
-                .Where(e => e.LastEventId.ToGuid() != Guid.Empty)
-                .OrderBy(x => x.LastEventId)
-                .SelectMany(x => x);
+                .Where(e => e.TimeUuid.ToGuid() != Guid.Empty)
+                .OrderBy(x => x.TimeUuid)
+                .SelectMany(x => x.Select(e => new Event(x.TimeGuid, e)));
         }
     }
 }

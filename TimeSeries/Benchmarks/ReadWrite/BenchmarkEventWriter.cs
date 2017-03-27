@@ -24,7 +24,7 @@ namespace Benchmarks.ReadWrite
 
             var writtenEventTimestamp = base.WriteNext(events);
 
-            Measurements.Add(measurement.Stop(writtenEventTimestamp.Length));
+            Measurements.Add(measurement.Stop(events.Length));
 
             return writtenEventTimestamp;
         }
