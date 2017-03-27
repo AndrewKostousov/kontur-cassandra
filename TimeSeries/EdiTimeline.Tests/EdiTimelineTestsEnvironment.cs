@@ -51,7 +51,7 @@ namespace EdiTimeline.Tests
                 cf.GCGraceSeconds = 864000;
                 cf.Caching = ColumnFamilyCaching.None;
                 cf.Compression = ColumnFamilyCompression.None();
-                cf.CompactionStrategy = CompactionStrategy.SizeTieredCompactionStrategy(0, 0); // disable compaction
+                cf.CompactionStrategy = CompactionStrategy.None();
             }));
             BoxEventSeriesCassandraSchemaConfigurator.Configure(schema);
             schemeActualizer.AddNewColumnFamilies();
