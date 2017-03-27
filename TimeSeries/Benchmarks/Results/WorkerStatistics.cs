@@ -10,33 +10,41 @@ namespace Benchmarks.Results
     [DataContract]
     abstract class WorkerStatistics
     {
-        public TimeSpan AverageOperationLatency { get; }
-        public TimeSpan AverageTotalLatency { get; }
-        public TimeSpan Latency95ThPercentile { get; }
-        public TimeSpan Latency99ThPercentile { get; }
+        [DataMember] public double AverageLatency { get; set; }
+        [DataMember] public double Latency95ThPercentile { get; set; }
+        [DataMember] public double Latency99ThPercentile { get; set; }
 
-        public int WorkersCount { get; }
-        public int TotalOperationsCount { get; }
-        public double AverageOperationsPerThread { get; }
-        public double TotalThroughput { get; }
+        [DataMember] public int WorkersCount { get; set; }
+        [DataMember] public int TotalThroughput { get; set; }
+        [DataMember] public double AverageThroughput { get; set; }
 
-        [DataMember] public List<List<int>> Latency { get; }
+        [DataMember] public List<List<Measurement>> Measurements { get; set; }
+        [DataMember] public List<int> Throuhgput { get; set; }
 
-        public WorkerStatistics(IReadOnlyList<IBenchmarkWorker> workers)
+        protected WorkerStatistics(IReadOnlyCollection<IBenchmarkWorker> workers)
         {
-            Latency = workers.Select(x => x.Latency.Select(z => z.Milliseconds).ToList()).ToList();
+            Measurements = workers.Select(x => x.Measurements.ToList()).ToList();
 
             if (workers.Count == 0) return;
 
             WorkersCount = workers.Count;
-            AverageOperationLatency = workers.SelectMany(x => x.Latency).Average();
-            AverageTotalLatency = workers.Select(x => x.Latency.Sum()).Average();
-            Latency95ThPercentile = workers.SelectMany(x => x.Latency).Percentile(95);
-            Latency99ThPercentile = workers.SelectMany(x => x.Latency).Percentile(99);
 
-            TotalOperationsCount = workers.Sum(x => x.TotalOperationsCount());
-            AverageOperationsPerThread = workers.Select(x => x.TotalOperationsCount()).Average();
-            TotalThroughput = workers.Select(x => x.AverageThroughput()).Sum();
+            var latency = Measurements.SelectMany(x => x.Select(z => z.LatencyMilliseconds)).ToArray();
+
+            AverageLatency = latency.Average();
+            Latency95ThPercentile = latency.Percentile(95);
+            Latency99ThPercentile = latency.Percentile(99);
+
+            TotalThroughput = workers.Sum(x => x.TotalThroughput());
+            AverageThroughput = workers.Sum(x => x.AverageThroughput());
+
+            Throuhgput = workers
+                .SelectMany(x => x.Measurements)
+                .Select(x => new {Time = x.StopMilliseconds%100, Throuhgput = x.Throughput})
+                .GroupBy(x => x.Time)
+                .OrderBy(x => x.Key)
+                .Select(x => x.Sum(z => z.Throuhgput))
+                .ToList();
         }
     }
 }

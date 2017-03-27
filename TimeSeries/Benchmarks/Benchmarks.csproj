@@ -72,6 +72,7 @@
     <Compile Include="ReadWrite\BenchmarkWorkerExtensions.cs" />
     <Compile Include="ReadWrite\IBenchmarkWorker.cs" />
     <Compile Include="Results\DatabaseBenchmarkingResult.cs" />
+    <Compile Include="Results\Measurement.cs" />
     <Compile Include="Results\ReadStatistics.cs" />
     <Compile Include="Results\WorkerStatistics.cs" />
     <Compile Include="Results\WriteStatistics.cs" />

@@ -1,20 +1,27 @@
 ﻿using System;
+using System.Linq;
 using Commons;
 
 namespace Benchmarks.ReadWrite
 {
     static class BenchmarkWorkerExtensions
     {
-        public static TimeSpan AverageLatency(this IBenchmarkWorker worker) =>
-            worker.Latency.Average();
-
-        public static TimeSpan OperationalTime(this IBenchmarkWorker worker) => 
-            worker.Latency.Sum();
-
-        public static int TotalOperationsCount(this IBenchmarkWorker worker) => 
-            worker.Latency.Count;
+        public static int TotalThroughput(this IBenchmarkWorker worker) =>
+            worker.Measurements.Select(x => x.Throughput).Sum();
 
         public static double AverageThroughput(this IBenchmarkWorker worker) =>
-            worker.TotalOperationsCount()/worker.OperationalTime().TotalSeconds;
+            worker.TotalThroughput() / worker.OperationalTime().TotalSeconds;
+
+        public static int OperationThrouput(this IBenchmarkWorker worker) =>
+            worker.TotalThroughput() / worker.OperationsCount();
+
+        public static TimeSpan AverageLatency(this IBenchmarkWorker worker) =>
+            TimeSpan.FromMilliseconds(worker.Measurements.Select(x => x.LatencyMilliseconds).Average());
+
+        public static TimeSpan OperationalTime(this IBenchmarkWorker worker) =>
+            TimeSpan.FromMilliseconds(worker.Measurements.Select(x => x.LatencyMilliseconds).Sum());
+
+        public static int OperationsCount(this IBenchmarkWorker worker) => 
+            worker.Measurements.Count;
     }
 }

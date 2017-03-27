@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Benchmarks.Results;
 
 namespace Benchmarks.ReadWrite
 {
     interface IBenchmarkWorker
     {
-        List<TimeSpan> Latency { get; }
+        List<Measurement> Measurements { get; }
     }
 }

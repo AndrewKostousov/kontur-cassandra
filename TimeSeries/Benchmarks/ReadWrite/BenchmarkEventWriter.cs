@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Benchmarks.Results;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
@@ -12,19 +13,19 @@ namespace Benchmarks.ReadWrite
 {
     class BenchmarkEventWriter : EventWriter, IBenchmarkWorker
     {
-        public List<TimeSpan> Latency { get; } = new List<TimeSpan>();
-        public List<int> WritesLength { get; } = new List<int>();
-        public double AverageWriteThroughput => WritesLength.Sum() / this.OperationalTime().TotalSeconds;
+        public List<Measurement> Measurements { get; } = new List<Measurement>();
 
         public BenchmarkEventWriter(ITimeSeries series, WriterSettings settings) 
             : base(series, settings) { }
 
         public override Timestamp[] WriteNext(params EventProto[] events)
         {
-            var sw = Stopwatch.StartNew();
+            var measurement = Measurement.Start();
+
             var writtenEventTimestamp = base.WriteNext(events);
-            Latency.Add(sw.Elapsed);
-            WritesLength.Add(writtenEventTimestamp.Length);
+
+            Measurements.Add(measurement.Stop(writtenEventTimestamp.Length));
+
             return writtenEventTimestamp;
         }
     }

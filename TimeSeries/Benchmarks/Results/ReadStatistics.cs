@@ -11,24 +11,16 @@ namespace Benchmarks.Results
     [DataContract]
     class ReadStatistics : WorkerStatistics
     {
-        private readonly int reads95ThPercentile;
-        private readonly int reads99ThPercentile;
-        private readonly double averageReadsLength;
-        private readonly int totalEventsRead;
-        private readonly double totalReadThroughput;
+        [DataMember] public double AverageEndToEndLatency { get; set; }
+        [DataMember] public double EndToEndLatency95ThPercentile { get; set; }
+        [DataMember] public double EndToEndLatency99ThPercentile { get; set; }
 
-        private readonly TimeSpan averageLatencyBetweenWriteAndRead;
-        private readonly TimeSpan percentile95ThBetweenWriteAndRead;
-        private readonly TimeSpan percentile99ThBetweenWriteAndRead;
+        [DataMember] public List<List<double>> WriteToReadLatency { get; set; }
 
-        [DataMember] public List<List<int>> ReadsLength { get; }
-
-        [DataMember] public List<List<int>> WriteToReadLatency { get; }
+        private readonly int totalOperationsCount;
 
         public ReadStatistics(IReadOnlyList<BenchmarkEventReader> readers) : base(readers)
         {
-            ReadsLength = readers.Select(r => r.ReadsLength).ToList();
-            
             var writeToReadLatency = readers
                 .Select(r => r.Timing
                     .Select(kv => kv.Value - kv.Key.ToTimeGuid().GetTimestamp())
@@ -36,22 +28,18 @@ namespace Benchmarks.Results
                 .ToList();
 
             WriteToReadLatency = writeToReadLatency
-                .Select(x => x.Select(z => z.Milliseconds).ToList())
+                .Select(x => x.Select(z => z.TotalMilliseconds).ToList())
                 .ToList();
 
             if (readers.Count == 0) return;
 
-            totalEventsRead = readers.Select(x => x.TotalEventsRead).Sum();
-            averageReadsLength = readers.Select(x => x.ReadsLength.Average()).Average();
-            reads95ThPercentile = readers.SelectMany(x => x.ReadsLength).Percentile(95);
-            reads99ThPercentile = readers.SelectMany(x => x.ReadsLength).Percentile(99);
-            totalReadThroughput = readers.Select(x => x.AverageReadThroughput).Sum();
+            totalOperationsCount = readers.Select(x => x.OperationsCount()).Sum();
 
-            var latencyBetweenWriteAndRead = writeToReadLatency.SelectMany(x => x).ToList();
+            var latencyBetweenWriteAndRead = WriteToReadLatency.SelectMany(x => x).ToList();
 
-            averageLatencyBetweenWriteAndRead = latencyBetweenWriteAndRead.Average();
-            percentile95ThBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(95);
-            percentile99ThBetweenWriteAndRead = latencyBetweenWriteAndRead.Percentile(99);
+            AverageEndToEndLatency = latencyBetweenWriteAndRead.Average();
+            EndToEndLatency95ThPercentile = latencyBetweenWriteAndRead.Percentile(95);
+            EndToEndLatency99ThPercentile = latencyBetweenWriteAndRead.Percentile(99);
         }
 
         public string CreateReport()
@@ -59,22 +47,19 @@ namespace Benchmarks.Results
             var nl = Environment.NewLine;
 
             return $"Readers count: {WorkersCount}{nl}{nl}" +
-                   $"Average single read latency: {AverageOperationLatency.TotalMilliseconds} ms{nl}" +
-                   $"95% of reads were faster than {Latency95ThPercentile.TotalMilliseconds} ms{nl}" +
-                   $"99% of reads were faster than {Latency99ThPercentile.TotalMilliseconds} ms{nl}" +
-                   $"Average read throughput: {totalReadThroughput} ev/s{nl}{nl}" +
 
-                   $"Total reads count: {TotalOperationsCount}{nl}" +
-                   $"Average reads by single thread: {AverageOperationsPerThread}{nl}{nl}" +
+                   $"Average single read latency: {AverageLatency} ms{nl}" +
+                   $"95% of reads were faster than {Latency95ThPercentile} ms{nl}" +
+                   $"99% of reads were faster than {Latency99ThPercentile} ms{nl}{nl}" +
+                   
+                   $"Average read throughput: {AverageThroughput} ev/s{nl}" +
+                   $"Oprations count: {totalOperationsCount}{nl}" +
+                   $"Total events read: {TotalThroughput}{nl}" +
+                   $"Average reads length: {TotalThroughput/totalOperationsCount} events/read{nl}{nl}" +
 
-                   $"Total events read: {totalEventsRead}{nl}" +
-                   $"Average reads length: {averageReadsLength} events/read{nl}" +
-                   $"95% of reads were shorter than {reads95ThPercentile} events{nl}" +
-                   $"99% of reads were shorter than {reads99ThPercentile} events{nl}{nl}" +
-
-                   $"Latency between write and read: {averageLatencyBetweenWriteAndRead.TotalMilliseconds} ms{nl}" +
-                   $"95% of events were read earlier than {percentile95ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written{nl}" +
-                   $"99% of events were read earlier than {percentile99ThBetweenWriteAndRead.TotalMilliseconds} ms since they had been written{nl}{nl}";
+                   $"Measurements between write and read: {AverageEndToEndLatency} ms{nl}" +
+                   $"95% of events were read earlier than {EndToEndLatency95ThPercentile} ms since they had been written{nl}" +
+                   $"99% of events were read earlier than {EndToEndLatency99ThPercentile} ms since they had been written{nl}{nl}";
         }
     }
 }

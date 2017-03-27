@@ -22,8 +22,11 @@ namespace Benchmarks.Benchmarks
         protected virtual ReaderSettings ReaderSettings { get; } = new ReaderSettings();
         protected virtual WriterSettings WriterSettings { get; } = new WriterSettings();
 
-        protected virtual int ReadersCount { get; } = 4;
-        protected virtual int WritersCount { get; } = 4;
+        private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4, 8, 16, 32, 64 };
+
+        protected virtual int[] ReadersCountRange => new[] {0, 1, 4};
+        protected virtual int[] WritersCountRange => DefaultReadersWritersCount;
+
         protected virtual int PreloadedEventsCount { get; } = 5000;
 
         protected override void ClassSetUp()
@@ -39,12 +42,17 @@ namespace Benchmarks.Benchmarks
 
         protected override IEnumerable<Benchmark> GetBenchmarks()
         {
-            return new[]
-            {
-                new Benchmark("Read and write", () => SetUp(ReadersCount, WritersCount), RunGenericBenchmark), 
-                new Benchmark("Read only", () => {SetUp(ReadersCount, 0); FillEvents(); }, RunGenericBenchmark),
-                new Benchmark("Write only", () => SetUp(0, WritersCount), RunGenericBenchmark), 
-            };
+            return ReadersCountRange.Product(WritersCountRange, (i, j) => new {Readers = i, Writers = j})
+                .Where(x => x.Writers != 0 || x.Readers != 0)
+                .Select(
+                    num => new Benchmark($"{num.Readers} reader{(num.Readers==1?"":"s")}, {num.Writers} writer{(num.Writers==1?"":"s")}",
+                        () =>
+                        {
+                            SetUp(num.Readers, num.Writers);
+                            if (num.Writers == 0) FillEvents();
+                        }, 
+                        RunGenericBenchmark)
+                );
         }
 
         private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> pool;
