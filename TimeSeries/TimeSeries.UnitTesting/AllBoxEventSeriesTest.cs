@@ -1,5 +1,4 @@
-﻿using System;
-using CassandraTimeSeries.Interfaces;
+﻿using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using NUnit.Framework;
@@ -7,26 +6,26 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class AllBoxEventSeriesTestSequential : CommonTimeSeriesTestSequential
+    public class EdiSeriesTestSequential : CommonTimeSeriesTestSequential
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
+        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
     }
 
     [TestFixture]
-    public class AllBoxEventSeriesTestParallel : CommonTimeSeriesTestParallel
+    public class EdiSeriesTestParallel : CommonTimeSeriesTestParallel
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
+        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
     }
 
     [TestFixture]
-    public class AllBoxEventSeriesTestWrite : CommonTimeSeriesTestWrite
+    public class EdiSeriesTestWrite : CommonTimeSeriesTestWrite
     {
         protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new AllBoxEventSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly AllBoxEventSeriesDatabaseController controller = new AllBoxEventSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
+        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
     }
 }

@@ -78,8 +78,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IDatabaseController.cs" />
-    <Compile Include="Series\AllBoxEventSeriesDatabaseController.cs" />
-    <Compile Include="Series\AllBoxEventSeriesWrapper.cs" />
+    <Compile Include="Series\EdiTimeSeriesDatabaseController.cs" />
+    <Compile Include="Series\EdiTimeSeriesWrapper.cs" />
     <Compile Include="Series\CasSynchronizationHelper.cs" />
     <Compile Include="Series\EventsCollection.cs" />
     <Compile Include="Series\StatementExecutionResult.cs" />

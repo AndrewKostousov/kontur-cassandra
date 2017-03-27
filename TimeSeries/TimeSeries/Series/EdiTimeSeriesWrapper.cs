@@ -12,7 +12,7 @@ using SKBKontur.Cassandra.CassandraClient.Clusters;
 
 namespace CassandraTimeSeries.Model
 {
-    public class AllBoxEventSeriesWrapper : ITimeSeries
+    public class EdiTimeSeriesWrapper : ITimeSeries
     {
         public TimeLinePartitioner Partitioner { get; }
 
@@ -22,7 +22,7 @@ namespace CassandraTimeSeries.Model
         private readonly AllBoxEventSeriesTicksHolder ticksHolder;
         private long lastGoodEventTicks;
 
-        public AllBoxEventSeriesWrapper(ICassandraCluster cluster, TimeLinePartitioner partitioner)
+        public EdiTimeSeriesWrapper(ICassandraCluster cluster, TimeLinePartitioner partitioner)
         {
             var serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
 

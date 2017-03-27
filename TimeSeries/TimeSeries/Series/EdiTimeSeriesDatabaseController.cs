@@ -4,7 +4,7 @@ using SKBKontur.Cassandra.CassandraClient.Clusters;
 
 namespace CassandraTimeSeries.Model
 {
-    public class AllBoxEventSeriesDatabaseController : IDatabaseController
+    public class EdiTimeSeriesDatabaseController : IDatabaseController
     {
         private readonly EdiTimelineTestsEnvironment environment = new EdiTimelineTestsEnvironment();
 
