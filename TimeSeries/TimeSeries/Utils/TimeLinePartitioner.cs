@@ -32,5 +32,15 @@ namespace CassandraTimeSeries.Utils
                 currentSlice += PartitionDuration;
             }
         }
+
+        public long Increment(long partitionId)
+        {
+            return partitionId + PartitionDuration.Ticks;
+        }
+
+        public long Decrement(long partitionId)
+        {
+            return partitionId - PartitionDuration.Ticks;
+        }
     }
 }

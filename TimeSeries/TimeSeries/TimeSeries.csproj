@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IDatabaseController.cs" />
+    <Compile Include="Series\BaseTimeSeries.cs" />
     <Compile Include="Series\EdiTimeSeriesDatabaseController.cs" />
     <Compile Include="Series\EdiTimeSeriesWrapper.cs" />
     <Compile Include="Series\EventsCollection.cs" />

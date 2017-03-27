@@ -47,6 +47,7 @@ namespace CassandraTimeSeries.Model
         public EventsCollection(TimeUuid id, long partitionId, params EventProto[] eventProtos)
         {
             TimeUuid = id;
+            MaxIdInPartition = id;
             PartitionId = partitionId;
 
             Payloads = eventProtos.Select(x => x.Payload).ToArray();

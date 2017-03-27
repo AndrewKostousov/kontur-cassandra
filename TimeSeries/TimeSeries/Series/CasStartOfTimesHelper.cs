@@ -9,21 +9,16 @@ namespace CassandraTimeSeries.Model
 {
     public class CasStartOfTimesHelper
     {
-        private readonly Table<CasTimeSeriesSyncData> syncTable;
-        private readonly TimeLinePartitioner partitioner;
-        private TimeGuid startOfTimes;
+        public TimeGuid StartOfTimes { get; }
+        public long PartitionIdOfStartOfTimes { get; }
 
         public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable, TimeLinePartitioner partitioner)
         {
-            this.syncTable = syncTable;
-            this.partitioner = partitioner;
+            StartOfTimes = TryUpdateStartOfTime(syncTable);
+            PartitionIdOfStartOfTimes = partitioner.CreatePartitionId(StartOfTimes.GetTimestamp());
         }
 
-        public TimeGuid StartOfTimes => startOfTimes ?? (startOfTimes = TryUpdateStartOfTime());
-
-        public long PartitionIdOfStartOfTimes => partitioner.CreatePartitionId(startOfTimes.GetTimestamp());
-
-        private TimeGuid TryUpdateStartOfTime()
+        private TimeGuid TryUpdateStartOfTime(Table<CasTimeSeriesSyncData> syncTable)
         {
             var guidToInsert = TimeGuid.NowGuid();
 

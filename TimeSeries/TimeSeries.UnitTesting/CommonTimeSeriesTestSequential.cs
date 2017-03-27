@@ -41,7 +41,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             var partitionDuration = Series.Partitioner.PartitionDuration;
 
-            t00 = Timestamp.Now.Floor(partitionDuration);
+            t00 = Timestamp.Now.Floor(partitionDuration) + partitionDuration;
 
             t10 = t00 + partitionDuration;
             t20 = t00 + partitionDuration.Multiply(2);
