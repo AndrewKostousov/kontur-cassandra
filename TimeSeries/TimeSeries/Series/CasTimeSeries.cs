@@ -21,11 +21,10 @@ namespace CassandraTimeSeries.Model
 
         private readonly CasStartOfTimesHelper startOfTimesHelper;
 
-        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable,
-            TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
-            : base(eventsTable, partitioner, operationalTimeoutMilliseconds)
+        public CasTimeSeries(CasTimeSeriesDatabaseController databaseController, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
+            : base(databaseController.EventsTable, partitioner, operationalTimeoutMilliseconds)
         {
-            startOfTimesHelper = new CasStartOfTimesHelper(synchronizationTable, partitioner);
+            startOfTimesHelper = new CasStartOfTimesHelper(databaseController.SyncTable, partitioner);
         }
 
         public override void WriteWithoutSync(Event ev)

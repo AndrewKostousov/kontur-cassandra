@@ -6,18 +6,20 @@ using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
 {
-    public abstract class TimeSeriesTestBase
+    public abstract class TimeSeriesTestBase<TDatabaseController>
+        where TDatabaseController : IDatabaseController, new ()
     {
-        protected abstract IDatabaseController Database { get; }
         protected ITimeSeries Series { get; private set; }
 
-        protected abstract ITimeSeries TimeSeriesFactory();
+        protected IDatabaseController Database { get; } = new TDatabaseController();
+
+        protected abstract ITimeSeries TimeSeriesFactory(TDatabaseController controller);
 
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()
         {
             Database.SetUpSchema();
-            Series = TimeSeriesFactory();
+            Series = TimeSeriesFactory(new TDatabaseController());
         }
 
         [OneTimeTearDown]

@@ -6,33 +6,24 @@ using CassandraTimeSeries.Utils;
 namespace Benchmarks.Benchmarks
 {
     // ReSharper disable once UnusedMember.Global
-    public class SimpleSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark
+    public class SimpleSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<SimpleTimeSeriesDatabaseController>
     {
         public override string Name => $"{nameof(SimpleTimeSeries)}";
-
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new SimpleTimeSeries(controller.EventsTable, new TimeLinePartitioner());
-        private readonly SimpleTimeSeriesDatabaseController controller = new SimpleTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(SimpleTimeSeriesDatabaseController c) => new SimpleTimeSeries(c, new TimeLinePartitioner());
     }
 
     // ReSharper disable once UnusedMember.Global
-    public class CasSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark
+    public class CasSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<CasTimeSeriesDatabaseController>
     {
         public override string Name => $"{nameof(CasTimeSeries)} with single write";
-
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable, new TimeLinePartitioner());
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(CasTimeSeriesDatabaseController c) => new CasTimeSeries(c, new TimeLinePartitioner());
     }
 
     // ReSharper disable once UnusedMember.Global
-    public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark
+    public class AllBoxEventSeriesBenchmark : BaseTimeSeriesBenchmark<EdiTimeSeriesDatabaseController>
     {
         public override string Name => $"{nameof(EdiTimeSeriesWrapper)} with single write";
-
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(EdiTimeSeriesDatabaseController c) => new EdiTimeSeriesWrapper(c, new TimeLinePartitioner());
     }
 
     // ReSharper disable once UnusedMember.Global

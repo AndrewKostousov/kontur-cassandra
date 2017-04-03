@@ -6,26 +6,20 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class EdiSeriesTestSequential : CommonTimeSeriesTestSequential
+    public class EdiSeriesTestSequential : CommonTimeSeriesTestSequential<EdiTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(EdiTimeSeriesDatabaseController c) => new EdiTimeSeriesWrapper(c, new TimeLinePartitioner());
     }
 
     [TestFixture]
-    public class EdiSeriesTestParallel : CommonTimeSeriesTestParallel
+    public class EdiSeriesTestParallel : CommonTimeSeriesTestParallel<EdiTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(EdiTimeSeriesDatabaseController c) => new EdiTimeSeriesWrapper(c, new TimeLinePartitioner());
     }
 
     [TestFixture]
-    public class EdiSeriesTestWrite : CommonTimeSeriesTestWrite
+    public class EdiSeriesTestWrite : CommonTimeSeriesTestWrite<EdiTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new EdiTimeSeriesWrapper(controller.Cluster, new TimeLinePartitioner());
-        private readonly EdiTimeSeriesDatabaseController controller = new EdiTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(EdiTimeSeriesDatabaseController c) => new EdiTimeSeriesWrapper(c, new TimeLinePartitioner());
     }
 }

@@ -1,9 +1,14 @@
-﻿using CassandraTimeSeries.Model;
+﻿using System.Linq;
+using CassandraTimeSeries.Interfaces;
+using CassandraTimeSeries.Model;
+using Commons.TimeBasedUuid;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
 {
-    public abstract class CommonTimeSeriesTestWrite : TimeSeriesTestBase
+    public abstract class CommonTimeSeriesTestWrite<TDatabaseController> : TimeSeriesTestBase<TDatabaseController>
+        where TDatabaseController : IDatabaseController, new()
     {
         [Test]
         public void Write_WriteOne()
@@ -22,6 +27,19 @@ namespace CassandraTimeSeries.UnitTesting
         public void Write_BulkWrite()
         {
             Series.Write(new EventProto(), new EventProto(), new EventProto());
+        }
+
+        [Test]
+        public void Write_CanReadAfterWrite()
+        {
+            var controller = new TDatabaseController();
+            controller.SetUpSchema();
+
+            var series = TimeSeriesFactory(controller);
+            var ev = new EventProto();
+
+            series.Write(ev);
+            series.ReadRange((TimeGuid) null, null).Select(e => e.Proto).ShouldBeExactly(ev);
         }
     }
 }

@@ -7,26 +7,20 @@ using NUnit.Framework;
 namespace CassandraTimeSeries.UnitTesting
 {
     [TestFixture]
-    public class CasTimeSeriesTestSequential : CommonTimeSeriesTestSequential
+    public class CasTimeSeriesTestSequential : CommonTimeSeriesTestSequential<CasTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable, new TimeLinePartitioner());
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(CasTimeSeriesDatabaseController c) => new CasTimeSeries(c, new TimeLinePartitioner());
     }
 
     [TestFixture]
-    public class CasTimeSeriesTestParallel : CommonTimeSeriesTestParallel
+    public class CasTimeSeriesTestParallel : CommonTimeSeriesTestParallel<CasTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable, new TimeLinePartitioner());
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(CasTimeSeriesDatabaseController c) => new CasTimeSeries(c, new TimeLinePartitioner());
     }
 
     [TestFixture]
-    public class CasTimeSeriesTestWrite : CommonTimeSeriesTestWrite
+    public class CasTimeSeriesTestWrite : CommonTimeSeriesTestWrite<CasTimeSeriesDatabaseController>
     {
-        protected override IDatabaseController Database => controller;
-        protected override ITimeSeries TimeSeriesFactory() => new CasTimeSeries(controller.EventsTable, controller.SyncTable, new TimeLinePartitioner());
-        private readonly CasTimeSeriesDatabaseController controller = new CasTimeSeriesDatabaseController();
+        protected override ITimeSeries TimeSeriesFactory(CasTimeSeriesDatabaseController c) => new CasTimeSeries(c, new TimeLinePartitioner());
     }
 }

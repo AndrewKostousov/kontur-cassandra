@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Cassandra;
-using Cassandra.Data.Linq;
+﻿using Cassandra.Data.Linq;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 
@@ -8,32 +6,18 @@ namespace CassandraTimeSeries.Model
 {
     public class SimpleTimeSeriesDatabaseController : IDatabaseController
     {
-        private const string keyspace = "TestingKeyspace";
+        public Table<EventsCollection> EventsTable { get; }
 
-        private Cluster cluster;
-        protected ISession session;
+        private readonly CassandraTestingCluster testingCluster;
 
-        public Table<EventsCollection> EventsTable { get; private set; }
-
-        public virtual void SetUpSchema()
+        public SimpleTimeSeriesDatabaseController()
         {
-            cluster = Cluster
-                .Builder()
-                .AddContactPoint("localhost")
-                .Build();
+            testingCluster = new CassandraTestingCluster();
+            EventsTable = new Table<EventsCollection>(testingCluster.Session);
+        }
 
-            session = cluster.Connect();
-
-            session.CreateKeyspaceIfNotExists(keyspace, new Dictionary<string, string>
-            {
-                ["class"] = "SimpleStrategy",
-                ["replication_factor"] = "1",
-            });
-
-            session.ChangeKeyspace(keyspace);
-
-            EventsTable = new Table<EventsCollection>(session);
-
+        public void SetUpSchema()
+        {
             EventsTable.CreateIfNotExists();
             EventsTable.Drop();
             EventsTable.Create();
@@ -46,8 +30,7 @@ namespace CassandraTimeSeries.Model
 
         public void TearDownSchema()
         {
-            session.Dispose();
-            cluster.Dispose();
+            testingCluster.Dispose();
         }
     }
 }

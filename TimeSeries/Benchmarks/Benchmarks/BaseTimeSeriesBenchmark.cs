@@ -12,10 +12,10 @@ using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
-    public abstract class BaseTimeSeriesBenchmark : BenchmarksFixture
+    public abstract class BaseTimeSeriesBenchmark<TDatabaseController> : BenchmarksFixture
+        where TDatabaseController : IDatabaseController, new ()
     {
-        protected abstract IDatabaseController Database { get; }
-        protected abstract ITimeSeries TimeSeriesFactory();
+        protected abstract ITimeSeries TimeSeriesFactory(TDatabaseController controller);
 
         private ITimeSeries series;
 
@@ -24,6 +24,8 @@ namespace Benchmarks.Benchmarks
 
         private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4, 8, 16, 32, 64 };
 
+        private readonly IDatabaseController database = new TDatabaseController();
+
         protected virtual int[] ReadersCountRange => new[] {0, 1, 4};
         protected virtual int[] WritersCountRange => DefaultReadersWritersCount;
 
@@ -31,13 +33,13 @@ namespace Benchmarks.Benchmarks
 
         protected override void ClassSetUp()
         {
-            Database.SetUpSchema();
-            series = TimeSeriesFactory();
+            database.SetUpSchema();
+            series = TimeSeriesFactory(new TDatabaseController());
         }
         
         protected override void ClassTearDown()
         {
-            Database.TearDownSchema();
+            database.TearDownSchema();
         }
 
         protected override IEnumerable<Benchmark> GetBenchmarks()
@@ -59,7 +61,7 @@ namespace Benchmarks.Benchmarks
 
         private void SetUp(int readersCount, int writersCount)
         {
-            Database.ResetSchema();
+            database.ResetSchema();
             pool = InitReadersWritersPool(readersCount, writersCount);
         }
 
@@ -74,8 +76,8 @@ namespace Benchmarks.Benchmarks
 
         private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> InitReadersWritersPool(int readersCount, int writersCount)
         {
-            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(), ReaderSettings)).ToList();
-            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(), WriterSettings)).ToList();
+            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(new TDatabaseController()), ReaderSettings)).ToList();
+            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(new TDatabaseController()), WriterSettings)).ToList();
             return new ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter>(readers, writers);
         }
 

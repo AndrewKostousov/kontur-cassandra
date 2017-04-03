@@ -1,21 +1,43 @@
 ﻿using Cassandra.Data.Linq;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 
 namespace CassandraTimeSeries.Model
 {
-    public class CasTimeSeriesDatabaseController : SimpleTimeSeriesDatabaseController
+    public class CasTimeSeriesDatabaseController : IDatabaseController
     {
-        public Table<CasTimeSeriesSyncData> SyncTable;
+        public Table<EventsCollection> EventsTable { get; }
+        public Table<CasTimeSeriesSyncData> SyncTable { get; }
 
-        public override void SetUpSchema()
+        private readonly CassandraTestingCluster testingCluster;
+
+        public CasTimeSeriesDatabaseController()
         {
-            base.SetUpSchema();
+            testingCluster = new CassandraTestingCluster();
+            EventsTable = new Table<EventsCollection>(testingCluster.Session);
+            SyncTable = new Table<CasTimeSeriesSyncData>(testingCluster.Session);
+        }
 
-            SyncTable = new Table<CasTimeSeriesSyncData>(session);
+        public void SetUpSchema()
+        {
+            EventsTable.CreateIfNotExists();
+            EventsTable.Drop();
+            EventsTable.Create();
 
             SyncTable.CreateIfNotExists();
             SyncTable.Drop();
             SyncTable.Create();
+        }
+
+        public void ResetSchema()
+        {
+            EventsTable.Truncate();
+            SyncTable.Truncate();
+        }
+
+        public void TearDownSchema()
+        {
+            testingCluster.Dispose();
         }
     }
 }

@@ -15,8 +15,8 @@ namespace CassandraTimeSeries.Model
 {
     public class SimpleTimeSeries : BaseTimeSeries
     {
-        public SimpleTimeSeries(Table<EventsCollection> eventsTable, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
-            : base(eventsTable, partitioner, operationalTimeoutMilliseconds) { }
+        public SimpleTimeSeries(SimpleTimeSeriesDatabaseController databaseController, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
+            : base(databaseController.EventsTable, partitioner, operationalTimeoutMilliseconds) { }
 
         public override void WriteWithoutSync(Event ev)
         {

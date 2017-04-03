@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
 using Commons;
@@ -10,7 +11,8 @@ using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
 {
-    public abstract class CommonTimeSeriesTestParallel : TimeSeriesTestBase
+    public abstract class CommonTimeSeriesTestParallel<TDatabaseController> : TimeSeriesTestBase<TDatabaseController> 
+        where TDatabaseController : IDatabaseController, new()
     {
         protected virtual bool ShouldFailWithManyWriters { get; } = false;
 
@@ -48,11 +50,11 @@ namespace CassandraTimeSeries.UnitTesting
         {
             var readers =
                 Enumerable.Range(0, readersCount)
-                    .Select(_ => new EventReader(TimeSeriesFactory(), new ReaderSettings()))
+                    .Select(_ => new EventReader(TimeSeriesFactory(new TDatabaseController()), new ReaderSettings()))
                     .ToList();
             var writers =
                 Enumerable.Range(0, writersCount)
-                    .Select(_ => new EventWriter(TimeSeriesFactory(), new WriterSettings()))
+                    .Select(_ => new EventWriter(TimeSeriesFactory(new TDatabaseController()), new WriterSettings()))
                     .ToList();
 
             var writtenEvents = writers.ToDictionary(r => r, r => new List<Tuple<Timestamp, EventProto>>());

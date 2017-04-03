@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using Commons;
@@ -9,7 +10,8 @@ using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
 {
-    public abstract class CommonTimeSeriesTestSequential : TimeSeriesTestBase
+    public abstract class CommonTimeSeriesTestSequential<TDatabaseController> : TimeSeriesTestBase<TDatabaseController> 
+        where TDatabaseController : IDatabaseController, new()
     {
         private Timestamp t00;
         private Timestamp t01;
