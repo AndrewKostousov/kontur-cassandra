@@ -78,7 +78,7 @@ namespace CassandraTimeSeries.Model
                 }
                 catch (DriverException ex)
                 {
-                    Log.For(this).Error(ex, "Cassandra driver exception occured during write.");
+                    Log.For(this).Error(ex, "Cassandra driver exception occured during read.");
                     if (ex.IsCritical()) throw;
                 }
             }

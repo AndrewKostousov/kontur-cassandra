@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Cassandra;
 using Cassandra.Data.Linq;
-using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Series;
 using CassandraTimeSeries.Utils;
 using Commons;
@@ -23,8 +21,8 @@ namespace CassandraTimeSeries.Model
 
         private readonly CasStartOfTimesHelper startOfTimesHelper;
 
-        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable, 
-                             TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds=10000)
+        public CasTimeSeries(Table<EventsCollection> eventsTable, Table<CasTimeSeriesSyncData> synchronizationTable,
+            TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
             : base(eventsTable, partitioner, operationalTimeoutMilliseconds)
         {
             startOfTimesHelper = new CasStartOfTimesHelper(synchronizationTable, partitioner);
@@ -68,10 +66,12 @@ namespace CassandraTimeSeries.Model
             throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
         }
 
-        private void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult, EventsCollection eventToWrite)
+        private void UpdateLastWrittenTimeGuid(StatementExecutionResult compareAndUpdateResult,
+            EventsCollection eventToWrite)
         {
             if (compareAndUpdateResult.State == ExecutionState.PartitionClosed)
-                lastWrittenTimeGuid = TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Partitioner.PartitionDuration);
+                lastWrittenTimeGuid =
+                    TimeGuid.MinForTimestamp(new Timestamp(eventToWrite.PartitionId) + Partitioner.PartitionDuration);
 
             if (compareAndUpdateResult.State == ExecutionState.OutdatedId)
                 lastWrittenTimeGuid = compareAndUpdateResult.PartitionMaxGuid;
@@ -93,7 +93,8 @@ namespace CassandraTimeSeries.Model
             return nowGuid;
         }
 
-        private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite, [CanBeNull] StatementExecutionResult lastUpdateResult)
+        private StatementExecutionResult CompareAndUpdate(EventsCollection eventToWrite,
+            [CanBeNull] StatementExecutionResult lastUpdateResult)
         {
             var lastWrittenPartitionId = idOfLastWrittenPartition;
             idOfLastWrittenPartition = eventToWrite.PartitionId;
@@ -104,12 +105,14 @@ namespace CassandraTimeSeries.Model
             return WriteEventToCurrentPartition(eventToWrite, eventToWrite.PartitionId != lastWrittenPartitionId);
         }
 
-        private bool ShouldCloseOutdatedPartitions(long partitionId, long lastWrittenPartitionId, [CanBeNull] StatementExecutionResult lastUpdateResult)
+        private bool ShouldCloseOutdatedPartitions(long partitionId, long lastWrittenPartitionId,
+            [CanBeNull] StatementExecutionResult lastUpdateResult)
         {
             var partitionDelta = partitionId - lastWrittenPartitionId;
             var isWritingToEmptyPartition = partitionDelta != 0;
             var isJumpedOverExactlyOnePartition = partitionDelta <= Partitioner.PartitionDuration.Ticks;
-            var lastPartitionIsNotAlreadyClosed = lastUpdateResult != null && lastUpdateResult.State != ExecutionState.PartitionClosed;
+            var lastPartitionIsNotAlreadyClosed = lastUpdateResult != null &&
+                                                  lastUpdateResult.State != ExecutionState.PartitionClosed;
 
             return isWritingToEmptyPartition && isJumpedOverExactlyOnePartition && lastPartitionIsNotAlreadyClosed;
         }
@@ -138,7 +141,8 @@ namespace CassandraTimeSeries.Model
             var idOfPartitionToClose = exclusiveLastPartitionId - Partitioner.PartitionDuration.Ticks;
             var executionState = ExecutionState.Success;
 
-            while (executionState != ExecutionState.PartitionClosed && idOfPartitionToClose >= startOfTimesHelper.PartitionIdOfStartOfTimes)
+            while (executionState != ExecutionState.PartitionClosed &&
+                   idOfPartitionToClose >= startOfTimesHelper.PartitionIdOfStartOfTimes)
             {
                 executionState = ExecuteStatement(CreateClosePartitionStatement(idOfPartitionToClose)).State;
                 idOfPartitionToClose = Partitioner.Decrement(idOfPartitionToClose);
@@ -169,6 +173,26 @@ namespace CassandraTimeSeries.Model
 
         public override Event[] ReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count = 1000)
         {
+            var sw = Stopwatch.StartNew();
+
+            while (sw.ElapsedMilliseconds < OperationalTimeoutMilliseconds)
+            {
+                try
+                {
+                    return DoReadRange(startExclusive, endInclusive, count);
+                }
+                catch (DriverException exception)
+                {
+                    Log.For(this).Error(exception, "Driver exception occured during read");
+                    if (exception.IsCritical()) throw;
+                }
+            }
+
+            throw new OperationTimeoutException(OperationalTimeoutMilliseconds);
+        }
+
+        private Event[] DoReadRange(TimeGuid startExclusive, TimeGuid endInclusive, int count)
+        {
             if (startExclusive == null) startExclusive = startOfTimesHelper.StartOfTimes;
 
             if (endInclusive == null) return ReadUntilEnd(startExclusive, count);
@@ -187,11 +211,6 @@ namespace CassandraTimeSeries.Model
                 .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
                 .Take(count)
                 .ToArray();
-        }
-
-        private TimeGuid GetReadBeginning()
-        {
-            return TimeGuid.MaxForTimestamp(new Timestamp(Partitioner.Decrement(startOfTimesHelper.PartitionIdOfStartOfTimes)));
         }
 
         private Event[] ReadUntilEnd(TimeGuid startExclusive, int count)
@@ -213,7 +232,8 @@ namespace CassandraTimeSeries.Model
 
                 extractedEvents.AddRange(read
                     .Where(x => x.TimeUuid != ClosingTimeUuid)
-                    .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload)))));
+                    .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
+                    .Take(count - extractedEvents.Count));
 
                 if (read.Length == 0 && !IsPartitionClosed(partitionId)) break;
 
@@ -225,7 +245,9 @@ namespace CassandraTimeSeries.Model
 
         private bool IsPartitionClosed(long partitionId)
         {
-            return EventsTable.Where(x => x.PartitionId == partitionId).Execute().Any(x => x.TimeUuid == default(TimeUuid));
+            var read = EventsTable.Where(x => x.PartitionId == partitionId).Execute().ToArray();
+
+            return read.Any(x => x.MaxIdInPartition == ClosingTimeUuid);
         }
     }
 }
