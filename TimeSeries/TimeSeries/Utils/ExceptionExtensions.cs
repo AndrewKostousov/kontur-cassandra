@@ -1,13 +1,13 @@
-﻿using Cassandra;
+﻿using System;
+using Cassandra;
 
 namespace CassandraTimeSeries.Utils
 {
-    public static class DriverExceptionExtensions
+    public static class ExceptionExtensions
     {
-        public static bool IsCritical(this DriverException ex)
+        public static bool IsCritical(this Exception ex)
         {
             return ex is QueryValidationException || ex is RequestInvalidException || ex is InvalidTypeException;
         }
-
     }
 }

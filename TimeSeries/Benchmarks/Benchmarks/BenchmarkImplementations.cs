@@ -6,11 +6,11 @@ using CassandraTimeSeries.Utils;
 namespace Benchmarks.Benchmarks
 {
     // ReSharper disable once UnusedMember.Global
-    public class SimpleSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<SimpleTimeSeriesDatabaseController>
-    {
-        public override string Name => $"{nameof(SimpleTimeSeries)}";
-        protected override ITimeSeries TimeSeriesFactory(SimpleTimeSeriesDatabaseController c) => new SimpleTimeSeries(c, new TimeLinePartitioner());
-    }
+    //public class SimpleSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<SimpleTimeSeriesDatabaseController>
+    //{
+    //    public override string Name => $"{nameof(SimpleTimeSeries)}";
+    //    protected override ITimeSeries TimeSeriesFactory(SimpleTimeSeriesDatabaseController c) => new SimpleTimeSeries(c, new TimeLinePartitioner());
+    //}
 
     // ReSharper disable once UnusedMember.Global
     public class CasSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<CasTimeSeriesDatabaseController>

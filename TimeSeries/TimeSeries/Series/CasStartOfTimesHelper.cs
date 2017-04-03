@@ -26,7 +26,7 @@ namespace CassandraTimeSeries.Model
 
             var query = session.Prepare(
                 $"INSERT INTO {syncTable.Name} (global_start) VALUES (?) IF NOT EXISTS"
-            ).Bind(guidToInsert.ToTimeUuid());
+            ).Bind(guidToInsert.ToTimeUuid()).SetConsistencyLevel(ConsistencyLevel.All);
 
             var executionResult = session.Execute(query).GetRows().Single();
 

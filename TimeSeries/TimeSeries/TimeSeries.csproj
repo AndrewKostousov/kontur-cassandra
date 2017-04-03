@@ -88,7 +88,7 @@
     <Compile Include="Series\EdiTimeSeriesWrapper.cs" />
     <Compile Include="Series\EventsCollection.cs" />
     <Compile Include="Series\StatementExecutionResult.cs" />
-    <Compile Include="Utils\DriverExceptionExtensions.cs" />
+    <Compile Include="Utils\ExceptionExtensions.cs" />
     <Compile Include="Utils\EnumerableExtensions.cs" />
     <Compile Include="Series\CasTimeSeriesDatabaseController.cs" />
     <Compile Include="Series\SimpleTimeSeriesDatabaseController.cs" />

@@ -6,7 +6,7 @@ namespace CassandraTimeSeries.Utils
 {
     public class TimeLinePartitioner
     {
-        private  static readonly TimeSpan DefaultPartitionDuration = TimeSpan.FromMinutes(1);
+        private  static readonly TimeSpan DefaultPartitionDuration = TimeSpan.FromSeconds(5);
 
         public TimeSpan PartitionDuration { get; }
 

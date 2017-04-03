@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Cassandra;
@@ -49,7 +50,7 @@ namespace CassandraTimeSeries.Model
                 {
                     statementExecutionResult = CompareAndUpdate(eventsToWrite, statementExecutionResult);
                 }
-                catch (DriverException exception)
+                catch (Exception exception)
                 {
                     Log.For(this).Error(exception, "Cassandra driver exception occured during write.");
                     if (exception.IsCritical()) throw;
@@ -180,7 +181,7 @@ namespace CassandraTimeSeries.Model
                 {
                     return DoReadRange(startExclusive, endInclusive, count);
                 }
-                catch (DriverException exception)
+                catch (Exception exception)
                 {
                     Log.For(this).Error(exception, "Driver exception occured during read");
                     if (exception.IsCritical()) throw;
@@ -227,8 +228,6 @@ namespace CassandraTimeSeries.Model
                     .Execute()
                     .ToArray();
 
-                partition = Partitioner.Increment(partition);
-
                 extractedEvents.AddRange(read
                     .Where(x => x.TimeUuid != ClosingTimeUuid)
                     .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
@@ -237,6 +236,8 @@ namespace CassandraTimeSeries.Model
                 if (read.Length == 0 && !IsPartitionClosed(partitionId)) break;
 
                 if (read.Length != 0 && read[read.Length - 1].MaxIdInPartition != ClosingTimeUuid) break;
+
+                partition = Partitioner.Increment(partition);
             }
 
             return extractedEvents.ToArray();

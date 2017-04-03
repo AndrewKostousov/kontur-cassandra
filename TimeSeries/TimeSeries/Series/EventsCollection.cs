@@ -21,7 +21,7 @@ namespace CassandraTimeSeries.Model
 
         [StaticColumn]
         [Column("max_id_in_partition")]
-        public TimeUuid MaxIdInPartition { get; set; } = TimeGuid.MaxValue.ToTimeUuid();
+        public TimeUuid MaxIdInPartition { get; set; } = default(TimeUuid);
 
         [Column("user_ids")]
         public Guid[] UserIds { get; set; }

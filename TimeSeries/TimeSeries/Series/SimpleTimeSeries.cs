@@ -35,7 +35,7 @@ namespace CassandraTimeSeries.Model
                     EventsTable.Insert(eventsToWrite).Execute();
                     return eventsToWrite.Select(_ => eventsToWrite.TimeGuid.GetTimestamp()).ToArray();
                 }
-                catch (DriverException ex)
+                catch (Exception ex)
                 {
                     Log.For(this).Error(ex, "Cassandra driver exception occured during write.");
                     if (ex.IsCritical()) throw;
@@ -76,7 +76,7 @@ namespace CassandraTimeSeries.Model
                         .Where(e => slices.Contains(e.PartitionId) && e.TimeUuid.CompareTo(start.Value) >= 0 && e.TimeUuid.CompareTo(end.Value) <= 0)
                         .Execute(), startExclusive, count);
                 }
-                catch (DriverException ex)
+                catch (Exception ex)
                 {
                     Log.For(this).Error(ex, "Cassandra driver exception occured during read.");
                     if (ex.IsCritical()) throw;
