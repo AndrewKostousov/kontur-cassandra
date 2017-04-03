@@ -19,7 +19,7 @@ namespace Benchmarks.Results
         [DataMember] public double AverageThroughput { get; set; }
 
         [DataMember] public List<List<Measurement>> Measurements { get; set; }
-        [DataMember] public List<int> Throuhgput { get; set; }
+        [DataMember] public List<int> Throughput { get; set; }
 
         protected WorkerStatistics(IReadOnlyCollection<IBenchmarkWorker> workers)
         {
@@ -38,12 +38,12 @@ namespace Benchmarks.Results
             TotalThroughput = workers.Sum(x => x.TotalThroughput());
             AverageThroughput = workers.Sum(x => x.AverageThroughput());
 
-            Throuhgput = workers
+            Throughput = workers
                 .SelectMany(x => x.Measurements)
-                .Select(x => new {Time = x.StopMilliseconds%100, Throuhgput = x.Throughput})
+                .Select(x => new {Time = x.StopMilliseconds%100, x.Throughput})
                 .GroupBy(x => x.Time)
                 .OrderBy(x => x.Key)
-                .Select(x => x.Sum(z => z.Throuhgput))
+                .Select(x => x.Sum(z => z.Throughput))
                 .ToList();
         }
     }

@@ -28,7 +28,17 @@ namespace CassandraTimeSeries.ReadWrite
             if (events.Length == 0)
                 events = Enumerable.Range(0, Settings.BulkSize).Select(x => CreateEventProto()).ToArray();
 
-            var timestamp = series.Write(events);
+            Timestamp[] timestamp;
+
+            try
+            {
+                timestamp = series.Write(events);
+            }
+            catch (OperationTimeoutException)
+            {
+                return new Timestamp[0];
+            }
+
             Thread.Sleep(Settings.MillisecondsSleep);
             return timestamp;
         }

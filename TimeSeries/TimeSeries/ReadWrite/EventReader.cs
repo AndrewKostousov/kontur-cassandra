@@ -35,7 +35,16 @@ namespace CassandraTimeSeries.ReadWrite
 
         public virtual Event[] ReadNext()
         {
-            var events = series.ReadRange(lastTimestamp, null, Settings.EventsToRead);
+            Event[] events;
+
+            try
+            {
+                events = series.ReadRange(lastTimestamp, null, Settings.EventsToRead);
+            }
+            catch (OperationTimeoutException)
+            {
+                return new Event[0];
+            }
 
             if (events.Length != 0)
                 lastTimestamp = events.Max(x => x.Timestamp);
