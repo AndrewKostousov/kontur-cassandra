@@ -62,7 +62,6 @@
     <Compile Include="BoxEventSeriesCassandraSchemaConfigurator.cs" />
     <Compile Include="BoxEventsReader.cs" />
     <Compile Include="BoxEventsReaderExtensions.cs" />
-    <Compile Include="BoxEventsWriter.cs" />
     <Compile Include="CassandraHelpers\ActionExtensions.cs" />
     <Compile Include="CassandraHelpers\CassandraClusterSettings.cs" />
     <Compile Include="CassandraHelpers\CassandraColumnFamilyDefinition.cs" />
@@ -77,7 +76,6 @@
     <Compile Include="IAllBoxEventSeriesSettings.cs" />
     <Compile Include="IAllBoxEventSeriesTicksHolder.cs" />
     <Compile Include="IBoxEventsReader.cs" />
-    <Compile Include="IBoxEventsWriter.cs" />
     <Compile Include="MaxTicksHolder.cs" />
     <Compile Include="MinTicksHolder.cs" />
     <Compile Include="Promise.cs" />

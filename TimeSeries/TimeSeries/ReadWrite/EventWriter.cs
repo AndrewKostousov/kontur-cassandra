@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using Commons;
-using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
 {
@@ -14,13 +12,10 @@ namespace CassandraTimeSeries.ReadWrite
         public WriterSettings Settings { get; }
         private readonly ITimeSeries series;
 
-        private readonly Random random;
-
         public EventWriter(ITimeSeries series, WriterSettings settings)
         {
             Settings = settings;
             this.series = series;
-            random = new Random();
         }
 
         public virtual Timestamp[] WriteNext(params EventProto[] events)
@@ -45,7 +40,9 @@ namespace CassandraTimeSeries.ReadWrite
 
         private EventProto CreateEventProto()
         {
-            return new EventProto(random.NextBytes(Settings.PayloadLength));
+            return new EventProto(rng.Value.NextBytes(Settings.PayloadLength));
         }
+
+        private readonly ThreadLocal<Random> rng = new ThreadLocal<Random>(() => new Random(Guid.NewGuid().GetHashCode()));
     }
 }
