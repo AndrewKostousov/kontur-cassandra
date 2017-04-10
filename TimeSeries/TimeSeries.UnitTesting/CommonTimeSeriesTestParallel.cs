@@ -98,7 +98,7 @@ namespace CassandraTimeSeries.UnitTesting
             foreach (var writer in writersThreads)
                 writer.Join();
 
-            Thread.Sleep(500); // wait readers
+            Thread.Sleep(1000); // wait readers
 
             keepReadersAlive = false;
 

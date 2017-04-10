@@ -40,7 +40,8 @@ namespace Benchmarks.ReadWrite
             var currentTime = Timestamp.Now;
 
             foreach (var ev in events)
-                Timing.Add(ev.Id, currentTime);
+                if (!Timing.ContainsKey(ev.Id))
+                    Timing.Add(ev.Id, currentTime);
 
             return events;
         }

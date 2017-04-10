@@ -37,17 +37,14 @@ namespace CassandraTimeSeries.Model
         private long lastGoodEventTicks;
         private readonly uint operationalTimeoutMilliseconds;
 
-        public EdiTimeSeriesWrapper(EdiTimeSeriesDatabaseController databaseController, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
+        public EdiTimeSeriesWrapper(EdiTimeSeriesDatabaseController c, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
         {
             Partitioner = partitioner;
             this.operationalTimeoutMilliseconds = operationalTimeoutMilliseconds;
 
-            var serializer = new Serializer(new AllFieldsExtractor(), new DefaultGroBufCustomSerializerCollection(), GroBufOptions.MergeOnRead);
+            ticksHolder = c.AllBoxEventSeriesTicksHolder;
 
-            ticksHolder = new AllBoxEventSeriesTicksHolder(serializer, databaseController.Cluster);
-            ticksHolder.SetEventSeriesExclusiveStartTicks(Timestamp.Now.AddMinutes(-1).Ticks);
-
-            series = new AllBoxEventSeries(new EdiTimeSeriesSettings(Partitioner.PartitionDuration), serializer, ticksHolder, databaseController.Cluster);
+            series = new AllBoxEventSeries(new EdiTimeSeriesSettings(Partitioner.PartitionDuration), c.Serializer, ticksHolder, c.CassandraCluster);
             reader = new BoxEventsReader(series);
         }
 

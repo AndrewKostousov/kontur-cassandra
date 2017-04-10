@@ -75,8 +75,8 @@ namespace Benchmarks.Benchmarks
         private ReadersWritersPool<IEventReader, IEventWriter> CreateWarmUpPool()
         {
             return new ReadersWritersPool<IEventReader, IEventWriter>(
-                readers.Select(r => new EventReader(r, settings.ReaderSettings)).ToList(),
-                writers.Select(w => new EventWriter(w, settings.WriterSettings)).ToList()
+                readers.Select(r => new BenchmarkEventReader(new EventReader(r, settings.ReaderSettings))).ToList(),
+                writers.Select(w => new BenchmarkEventWriter(new EventWriter(w, settings.WriterSettings))).ToList()
             );
         }
 

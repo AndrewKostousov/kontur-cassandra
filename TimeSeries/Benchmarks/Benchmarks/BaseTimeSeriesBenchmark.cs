@@ -14,7 +14,7 @@ namespace Benchmarks.Benchmarks
         protected abstract ITimeSeries TimeSeriesFactory(TDatabaseController controller);
 
         private ITimeSeries maintenanceSeries;
-        private IDatabaseController maintenanceDatabase;
+        private TDatabaseController maintenanceDatabase;
         private TDatabaseController[] readersControllersPool;
         private TDatabaseController[] writersControllersPool;
 
@@ -29,7 +29,7 @@ namespace Benchmarks.Benchmarks
         {
             maintenanceDatabase = new TDatabaseController();
             maintenanceDatabase.SetUpSchema();
-            maintenanceSeries = TimeSeriesFactory(new TDatabaseController());
+            maintenanceSeries = TimeSeriesFactory(maintenanceDatabase);
 
             readersControllersPool = CreatePool(ReadersCountRange.Max());
             writersControllersPool = CreatePool(WritersCountRange.Max());
