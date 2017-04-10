@@ -19,9 +19,8 @@ namespace CassandraTimeSeries.Series
         
         protected readonly Table<EventsCollection> EventsTable;
         protected readonly uint OperationalTimeoutMilliseconds;
+        protected readonly TimeGuidGenerator TimeGuidGenerator;
         protected readonly ISession Session;
-
-        private readonly TimeGuidGenerator timeGuidGenerator;
 
         protected BaseTimeSeries(Table<EventsCollection> eventsTable, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds)
         {
@@ -30,14 +29,14 @@ namespace CassandraTimeSeries.Series
             Partitioner = partitioner;
             Session = eventsTable.GetSession();
 
-            timeGuidGenerator = new TimeGuidGenerator(new PreciseTimestampGenerator(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100)));
+            TimeGuidGenerator = new TimeGuidGenerator(new PreciseTimestampGenerator(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100)));
         }
 
         public abstract Timestamp[] Write(params EventProto[] events);
 
         protected TimeGuid NewTimeGuid()
         {
-            return new TimeGuid(timeGuidGenerator.NewGuid());
+            return new TimeGuid(TimeGuidGenerator.NewGuid());
         }
 
         protected EventsCollection PackIntoCollection(EventProto[] eventProtos, TimeGuid id)

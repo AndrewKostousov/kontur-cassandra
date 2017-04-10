@@ -25,7 +25,7 @@ namespace CassandraTimeSeries.Model
         public CasTimeSeries(CasTimeSeriesDatabaseController databaseController, TimeLinePartitioner partitioner, uint operationalTimeoutMilliseconds = 10000)
             : base(databaseController.EventsTable, partitioner, operationalTimeoutMilliseconds)
         {
-            startOfTimesHelper = new CasStartOfTimesHelper(databaseController.SyncTable, partitioner);
+            startOfTimesHelper = new CasStartOfTimesHelper(databaseController.SyncTable, partitioner, TimeGuidGenerator);
         }
 
         public override void WriteWithoutSync(Event ev)
@@ -82,7 +82,7 @@ namespace CassandraTimeSeries.Model
 
         private TimeGuid CreateSynchronizedId()
         {
-            var nowGuid = TimeGuid.NowGuid();
+            var nowGuid = NewTimeGuid();
 
             if (lastWrittenTimeGuid != null && lastWrittenTimeGuid.GetTimestamp() >= nowGuid.GetTimestamp())
                 return lastWrittenTimeGuid.AddMilliseconds(1);
@@ -242,9 +242,10 @@ namespace CassandraTimeSeries.Model
 
         private bool IsPartitionClosed(long partitionId)
         {
-            var read = EventsTable.Where(x => x.PartitionId == partitionId).Execute().ToArray();
-
-            return read.Any(x => x.MaxIdInPartition == ClosingTimeUuid);
+            return EventsTable
+                .Where(x => x.PartitionId == partitionId)
+                .Execute()
+                .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
         }
     }
 }

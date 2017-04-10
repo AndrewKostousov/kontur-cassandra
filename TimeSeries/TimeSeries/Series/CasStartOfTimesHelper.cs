@@ -12,17 +12,17 @@ namespace CassandraTimeSeries.Model
         public TimeGuid StartOfTimes { get; }
         public long PartitionIdOfStartOfTimes { get; }
 
-        public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable, TimeLinePartitioner partitioner)
+        public CasStartOfTimesHelper(Table<CasTimeSeriesSyncData> syncTable, TimeLinePartitioner partitioner, TimeGuidGenerator timeGuidGenerator)
         {
-            StartOfTimes = TryUpdateStartOfTime(syncTable);
+            StartOfTimes = TryUpdateStartOfTime(syncTable, timeGuidGenerator);
             PartitionIdOfStartOfTimes = partitioner.CreatePartitionId(StartOfTimes.GetTimestamp());
         }
 
-        private TimeGuid TryUpdateStartOfTime(Table<CasTimeSeriesSyncData> syncTable)
+        private TimeGuid TryUpdateStartOfTime(Table<CasTimeSeriesSyncData> syncTable, TimeGuidGenerator timeGuidGenerator)
         {
             var session = syncTable.GetSession();
 
-            var guidToInsert = TimeGuid.NowGuid();
+            var guidToInsert = new TimeGuid(timeGuidGenerator.NewGuid());
             var syncData = new CasTimeSeriesSyncData(guidToInsert);
 
             var query = session.Prepare($"INSERT INTO {syncTable.Name} (partition_key, global_start) VALUES (?, ?) IF NOT EXISTS")
