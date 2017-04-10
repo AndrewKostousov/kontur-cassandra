@@ -35,7 +35,7 @@ namespace CassandraTimeSeries.Model
             SyncTable.Truncate();
         }
 
-        public void TearDownSchema()
+        public void Dispose()
         {
             testingCluster.Dispose();
         }

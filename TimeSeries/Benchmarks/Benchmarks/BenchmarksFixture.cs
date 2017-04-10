@@ -11,23 +11,28 @@ namespace Benchmarks.Benchmarks
         protected virtual void ClassSetUp() { }
         protected virtual void ClassTearDown() { }
 
-        protected abstract IEnumerable<Benchmark> GetBenchmarks();
+        protected abstract IEnumerable<IBenchmark> GetBenchmarks();
 
-        public event Action<Benchmark> BenchmarkSetup;
-        public event Action<Benchmark> BenchmarkStarted;
-        public event Action<Benchmark, IBenchmarkingResult> BenchmarkFinished;
-        public event Action<Benchmark> BenchmarkTeardown;
+        public event Action<IBenchmark> BenchmarkSetup;
+        public event Action<IBenchmark> BenchmarkStarted;
+        public event Action<IBenchmark, IBenchmarkingResult> BenchmarkFinished;
+        public event Action<IBenchmark> BenchmarkTeardown;
+
+        public event Action OnClassSetup;
+        public event Action OnClassTearDown;
 
         public void Run()
         {
+            OnClassSetup?.Invoke();
             ClassSetUp();
 
             GetBenchmarks().ToList().ForEach(RunSingleBenchmark);
 
+            OnClassTearDown?.Invoke();
             ClassTearDown();
         }
 
-        private void RunSingleBenchmark(Benchmark benchmark)
+        private void RunSingleBenchmark(IBenchmark benchmark)
         {
             BenchmarkSetup?.Invoke(benchmark);
 

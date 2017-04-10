@@ -82,6 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IDatabaseController.cs" />
+    <Compile Include="ReadWrite\IEventReader.cs" />
+    <Compile Include="ReadWrite\IEventWriter.cs" />
     <Compile Include="Series\BaseTimeSeries.cs" />
     <Compile Include="Series\CassandraTestingCluster.cs" />
     <Compile Include="Series\EdiTimeSeriesDatabaseController.cs" />

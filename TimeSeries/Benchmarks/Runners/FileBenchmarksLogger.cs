@@ -17,10 +17,10 @@ namespace Benchmarks.Runners
         public override void LogFixtureBegan(BenchmarksFixture fixture) =>
             File.WriteAllText(FormatFileNameFor(fixture), CreateBigTitle($"   {fixture.Name}"));
 
-        public override void LogBenchmarkStarted(BenchmarksFixture fixture, Benchmark benchmark) =>
+        public override void LogBenchmarkStarted(BenchmarksFixture fixture, IBenchmark benchmark) =>
             File.AppendAllText(FormatFileNameFor(fixture), $"{NewLine}== {benchmark.Name} ".PadRight(100, '=') + NewLine);
 
-        public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result) =>
+        public override void LogBenchmarkFinished(BenchmarksFixture fixture, IBenchmark benchmark, IBenchmarkingResult result) =>
             File.AppendAllText(FormatFileNameFor(fixture), NewLine + result.CreateReport());
     }
 }

@@ -67,6 +67,9 @@
     <Compile Include="Benchmarks\BenchmarkImplementations.cs" />
     <Compile Include="Benchmarks\BenchmarksFixture.cs" />
     <Compile Include="Benchmarks\BaseTimeSeriesBenchmark.cs" />
+    <Compile Include="Benchmarks\IBenchmark.cs" />
+    <Compile Include="Benchmarks\TimeSeriesBenchmark.cs" />
+    <Compile Include="Benchmarks\TimeSeriesBenchmarkSettings.cs" />
     <Compile Include="ReadWrite\BenchmarkEventReader.cs" />
     <Compile Include="ReadWrite\BenchmarkEventWriter.cs" />
     <Compile Include="ReadWrite\BenchmarkWorkerExtensions.cs" />
@@ -79,7 +82,7 @@
     <Compile Include="Runners\BenchmarksLogger.cs" />
     <Compile Include="Runners\BenchmarksRunner.cs" />
     <Compile Include="Runners\BenchmarkFinder.cs" />
-    <Compile Include="Benchmarks\Benchmark.cs" />
+    <Compile Include="Benchmarks\DelegatedBenchmark.cs" />
     <Compile Include="Results\IBenchmarkingResult.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

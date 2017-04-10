@@ -11,18 +11,22 @@ using Commons.TimeBasedUuid;
 
 namespace Benchmarks.ReadWrite
 {
-    class BenchmarkEventWriter : EventWriter, IBenchmarkWorker
+    class BenchmarkEventWriter : IEventWriter, IBenchmarkWorker
     {
         public List<Measurement> Measurements { get; } = new List<Measurement>();
 
-        public BenchmarkEventWriter(ITimeSeries series, WriterSettings settings) 
-            : base(series, settings) { }
+        private readonly IEventWriter writer;
 
-        public override Timestamp[] WriteNext(params EventProto[] events)
+        public BenchmarkEventWriter(IEventWriter writer)
+        {
+            this.writer = writer;
+        }
+
+        public Timestamp[] WriteNext(params EventProto[] events)
         {
             var measurement = Measurement.Start();
 
-            var writtenEventTimestamp = base.WriteNext(events);
+            var writtenEventTimestamp = writer.WriteNext(events);
 
             Measurements.Add(measurement.Stop(writtenEventTimestamp.Length));
 

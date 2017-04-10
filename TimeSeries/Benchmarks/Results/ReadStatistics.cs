@@ -57,7 +57,7 @@ namespace Benchmarks.Results
                    $"Total events read: {TotalThroughput}{nl}" +
                    $"Average reads length: {TotalThroughput/totalOperationsCount} events/read{nl}{nl}" +
 
-                   $"Measurements between write and read: {AverageEndToEndLatency} ms{nl}" +
+                   $"Latency between write and read: {AverageEndToEndLatency} ms{nl}" +
                    $"95% of events were read earlier than {EndToEndLatency95ThPercentile} ms since they had been written{nl}" +
                    $"99% of events were read earlier than {EndToEndLatency99ThPercentile} ms since they had been written{nl}{nl}";
         }

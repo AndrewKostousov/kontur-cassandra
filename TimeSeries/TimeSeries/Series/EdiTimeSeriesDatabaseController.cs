@@ -21,7 +21,7 @@ namespace CassandraTimeSeries.Model
             EdiTimelineTestsEnvironment.ResetState();
         }
 
-        public void TearDownSchema()
+        public void Dispose()
         {
             environment.RunAfterAnyTests();
         }

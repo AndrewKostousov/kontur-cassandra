@@ -2,7 +2,7 @@
 
 namespace Benchmarks.Benchmarks
 {
-    public class Benchmark
+    public class DelegatedBenchmark : IBenchmark
     {
         public string Name { get; }
 
@@ -10,9 +10,9 @@ namespace Benchmarks.Benchmarks
         private readonly Func<IBenchmarkingResult> run;
         private readonly Action tearDown;
 
-        public Benchmark(string name, Func<IBenchmarkingResult> run, Action tearDown = null) : this(name, null, run, tearDown) { }
+        public DelegatedBenchmark(string name, Func<IBenchmarkingResult> run, Action tearDown = null) : this(name, null, run, tearDown) { }
         
-        public Benchmark(string name, Action setUp, Func<IBenchmarkingResult> run, Action tearDown = null)
+        public DelegatedBenchmark(string name, Action setUp, Func<IBenchmarkingResult> run, Action tearDown = null)
         {
             if (run == null)
                 throw new ArgumentException($"Illegal argument '{nameof(run)}': expected delegate, got null.");

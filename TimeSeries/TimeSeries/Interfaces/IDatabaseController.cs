@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace CassandraTimeSeries.Interfaces
 {
-    public interface IDatabaseController
+    public interface IDatabaseController : IDisposable
     {
         void SetUpSchema();
         void ResetSchema();
-        void TearDownSchema();
     }
 }

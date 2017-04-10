@@ -34,6 +34,10 @@ namespace Benchmarks.Runners
 
             fixture.BenchmarkTeardown += b => loggers.ForEach(lgr => lgr.LogBenchmarkTearDown(fixture, b));
 
+            fixture.OnClassSetup += () => loggers.ForEach(lgr => lgr.LogFixtureSetup(fixture));
+
+            fixture.OnClassTearDown += () => loggers.ForEach(lgr => lgr.LogFixtureTearDown(fixture));
+
             foreach (var logger in loggers)
                 logger.LogFixtureBegan(fixture);
 

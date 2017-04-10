@@ -10,7 +10,7 @@ namespace Benchmarks.Runners
 {
     class JsonBenchmarkLogger : BenchmarksLogger
     {
-        private static string FormatFileNameFor(BenchmarksFixture fixture, Benchmark benchmark)
+        private static string FormatFileNameFor(BenchmarksFixture fixture, IBenchmark benchmark)
         {
             var directoryName = $"Raw data\\{fixture.Name}";
 
@@ -19,7 +19,7 @@ namespace Benchmarks.Runners
             return $"{directoryName}\\{benchmark.Name}.json";
         }
 
-        public override void LogBenchmarkFinished(BenchmarksFixture fixture, Benchmark benchmark, IBenchmarkingResult result)
+        public override void LogBenchmarkFinished(BenchmarksFixture fixture, IBenchmark benchmark, IBenchmarkingResult result)
         {
             var fileToWrite = FormatFileNameFor(fixture, benchmark);
 

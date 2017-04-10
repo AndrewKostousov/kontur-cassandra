@@ -5,8 +5,8 @@ using CassandraTimeSeries.Model;
 namespace CassandraTimeSeries.ReadWrite
 {
     public class ReadersWritersPool<TReader, TWriter>
-        where TReader : EventReader 
-        where TWriter : EventWriter
+        where TReader : IEventReader 
+        where TWriter : IEventWriter
     {
         private readonly WorkersPool readersPool;
         private readonly WorkersPool writersPool;

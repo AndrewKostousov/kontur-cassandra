@@ -8,7 +8,7 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
 {
-    public class EventReader
+    public class EventReader : IEventReader
     {
         public ReaderSettings Settings { get; }
 
@@ -23,10 +23,12 @@ namespace CassandraTimeSeries.ReadWrite
 
         public virtual Event[] ReadFirst()
         {
+            if (lastTimestamp != null) return ReadNext();
+
             Event[] events = null;
 
             while (events == null || events.Length == 0)
-                 events = series.ReadRange((TimeGuid) null, null);
+                 events = series.ReadRange((TimeGuid) null, null, Settings.EventsToRead);
 
             lastTimestamp = events.Max(x => x.Timestamp);
 

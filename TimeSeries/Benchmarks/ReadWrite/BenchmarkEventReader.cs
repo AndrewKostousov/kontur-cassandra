@@ -11,20 +11,29 @@ using Commons;
 
 namespace Benchmarks.ReadWrite
 {
-    class BenchmarkEventReader : EventReader, IBenchmarkWorker
+    class BenchmarkEventReader : IEventReader, IBenchmarkWorker
     {
         public List<Measurement> Measurements { get; } = new List<Measurement>();
 
         public Dictionary<TimeUuid, Timestamp> Timing { get; } = new Dictionary<TimeUuid, Timestamp>();
 
-        public BenchmarkEventReader(ITimeSeries series, ReaderSettings settings) 
-            : base(series, settings) { }
+        private readonly IEventReader reader;
 
-        public override Event[] ReadNext()
+        public BenchmarkEventReader(IEventReader reader)
+        {
+            this.reader = reader;
+        }
+
+        public Event[] ReadFirst()
+        {
+            return reader.ReadFirst();
+        }
+
+        public Event[] ReadNext()
         {
             var measurement = Measurement.Start();
 
-            var events = base.ReadNext();
+            var events = reader.ReadNext();
 
             Measurements.Add(measurement.Stop(events.Length));
 

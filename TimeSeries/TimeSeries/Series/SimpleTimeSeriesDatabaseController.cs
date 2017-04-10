@@ -28,7 +28,7 @@ namespace CassandraTimeSeries.Model
             EventsTable.Truncate();
         }
 
-        public void TearDownSchema()
+        public void Dispose()
         {
             testingCluster.Dispose();
         }

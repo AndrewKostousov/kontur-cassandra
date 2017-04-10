@@ -9,7 +9,7 @@ using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.ReadWrite
 {
-    public class EventWriter
+    public class EventWriter : IEventWriter
     {
         public WriterSettings Settings { get; }
         private readonly ITimeSeries series;

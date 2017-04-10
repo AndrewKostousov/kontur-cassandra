@@ -1,14 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Benchmarks.ReadWrite;
 using Benchmarks.Reflection;
-using Benchmarks.Results;
+using Cassandra;
 using CassandraTimeSeries.Interfaces;
-using CassandraTimeSeries.Model;
-using CassandraTimeSeries.ReadWrite;
 using CassandraTimeSeries.Utils;
-using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Benchmarks
 {
@@ -17,77 +13,68 @@ namespace Benchmarks.Benchmarks
     {
         protected abstract ITimeSeries TimeSeriesFactory(TDatabaseController controller);
 
-        private ITimeSeries series;
+        private ITimeSeries maintenanceSeries;
+        private IDatabaseController maintenanceDatabase;
+        private TDatabaseController[] readersControllersPool;
+        private TDatabaseController[] writersControllersPool;
 
-        protected virtual ReaderSettings ReaderSettings { get; } = new ReaderSettings();
-        protected virtual WriterSettings WriterSettings { get; } = new WriterSettings();
+        private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4, 8, 16, 32 };
 
-        private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4, 8, 16, 32, 64 };
-
-        private readonly IDatabaseController database = new TDatabaseController();
-
-        protected virtual int[] ReadersCountRange => new[] {0, 1, 4};
+        protected virtual int[] ReadersCountRange => DefaultReadersWritersCount;
         protected virtual int[] WritersCountRange => DefaultReadersWritersCount;
 
-        protected virtual int PreloadedEventsCount { get; } = 5000;
+        protected virtual TimeSeriesBenchmarkSettings Settings => TimeSeriesBenchmarkSettings.Default();
 
         protected override void ClassSetUp()
         {
-            database.SetUpSchema();
-            series = TimeSeriesFactory(new TDatabaseController());
+            maintenanceDatabase = new TDatabaseController();
+            maintenanceDatabase.SetUpSchema();
+            maintenanceSeries = TimeSeriesFactory(new TDatabaseController());
+
+            readersControllersPool = CreatePool(ReadersCountRange.Max());
+            writersControllersPool = CreatePool(WritersCountRange.Max());
         }
-        
+
+        private TDatabaseController[] CreatePool(int poolSize)
+        {
+            var pool = Enumerable
+                .Range(0, poolSize)
+                .Select(_ => { Console.Write("."); return new TDatabaseController(); })
+                .ToArray();
+
+            Console.WriteLine();
+
+            return pool;
+        }
+
         protected override void ClassTearDown()
         {
-            database.TearDownSchema();
+            maintenanceDatabase.Dispose();
+
+            foreach (var databaseController in readersControllersPool)
+                databaseController.Dispose();
+
+            foreach (var databaseController in writersControllersPool)
+                databaseController.Dispose();
         }
 
-        protected override IEnumerable<Benchmark> GetBenchmarks()
+        protected override IEnumerable<IBenchmark> GetBenchmarks()
         {
             return ReadersCountRange.Product(WritersCountRange, (i, j) => new {Readers = i, Writers = j})
-                .Where(x => x.Writers != 0 || x.Readers != 0)
-                .Select(
-                    num => new Benchmark($"{num.Readers} reader{(num.Readers==1?"":"s")}, {num.Writers} writer{(num.Writers==1?"":"s")}",
-                        () =>
-                        {
-                            SetUp(num.Readers, num.Writers);
-                            if (num.Writers == 0) FillEvents();
-                        }, 
-                        RunGenericBenchmark)
-                );
+                .Where(num => num.Writers != 0)
+                .Select(num => new TimeSeriesBenchmark(CreateBenchmarkName(num.Readers, num.Writers),
+                    Settings, maintenanceDatabase, maintenanceSeries, 
+                    InitTimeSeries(num.Readers, readersControllersPool), InitTimeSeries(num.Writers, writersControllersPool)));
         }
 
-        private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> pool;
-
-        private void SetUp(int readersCount, int writersCount)
+        private String CreateBenchmarkName(int numReaders, int numWriters)
         {
-            database.ResetSchema();
-            pool = InitReadersWritersPool(readersCount, writersCount);
+            return $"{numReaders} reader{(numReaders == 1 ? "" : "s")}, {numWriters} writer{(numWriters == 1 ? "" : "s")}";
         }
 
-        private void FillEvents()
+        private List<ITimeSeries> InitTimeSeries(int count, TDatabaseController[] pool)
         {
-            for (var i = 0; i < PreloadedEventsCount; ++i)
-            {
-                var id = TimeGuid.NowGuid();
-                series.WriteWithoutSync(new Event(id, new EventProto()));
-            }
-        }
-
-        private ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter> InitReadersWritersPool(int readersCount, int writersCount)
-        {
-            var readers = Enumerable.Range(0, readersCount).Select(_ => new BenchmarkEventReader(TimeSeriesFactory(new TDatabaseController()), ReaderSettings)).ToList();
-            var writers = Enumerable.Range(0, writersCount).Select(_ => new BenchmarkEventWriter(TimeSeriesFactory(new TDatabaseController()), WriterSettings)).ToList();
-            return new ReadersWritersPool<BenchmarkEventReader, BenchmarkEventWriter>(readers, writers);
-        }
-
-        private IBenchmarkingResult RunGenericBenchmark()
-        {
-            pool.Start();
-            Thread.Sleep(5 * 1000);
-            pool.Stop();
-
-            return new DatabaseBenchmarkingResult(pool.Readers, pool.Writers);
+            return pool.Take(count).Select(TimeSeriesFactory).ToList();
         }
     }
 }

@@ -28,7 +28,7 @@ namespace CassandraTimeSeries.UnitTesting
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            Database.TearDownSchema();
+            Database.Dispose();
         }
     }
 }
