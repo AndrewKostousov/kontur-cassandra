@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Commons.Bits;
@@ -379,18 +378,6 @@ namespace Commons.Tests.TimeGuidTests
             Assert.That(serializeAndDeserialize(new TestDto {TimeGuid = TimeGuid.MinValue}).TimeGuid, Is.EqualTo(TimeGuid.MinValue));
             Assert.That(serializeAndDeserialize(new TestDto {TimeGuid = TimeGuid.MaxValue}).TimeGuid, Is.EqualTo(TimeGuid.MaxValue));
             Assert.That(serializeAndDeserialize(new TestDto {TimeGuid = null}).TimeGuid, Is.Null);
-        }
-
-        [Test]
-        [Category("Manual")]
-        public void Perf()
-        {
-            const int count = 10 * 1000 * 1000;
-            var sw = Stopwatch.StartNew();
-            for(var i = 0; i < count; i++)
-                TimeGuid.NowGuid();
-            sw.Stop();
-            Console.Out.WriteLine("TimeGuid.NowGuid() took {0} ms for {1} calls", sw.ElapsedMilliseconds, count);
         }
 
         private ushort GetRandomClockSequence()
