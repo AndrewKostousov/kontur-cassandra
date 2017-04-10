@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Benchmarks.Benchmarks;
+using Commons.Logging;
 
 namespace Benchmarks.Runners
 {
@@ -15,6 +16,8 @@ namespace Benchmarks.Runners
 
         public void RunAll(IEnumerable<BenchmarksFixture> benchmarks)
         {
+            Logging.SetUp();
+
             foreach (var fixture in benchmarks)
                 RunSingleBenchmark(fixture);
 
