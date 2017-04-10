@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Commons.TimeBasedUuid;
 using NUnit.Framework;
@@ -10,24 +9,27 @@ namespace Commons.Tests.TimeGuidTests
     [TestFixture]
     public class PreciseTimestampGeneratorTest
     {
-        [Test]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(8)]
+        [TestCase(16)]
+        [TestCase(32)]
+        [TestCase(64)]
+        [TestCase(128)]
         [Category("Manual")]
-        public void Perf()
+        public void Perf(int threadsCount)
         {
-            const int count = 10 * 1000 * 1000;
-            var timestampGenerator = new PreciseTimestampGenerator(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100));
-            var sw = Stopwatch.StartNew();
-            for(var i = 0; i < count; i++)
-                timestampGenerator.NowTicks();
-            sw.Stop();
-            Console.Out.WriteLine("PreciseTimestampGenerator.Now() took {0} ms to generate {1} timestamps", sw.ElapsedMilliseconds, count);
+            const int totalIterationsCount = 64 * 1000 * 1000;
+            var sut = new PreciseTimestampGenerator(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100));
+            PerfMeasurement.Do("PreciseTimestampGenerator.Now()", threadsCount, totalIterationsCount, () => sut.NowTicks());
         }
 
         [Test]
         [Category("Nightly")]
         public void Collisions()
         {
-            const int count = 10 * 1000 * 1000;
+            const int count = 32 * 1000 * 1000;
             var timestampGenerator = new PreciseTimestampGenerator(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100));
             var results = new HashSet<long>();
             for(var i = 0; i < count; i++)

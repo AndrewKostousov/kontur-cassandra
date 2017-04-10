@@ -68,6 +68,7 @@
     <Compile Include="Json\StringTimestampConverter_Test.cs" />
     <Compile Include="Logging\Serilog_Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimeGuidTests\PerfMeasurement.cs" />
     <Compile Include="TimeGuidTests\PreciseTimestampGeneratorTest.cs" />
     <Compile Include="TimeGuidTests\TimeGuidBitsLayoutTest.cs" />
     <Compile Include="TimeGuidTests\TimeGuidGeneratorTest.cs" />

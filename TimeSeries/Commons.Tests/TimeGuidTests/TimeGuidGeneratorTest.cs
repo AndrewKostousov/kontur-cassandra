@@ -13,17 +13,20 @@ namespace Commons.Tests.TimeGuidTests
     [TestFixture]
     public class TimeGuidGeneratorTest
     {
-        [Test]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(8)]
+        [TestCase(16)]
+        [TestCase(32)]
+        [TestCase(64)]
+        [TestCase(128)]
         [Category("Manual")]
-        public void Perf()
+        public void Perf(int threadsCount)
         {
-            const int count = 10 * 1000 * 1000;
-            var guidGen = new TimeGuidGenerator(PreciseTimestampGenerator.Instance);
-            var sw = Stopwatch.StartNew();
-            for(var i = 0; i < count; i++)
-                guidGen.NewGuid();
-            sw.Stop();
-            Console.Out.WriteLine("TimeGuidGenerator.NewGuid() took {0} ms to generate {1} time guids", sw.ElapsedMilliseconds, count);
+            const int totalIterationsCount = 64 * 1000 * 1000;
+            var sut = new TimeGuidGenerator(PreciseTimestampGenerator.Instance);
+            PerfMeasurement.Do("TimeGuidGenerator.NewGuid()", threadsCount, totalIterationsCount, () => sut.NewGuid());
         }
 
         [Test]
