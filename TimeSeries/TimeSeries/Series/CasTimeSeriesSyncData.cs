@@ -13,8 +13,14 @@ namespace CassandraTimeSeries.Model
     public class CasTimeSeriesSyncData
     {
         [PartitionKey]
+        [ClusteringKey]
+        [Column("partition_key")]
+        public int SharedPartitionKey { get; set; } = 0;
+
         [Column("global_start")]
         public TimeUuid GlobalStartOfTimeSeries { get; set; }
+
+        public CasTimeSeriesSyncData() { }
 
         public CasTimeSeriesSyncData(TimeUuid globalStartOfTimeSeries)
         {

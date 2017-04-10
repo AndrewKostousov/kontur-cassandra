@@ -62,7 +62,7 @@ namespace CassandraTimeSeries.UnitTesting
 
             var keepReadersAlive = true;
 
-            var readersThreads = readers.Select(reader =>
+            var readersThreads = readers.Select((reader, index) =>
                 {
                     return new Thread(() =>
                     {
@@ -70,22 +70,23 @@ namespace CassandraTimeSeries.UnitTesting
 
                         while (keepReadersAlive)
                             readEvents[reader].AddRange(reader.ReadNext());
-                    });
+
+                    }) { Name = $"reader #{index}" };
                 }
             ).ToList();
 
-            var writersThreads = writers.Select(writer =>
+            var writersThreads = writers.Select((writer, index) =>
             {
                 return new Thread(() =>
                 {
-                    for (int i = 0; i < 10; ++i)
+                    for (var i = 0; i < 20; ++i)
                     {
                         var eventProtos = Enumerable.Range(0, 10).Select(_ => new EventProto()).ToArray();
                         var timestamp = writer.WriteNext(eventProtos);
 
                         writtenEvents[writer].AddRange(timestamp.Select((t, n) => Tuple.Create(t, eventProtos[n])));
                     }
-                });
+                }) {Name = $"writer #{index}"};
             }).ToList();
 
             foreach (var writer in writersThreads)
@@ -97,7 +98,7 @@ namespace CassandraTimeSeries.UnitTesting
             foreach (var writer in writersThreads)
                 writer.Join();
 
-            Thread.Sleep(1000); // wait readers
+            Thread.Sleep(500); // wait readers
 
             keepReadersAlive = false;
 

@@ -2,6 +2,7 @@ using System;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
+using Commons.Logging;
 using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting
@@ -18,6 +19,8 @@ namespace CassandraTimeSeries.UnitTesting
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()
         {
+            Logging.SetUp();
+
             Database.SetUpSchema();
             Series = TimeSeriesFactory(new TDatabaseController());
         }

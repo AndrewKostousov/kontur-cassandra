@@ -20,13 +20,14 @@ namespace CassandraTimeSeries.Model
 
         private TimeGuid TryUpdateStartOfTime(Table<CasTimeSeriesSyncData> syncTable)
         {
-            var guidToInsert = TimeGuid.NowGuid();
-
             var session = syncTable.GetSession();
 
-            var query = session.Prepare(
-                $"INSERT INTO {syncTable.Name} (global_start) VALUES (?) IF NOT EXISTS"
-            ).Bind(guidToInsert.ToTimeUuid()).SetConsistencyLevel(ConsistencyLevel.All);
+            var guidToInsert = TimeGuid.NowGuid();
+            var syncData = new CasTimeSeriesSyncData(guidToInsert);
+
+            var query = session.Prepare($"INSERT INTO {syncTable.Name} (partition_key, global_start) VALUES (?, ?) IF NOT EXISTS")
+                .Bind(syncData.SharedPartitionKey, syncData.GlobalStartOfTimeSeries)
+                .SetConsistencyLevel(ConsistencyLevel.All);
 
             var executionResult = session.Execute(query).GetRows().Single();
 

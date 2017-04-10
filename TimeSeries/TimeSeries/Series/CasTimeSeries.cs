@@ -105,16 +105,13 @@ namespace CassandraTimeSeries.Model
             return WriteEventToCurrentPartition(eventToWrite, eventToWrite.PartitionId != lastWrittenPartitionId);
         }
 
-        private bool ShouldCloseOutdatedPartitions(long partitionId, long lastWrittenPartitionId,
-            [CanBeNull] StatementExecutionResult lastUpdateResult)
+        private bool ShouldCloseOutdatedPartitions(long partitionId, long lastWrittenPartitionId, [CanBeNull] StatementExecutionResult lastUpdateResult)
         {
             var partitionDelta = partitionId - lastWrittenPartitionId;
             var isWritingToEmptyPartition = partitionDelta != 0;
-            var isJumpedOverExactlyOnePartition = partitionDelta <= Partitioner.PartitionDuration.Ticks;
-            var lastPartitionIsNotAlreadyClosed = lastUpdateResult != null &&
-                                                  lastUpdateResult.State != ExecutionState.PartitionClosed;
+            var lastPartitionIsNotAlreadyClosed = lastUpdateResult == null || lastUpdateResult.State != ExecutionState.PartitionClosed;
 
-            return isWritingToEmptyPartition && isJumpedOverExactlyOnePartition && lastPartitionIsNotAlreadyClosed;
+            return isWritingToEmptyPartition && lastPartitionIsNotAlreadyClosed;
         }
 
         private StatementExecutionResult WriteEventToCurrentPartition(EventsCollection e, bool isWritingToEmptyPartition)
