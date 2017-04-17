@@ -79,12 +79,11 @@ namespace CassandraTimeSeries.UnitTesting
             {
                 return new Thread(() =>
                 {
-                    for (var i = 0; i < 20; ++i)
+                    for (var i = 0; i < 100; ++i)
                     {
-                        var eventProtos = Enumerable.Range(0, 10).Select(_ => new EventProto()).ToArray();
-                        var timestamp = writer.WriteNext(eventProtos);
-
-                        writtenEvents[writer].AddRange(timestamp.Select((t, n) => Tuple.Create(t, eventProtos[n])));
+                        var eventProto = new EventProto();
+                        var timestamp = writer.WriteNext(eventProto);
+                        writtenEvents[writer].Add(Tuple.Create(timestamp[0], eventProto));
                     }
                 }) {Name = $"writer #{index}"};
             }).ToList();
