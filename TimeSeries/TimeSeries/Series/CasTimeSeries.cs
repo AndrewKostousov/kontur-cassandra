@@ -42,6 +42,9 @@ namespace CassandraTimeSeries.Model
             var sw = Stopwatch.StartNew();
             StatementExecutionResult statementExecutionResult = null;
 
+            if (lastWrittenTimeGuid == null)
+                lastWrittenTimeGuid = ReadLastWrittenTimeGuid();
+
             while (sw.ElapsedMilliseconds < OperationalTimeoutMilliseconds)
             {
                 var eventsToWrite = PackIntoCollection(events, CreateSynchronizedId());
@@ -125,12 +128,12 @@ namespace CassandraTimeSeries.Model
                 $"UPDATE {EventsTable.Name} " +
                 "SET user_ids = ?, payloads = ?, max_id_in_partition = ?" +
                 "WHERE time_uuid = ? AND partition_id = ? " +
-                (isWritingToEmptyPartition ? "IF max_id_in_partition = NULL" : "IF max_id_in_partition < ?")
+                (isWritingToEmptyPartition ? "IF max_id_in_partition = NULL" : "IF max_id_in_partition = ?")
             );
 
             return isWritingToEmptyPartition
                 ? writeEventStatement.Bind(e.UserIds, e.Payloads, e.TimeUuid, e.TimeUuid, e.PartitionId)
-                : writeEventStatement.Bind(e.UserIds, e.Payloads, e.TimeUuid, e.TimeUuid, e.PartitionId, e.TimeUuid);
+                : writeEventStatement.Bind(e.UserIds, e.Payloads, e.TimeUuid, e.TimeUuid, e.PartitionId, lastWrittenTimeGuid.ToTimeUuid());
         }
 
         private void CloseAllPartitionsBefore(long exclusiveLastPartitionId)
@@ -254,6 +257,32 @@ namespace CassandraTimeSeries.Model
                 .Where(x => x.PartitionId == partitionId)
                 .Execute()
                 .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
+        }
+
+        private TimeGuid ReadLastWrittenTimeGuid()
+        {
+            var startGuid = lastWrittenTimeGuid ?? startOfTimesHelper.StartOfTimes;
+            var partition = Partitioner.CreatePartitionId(startGuid.GetTimestamp());
+
+            while (true)
+            {
+                var partitionId = partition;
+
+                var read = EventsTable
+                    .SetConsistencyLevel(ConsistencyLevel.Serial)
+                    .Where(x => x.PartitionId == partitionId)
+                    .Take(1)
+                    .Execute()
+                    .FirstOrDefault();
+
+                if (read == null && !IsPartitionClosed(partitionId))
+                    return TimeGuid.MinForTimestamp(new Timestamp(partitionId));
+
+                if (read != null && read.MaxIdInPartition != ClosingTimeUuid)
+                    return read.MaxIdInPartition.ToTimeGuid();
+
+                partition = Partitioner.Increment(partition);
+            }
         }
     }
 }
