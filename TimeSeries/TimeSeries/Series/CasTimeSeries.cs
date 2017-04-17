@@ -211,7 +211,6 @@ namespace CassandraTimeSeries.Model
                 .ToArray();
 
             return EventsTable
-                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => partitions.Contains(x.PartitionId) && x.TimeUuid.CompareTo(start) > 0 && x.TimeUuid.CompareTo(end) <= 0)
                 .Execute()
                 .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
@@ -230,7 +229,6 @@ namespace CassandraTimeSeries.Model
                 var partitionId = partition;
 
                 var read = EventsTable
-                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Where(x => x.PartitionId == partitionId && x.TimeUuid.CompareTo(start) > 0)
                     .Execute()
                     .ToArray();
@@ -253,7 +251,6 @@ namespace CassandraTimeSeries.Model
         private bool IsPartitionClosed(long partitionId)
         {
             return EventsTable
-                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => x.PartitionId == partitionId)
                 .Execute()
                 .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
@@ -269,7 +266,6 @@ namespace CassandraTimeSeries.Model
                 var partitionId = partition;
 
                 var read = EventsTable
-                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Where(x => x.PartitionId == partitionId)
                     .Take(1)
                     .Execute()
