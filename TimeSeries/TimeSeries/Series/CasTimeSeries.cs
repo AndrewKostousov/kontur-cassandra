@@ -192,8 +192,13 @@ namespace CassandraTimeSeries.Model
         {
             if (startExclusive == null) startExclusive = startOfTimesHelper.StartOfTimes;
 
-            if (endInclusive == null) return ReadUntilEnd(startExclusive, count);
+            return endInclusive == null 
+                ? ReadFromStartToInfinity(startExclusive, count) 
+                : ReadFromStartToEnd(startExclusive, endInclusive, count);
+        }
 
+        private Event[] ReadFromStartToEnd(TimeGuid startExclusive, TimeGuid endInclusive, int count)
+        {
             var start = startExclusive.ToTimeUuid();
             var end = endInclusive.ToTimeUuid();
 
@@ -203,6 +208,7 @@ namespace CassandraTimeSeries.Model
                 .ToArray();
 
             return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => partitions.Contains(x.PartitionId) && x.TimeUuid.CompareTo(start) > 0 && x.TimeUuid.CompareTo(end) <= 0)
                 .Execute()
                 .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
@@ -210,7 +216,7 @@ namespace CassandraTimeSeries.Model
                 .ToArray();
         }
 
-        private Event[] ReadUntilEnd(TimeGuid startExclusive, int count)
+        private Event[] ReadFromStartToInfinity(TimeGuid startExclusive, int count)
         {
             var extractedEvents = new List<Event>();
             var partition = Partitioner.CreatePartitionId(startExclusive.GetTimestamp());
@@ -221,6 +227,7 @@ namespace CassandraTimeSeries.Model
                 var partitionId = partition;
 
                 var read = EventsTable
+                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Where(x => x.PartitionId == partitionId && x.TimeUuid.CompareTo(start) > 0)
                     .Execute()
                     .ToArray();
@@ -243,6 +250,7 @@ namespace CassandraTimeSeries.Model
         private bool IsPartitionClosed(long partitionId)
         {
             return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => x.PartitionId == partitionId)
                 .Execute()
                 .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
