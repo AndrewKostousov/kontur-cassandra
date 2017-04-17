@@ -31,7 +31,7 @@ namespace Benchmarks.ReadWrite
 
         public Event[] ReadNext()
         {
-            var measurement = Measurement.Start();
+            var measurement = Measurement.StartNew();
 
             var events = reader.ReadNext();
 

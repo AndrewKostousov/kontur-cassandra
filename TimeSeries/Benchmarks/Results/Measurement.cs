@@ -1,58 +1,57 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using Commons;
+using Commons.TimeBasedUuid;
 
 namespace Benchmarks.Results
 {
-
     [DataContract]
     public class Measurement
     {
         [DataMember]
-        public long LatencyMilliseconds { get; set; }
+        public TimeSpan Latency { get; set; }
 
         [DataMember]
-        public long StartMilliseconds { get; set; }
+        public DateTimeOffset Start { get; set; }
 
         [DataMember]
         public int Throughput { get; set; }
 
-        public long StopMilliseconds { get; }
+        public DateTimeOffset Stop { get; }
 
-        private Measurement(long startMilliseconds, long stopMilliseconds, int throughput)
+        private Measurement(DateTimeOffset start, DateTimeOffset stop, int throughput)
         {
-            if (startMilliseconds > stopMilliseconds)
-                throw new ArgumentException($"Expected {nameof(startMilliseconds)} to be less or equal to {nameof(stopMilliseconds)}");
+            if (start > stop)
+                throw new ArgumentException($"Expected {nameof(start)} to be less or equal to {nameof(stop)}");
 
-            StopMilliseconds = stopMilliseconds;
-            StartMilliseconds = startMilliseconds;
-            LatencyMilliseconds = StopMilliseconds - StartMilliseconds;
+            Stop = stop;
+            Start = start;
+            Latency = Stop - Start;
             Throughput = throughput;
         }
 
-        public static RunningMeasurement Start()
+        public static RunningMeasurement StartNew()
         {
-            return new RunningMeasurement(GetTimeTotalMilliseconds());
+            return new RunningMeasurement(GetPreciseTime());
         }
 
         public class RunningMeasurement
         {
-            private readonly long startMilliseconds;
+            private readonly DateTimeOffset start;
 
-            public RunningMeasurement(long startMilliseconds)
+            public RunningMeasurement(DateTimeOffset start)
             {
-                this.startMilliseconds = startMilliseconds;
+                this.start = start;
             }
 
             public Measurement Stop(int throughput)
             {
-                return new Measurement(startMilliseconds, GetTimeTotalMilliseconds(), throughput);
+                return new Measurement(start, GetPreciseTime(), throughput);
             }
         }
 
-        private static long GetTimeTotalMilliseconds()
+        private static DateTimeOffset GetPreciseTime()
         {
-            return Timestamp.Now.Ticks/TimeSpan.TicksPerMillisecond;
+            return new DateTimeOffset(PreciseTimestampGenerator.Instance.NowTicks(), TimeSpan.Zero);
         }
     }
 }

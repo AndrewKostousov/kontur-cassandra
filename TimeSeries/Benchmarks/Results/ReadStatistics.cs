@@ -11,24 +11,20 @@ namespace Benchmarks.Results
     [DataContract]
     class ReadStatistics : WorkerStatistics
     {
-        [DataMember] public double AverageEndToEndLatency { get; set; }
-        [DataMember] public double EndToEndLatency95ThPercentile { get; set; }
-        [DataMember] public double EndToEndLatency99ThPercentile { get; set; }
+        [DataMember] public TimeSpan AverageEndToEndLatency { get; set; }
+        [DataMember] public TimeSpan EndToEndLatency95ThPercentile { get; set; }
+        [DataMember] public TimeSpan EndToEndLatency99ThPercentile { get; set; }
 
-        [DataMember] public List<List<double>> WriteToReadLatency { get; set; }
+        [DataMember] public List<List<TimeSpan>> WriteToReadLatency { get; set; }
 
         private readonly int totalOperationsCount;
 
         public ReadStatistics(IReadOnlyList<BenchmarkEventReader> readers) : base(readers)
         {
-            var writeToReadLatency = readers
+            WriteToReadLatency = readers
                 .Select(r => r.Timing
                     .Select(kv => kv.Value - kv.Key.ToTimeGuid().GetTimestamp())
                     .ToList())
-                .ToList();
-
-            WriteToReadLatency = writeToReadLatency
-                .Select(x => x.Select(z => z.TotalMilliseconds).ToList())
                 .ToList();
 
             if (readers.Count == 0) return;

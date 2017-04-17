@@ -10,9 +10,9 @@ namespace Benchmarks.Results
     [DataContract]
     abstract class WorkerStatistics
     {
-        [DataMember] public double AverageLatency { get; set; }
-        [DataMember] public double Latency95ThPercentile { get; set; }
-        [DataMember] public double Latency99ThPercentile { get; set; }
+        [DataMember] public TimeSpan AverageLatency { get; set; }
+        [DataMember] public TimeSpan Latency95ThPercentile { get; set; }
+        [DataMember] public TimeSpan Latency99ThPercentile { get; set; }
 
         [DataMember] public int WorkersCount { get; set; }
         [DataMember] public int TotalThroughput { get; set; }
@@ -29,7 +29,7 @@ namespace Benchmarks.Results
 
             WorkersCount = workers.Count;
 
-            var latency = Measurements.SelectMany(x => x.Select(z => z.LatencyMilliseconds)).ToArray();
+            var latency = Measurements.SelectMany(x => x.Select(z => z.Latency)).ToArray();
 
             AverageLatency = latency.Average();
             Latency95ThPercentile = latency.Percentile(95);
@@ -40,7 +40,7 @@ namespace Benchmarks.Results
 
             Throughput = workers
                 .SelectMany(x => x.Measurements)
-                .Select(x => new {Time = x.StopMilliseconds%100, x.Throughput})
+                .Select(x => new {Time = x.Stop.Ticks / TimeSpan.TicksPerMillisecond % 100, x.Throughput})
                 .GroupBy(x => x.Time)
                 .OrderBy(x => x.Key)
                 .Select(x => x.Sum(z => z.Throughput))

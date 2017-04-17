@@ -24,7 +24,7 @@ namespace Benchmarks.ReadWrite
 
         public Timestamp[] WriteNext(params EventProto[] events)
         {
-            var measurement = Measurement.Start();
+            var measurement = Measurement.StartNew();
 
             var writtenEventTimestamp = writer.WriteNext(events);
 

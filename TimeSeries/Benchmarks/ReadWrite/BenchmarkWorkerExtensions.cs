@@ -16,10 +16,10 @@ namespace Benchmarks.ReadWrite
             worker.TotalThroughput() / worker.OperationsCount();
 
         public static TimeSpan AverageLatency(this IBenchmarkWorker worker) =>
-            TimeSpan.FromMilliseconds(worker.Measurements.Select(x => x.LatencyMilliseconds).Average());
+            worker.Measurements.Select(x => x.Latency).Average();
 
         public static TimeSpan OperationalTime(this IBenchmarkWorker worker) =>
-            TimeSpan.FromMilliseconds(worker.Measurements.Select(x => x.LatencyMilliseconds).Sum());
+            worker.Measurements.Select(x => x.Latency).Sum();
 
         public static int OperationsCount(this IBenchmarkWorker worker) => 
             worker.Measurements.Count;
