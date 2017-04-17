@@ -7,7 +7,8 @@ namespace CassandraTimeSeries.Utils
     {
         public static bool IsCritical(this Exception ex)
         {
-            return ex is QueryValidationException || ex is RequestInvalidException || ex is InvalidTypeException;
+            return (ex is QueryValidationException || ex is RequestInvalidException || ex is InvalidTypeException)
+                && !(ex is QueryExecutionException);
         }
     }
 }
