@@ -11,13 +11,13 @@ namespace CassandraTimeSeries.UnitTesting
         where TDatabaseController : IDatabaseController, new()
     {
         [Test]
-        public void Write_WriteOne()
+        public void Write_SingleWrite()
         {
             Series.Write(new EventProto());
         }
 
         [Test]
-        public void Write_WriteMany()
+        public void Write_SequentialWrite()
         {
             for (var i = 0; i < 3; ++i)
                 Series.Write(new EventProto());
