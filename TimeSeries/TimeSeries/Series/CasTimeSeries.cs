@@ -212,6 +212,8 @@ namespace CassandraTimeSeries.Model
 
             return EventsTable
                 .Where(x => partitions.Contains(x.PartitionId) && x.TimeUuid.CompareTo(start) > 0 && x.TimeUuid.CompareTo(end) <= 0)
+                //.SetSerialConsistencyLevel(ConsistencyLevel.Serial)
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Execute()
                 .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
                 .Take(count)
@@ -230,6 +232,8 @@ namespace CassandraTimeSeries.Model
 
                 var read = EventsTable
                     .Where(x => x.PartitionId == partitionId && x.TimeUuid.CompareTo(start) > 0)
+                    //.SetSerialConsistencyLevel(ConsistencyLevel.Serial)
+                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Execute()
                     .ToArray();
 
@@ -252,6 +256,8 @@ namespace CassandraTimeSeries.Model
         {
             return EventsTable
                 .Where(x => x.PartitionId == partitionId)
+                //.SetSerialConsistencyLevel(ConsistencyLevel.Serial)
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Execute()
                 .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
         }
@@ -268,6 +274,8 @@ namespace CassandraTimeSeries.Model
                 var read = EventsTable
                     .Where(x => x.PartitionId == partitionId)
                     .Take(1)
+                    //.SetSerialConsistencyLevel(ConsistencyLevel.Serial)
+                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Execute()
                     .FirstOrDefault();
 

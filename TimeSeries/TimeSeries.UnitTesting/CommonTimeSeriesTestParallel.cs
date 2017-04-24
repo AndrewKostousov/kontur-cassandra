@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.ReadWrite;
+using CassandraTimeSeries.Utils;
 using Commons;
+using Commons.TimeBasedUuid;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -46,6 +49,29 @@ namespace CassandraTimeSeries.UnitTesting
             DoTestParallel(readersCount: 4, writersCount: 4, shouldFail: ShouldFailWithManyWriters);
         }
 
+        private class ReadStamp
+        {
+            private readonly Timestamp timestamp;
+            private readonly long partitionId;
+
+            public Event[] Events { get; }
+
+            private static readonly PreciseTimestampGenerator time = PreciseTimestampGenerator.Instance;
+            private static readonly TimeLinePartitioner partitioner = new TimeLinePartitioner();
+
+            public ReadStamp(Event[] events)
+            {
+                Events = events;
+                timestamp = new Timestamp(time.NowTicks());
+                partitionId = events.Length > 0 ? partitioner.CreatePartitionId(events[0].TimeGuid.GetTimestamp()) : 0;
+            }
+
+            public override string ToString()
+            {
+                return Events.Length.ToString();
+            }
+        }
+
         private void DoTestParallel(int readersCount, int writersCount, bool shouldFail)
         {
             var readers =
@@ -58,7 +84,7 @@ namespace CassandraTimeSeries.UnitTesting
                     .ToList();
 
             var writtenEvents = writers.ToDictionary(r => r, r => new List<Tuple<Timestamp, EventProto>>());
-            var readEvents = readers.ToDictionary(r => r, r => new List<Event>());
+            var readEvents = readers.ToDictionary(r => r, r => new List<ReadStamp>());
 
             var keepReadersAlive = true;
 
@@ -66,10 +92,10 @@ namespace CassandraTimeSeries.UnitTesting
                 {
                     return new Thread(() =>
                     {
-                        readEvents[reader].AddRange(reader.ReadFirst());
+                        readEvents[reader].Add(new ReadStamp(reader.ReadFirst()));
 
                         while (keepReadersAlive)
-                            readEvents[reader].AddRange(reader.ReadNext());
+                            readEvents[reader].Add(new ReadStamp(reader.ReadNext()));
 
                     }) { Name = $"reader #{index}" };
                 }
@@ -105,11 +131,47 @@ namespace CassandraTimeSeries.UnitTesting
                 reader.Join();
 
             var allWrittenEvents = writtenEvents.SelectMany(x => x.Value).OrderBy(x => x.Item1.Ticks).ToList();
+            var allReadEvents = readEvents.Values.Select(x => x.SelectMany(z => z.Events).ToList()).ToList();
+
+            ValidateReads(readEvents.Values.ToList());
 
             if (shouldFail)
-                AssertNotAllEventsWereRead(allWrittenEvents, readEvents.Values);
+                AssertNotAllEventsWereRead(allWrittenEvents, allReadEvents);
             else
-                AssertAllEventsWereRead(allWrittenEvents, readEvents.Values);
+                AssertAllEventsWereRead(allWrittenEvents, allReadEvents);
+        }
+
+        private void ValidateReads(List<List<ReadStamp>> reads)
+        {
+            var readByThread = reads.Select(x => x.SelectMany(z => z.Events).ToList()).ToList();
+
+            for (int i = 0; i < reads[0].Count; ++i)
+            { 
+                foreach (var read in readByThread)
+                    foreach (var read2 in readByThread)
+                        if (i < read.Count && i < read2.Count && read2[i].TimeGuid != read[i].TimeGuid)
+                        {
+                            int[] indicesFirst = new int[reads.Count];
+                            int[] indicesSecond = new int[reads.Count];
+
+                            for (int j = 0; j < reads.Count; ++j)
+                            {
+                                var firstOrDefault = reads[j]
+                                    .Select((r, k) => Tuple.Create(r, k))
+                                    .FirstOrDefault(t => t.Item1.Events.Select(z => z.TimeGuid).Contains(read[i].TimeGuid));
+
+                                indicesFirst[j] = firstOrDefault?.Item2 ?? -1;
+
+                                firstOrDefault = reads[j]
+                                    .Select((r, k) => Tuple.Create(r, k))
+                                    .FirstOrDefault(t => t.Item1.Events.Select(z => z.TimeGuid).Contains(read2[i].TimeGuid));
+
+                                indicesSecond[j] = firstOrDefault?.Item2 ?? -1;
+                            }
+
+                            throw new Exception();
+                        }
+                }
         }
 
         private void AssertNotAllEventsWereRead(List<Tuple<Timestamp, EventProto>> allWrittenEvents, IEnumerable<List<Event>> readByThread)
