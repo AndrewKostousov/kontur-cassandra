@@ -145,28 +145,53 @@ namespace CassandraTimeSeries.UnitTesting
         {
             var readByThread = reads.Select(x => x.SelectMany(z => z.Events).ToList()).ToList();
 
-            for (int i = 0; i < reads[0].Count; ++i)
+            for (var i = 0; i < reads[0].Count; ++i)
             { 
                 foreach (var read in readByThread)
-                    foreach (var read2 in readByThread)
+                    foreach (var read2 in readByThread.Where(x => x != read))
                         if (i < read.Count && i < read2.Count && read2[i].TimeGuid != read[i].TimeGuid)
                         {
-                            int[] indicesFirst = new int[reads.Count];
-                            int[] indicesSecond = new int[reads.Count];
+                            var indicesOfFirstEventInReads = new int[reads.Count];
+                            var indicesOfSecondEventInReads = new int[reads.Count];
 
-                            for (int j = 0; j < reads.Count; ++j)
+                            for (var j = 0; j < reads.Count; ++j)
                             {
                                 var firstOrDefault = reads[j]
                                     .Select((r, k) => Tuple.Create(r, k))
                                     .FirstOrDefault(t => t.Item1.Events.Select(z => z.TimeGuid).Contains(read[i].TimeGuid));
 
-                                indicesFirst[j] = firstOrDefault?.Item2 ?? -1;
+                                indicesOfFirstEventInReads[j] = firstOrDefault?.Item2 ?? -1;
 
                                 firstOrDefault = reads[j]
                                     .Select((r, k) => Tuple.Create(r, k))
                                     .FirstOrDefault(t => t.Item1.Events.Select(z => z.TimeGuid).Contains(read2[i].TimeGuid));
 
-                                indicesSecond[j] = firstOrDefault?.Item2 ?? -1;
+                                indicesOfSecondEventInReads[j] = firstOrDefault?.Item2 ?? -1;
+                            }
+
+                            var malformedReads = new List<ReadStamp>[reads.Count];
+
+                            for (int k = 0; k < reads.Count; ++k)
+                            {
+                                int malformedIndex = indicesOfFirstEventInReads[k] == -1
+                                    ? indicesOfSecondEventInReads[k]
+                                    : indicesOfFirstEventInReads[k];
+
+                                int backwardIndex = malformedIndex - 1;
+
+                                while (reads[k][backwardIndex].Events.Length == 0)
+                                    backwardIndex--;
+
+                                int forwardIndex = malformedIndex + 1;
+
+                                while (reads[k][forwardIndex].Events.Length == 0)
+                                    forwardIndex++;
+
+                                malformedReads[k] = reads[k]
+                                    .Skip(backwardIndex)
+                                    .Take(forwardIndex - backwardIndex + 1)
+                                    .Where(x => x.Events.Length > 0)
+                                    .ToList();
                             }
 
                             throw new Exception();
