@@ -211,6 +211,7 @@ namespace CassandraTimeSeries.Model
                 .ToArray();
 
             return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => partitions.Contains(x.PartitionId) && x.TimeUuid.CompareTo(start) > 0 && x.TimeUuid.CompareTo(end) <= 0)
                 .Execute()
                 .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
@@ -221,36 +222,94 @@ namespace CassandraTimeSeries.Model
         private Event[] ReadFromStartToInfinity(TimeGuid startExclusive, int count)
         {
             var extractedEvents = new List<Event>();
-            var partition = Partitioner.CreatePartitionId(startExclusive.GetTimestamp());
-            var start = startExclusive.ToTimeUuid();
+            var startingPartition = Partitioner.CreatePartitionId(startExclusive.GetTimestamp());
 
-            while (extractedEvents.Count < count)
-            {
-                var partitionId = partition;
+            var fistRead = MakeFirstRead(startExclusive, count, extractedEvents);
 
-                var read = EventsTable
-                    .Where(x => x.PartitionId == partitionId && x.TimeUuid.CompareTo(start) > 0)
-                    .Execute()
-                    .ToArray();
-
-                extractedEvents.AddRange(read
-                    .Where(x => x.TimeUuid != ClosingTimeUuid)
-                    .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
-                    .Take(count - extractedEvents.Count));
-
-                if (read.Length == 0 && !IsPartitionClosed(partitionId)) break;
-
-                if (read.Length != 0 && read[read.Length - 1].MaxIdInPartition != ClosingTimeUuid) break;
-
-                partition = Partitioner.Increment(partition);
-            }
+            if (!ShouldStopReading(fistRead))
+                ContinueReading(Partitioner.Increment(startingPartition), count, extractedEvents);
 
             return extractedEvents.ToArray();
+        }
+
+        private IEnumerable<EventsCollection> MakeFirstRead(TimeGuid startExclusive, int count, List<Event> extractedEvents)
+        {
+            var startingPartition = Partitioner.CreatePartitionId(startExclusive.GetTimestamp());
+            var startUuid = startExclusive.ToTimeUuid();
+
+            var conditionalRead = ConditionalReadFromPartition(startUuid, startingPartition);
+            extractedEvents.AddRange(ExtractEvents(conditionalRead, count - extractedEvents.Count));
+
+            if (conditionalRead.Length != 0)
+                return conditionalRead;
+
+            var wholePartitionRead = UnconditionalReadFromPartition(startingPartition);
+            extractedEvents.AddRange(ExtractEvents(wholePartitionRead, startExclusive, count - extractedEvents.Count));
+
+            return wholePartitionRead;
+        }
+
+        private void ContinueReading(long partitionId, int count, List<Event> extractedEvents)
+        {
+            while (extractedEvents.Count < count)
+            {
+                var read = UnconditionalReadFromPartition(partitionId);
+                extractedEvents.AddRange(ExtractEvents(read, count));
+
+                if (ShouldStopReading(read)) return;
+
+                partitionId = Partitioner.Increment(partitionId);
+            }
+        }
+
+        private IEnumerable<Event> ExtractEvents(IEnumerable<EventsCollection> collection, TimeGuid startExclusive, int count)
+        {
+            return collection
+                .Where(x => x.TimeUuid != default(TimeUuid) && x.TimeGuid > startExclusive)
+                .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
+                .Take(count);
+        }
+
+        private IEnumerable<Event> ExtractEvents(IEnumerable<EventsCollection> collection, int count)
+        {
+            return collection
+                .Where(x => x.TimeUuid != default(TimeUuid))
+                .SelectMany(x => x.Select(e => new Event(x.TimeGuid, new EventProto(e.UserId, e.Payload))))
+                .Take(count);
+        }
+
+        private bool ShouldStopReading(IEnumerable<EventsCollection> read)
+        {
+            return read.All(x => x.MaxIdInPartition != ClosingTimeUuid);
+        }
+
+        /// <returns>If partition is empty, this method will return empty array.</returns>
+        private EventsCollection[] ConditionalReadFromPartition(TimeUuid startExclusive, long partitionId)
+        {
+            return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
+                .Where(x => x.PartitionId == partitionId && x.TimeUuid.CompareTo(startExclusive) > 0)
+                .Execute()
+                .ToArray();
+        }
+
+        /// <returns>
+        /// If partition is empty, this method will return array with exactly one element 
+        /// with data from static columns. Thx, Cassandra driver :/
+        /// </returns>
+        private EventsCollection[] UnconditionalReadFromPartition(long partitionId)
+        {
+            return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
+                .Where(x => x.PartitionId == partitionId)
+                .Execute()
+                .ToArray();
         }
 
         private bool IsPartitionClosed(long partitionId)
         {
             return EventsTable
+                .SetConsistencyLevel(ConsistencyLevel.Serial)
                 .Where(x => x.PartitionId == partitionId)
                 .Execute()
                 .Any(x => x.MaxIdInPartition == ClosingTimeUuid);
@@ -266,6 +325,7 @@ namespace CassandraTimeSeries.Model
                 var partitionId = partition;
 
                 var read = EventsTable
+                    .SetConsistencyLevel(ConsistencyLevel.Serial)
                     .Where(x => x.PartitionId == partitionId)
                     .Take(1)
                     .Execute()
