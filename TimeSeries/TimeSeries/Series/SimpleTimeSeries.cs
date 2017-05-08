@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Cassandra;
 using Cassandra.Data.Linq;
-using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Series;
 using CassandraTimeSeries.Utils;
 using Commons;

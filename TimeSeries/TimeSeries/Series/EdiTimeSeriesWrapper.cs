@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;
 using EdiTimeline;
-using GroBuf;
-using GroBuf.DataMembersExtracters;
-using NUnit.Framework;
-using SKBKontur.Cassandra.CassandraClient.Clusters;
 
 namespace CassandraTimeSeries.Model
 {

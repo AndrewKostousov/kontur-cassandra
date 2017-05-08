@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading;
 using CassandraTimeSeries.Model;
-using System.Collections.Generic;
 using CassandraTimeSeries.Interfaces;
 using Commons;
 using Commons.TimeBasedUuid;

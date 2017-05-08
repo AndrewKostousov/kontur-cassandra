@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CassandraTimeSeries.Model;
 using FluentAssertions;
 
 namespace CassandraTimeSeries.UnitTesting

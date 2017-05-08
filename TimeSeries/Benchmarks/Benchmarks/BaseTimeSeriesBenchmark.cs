@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Benchmarks.Reflection;
-using Cassandra;
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Utils;
 

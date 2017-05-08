@@ -1,7 +1,4 @@
-using System;
 using CassandraTimeSeries.Interfaces;
-using CassandraTimeSeries.Model;
-using CassandraTimeSeries.Utils;
 using Commons.Logging;
 using NUnit.Framework;
 

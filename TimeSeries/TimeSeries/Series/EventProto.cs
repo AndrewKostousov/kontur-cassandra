@@ -1,5 +1,4 @@
 ﻿using System;
-using Cassandra.Mapping.Attributes;
 using Commons.TimeBasedUuid;
 
 namespace CassandraTimeSeries.Model

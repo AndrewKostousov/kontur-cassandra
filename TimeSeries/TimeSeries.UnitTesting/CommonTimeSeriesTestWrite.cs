@@ -2,7 +2,6 @@
 using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using Commons.TimeBasedUuid;
-using FluentAssertions;
 using NUnit.Framework;
 
 namespace CassandraTimeSeries.UnitTesting

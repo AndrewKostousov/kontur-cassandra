@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CassandraTimeSeries.Model;
+﻿using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using Commons;
 using Commons.TimeBasedUuid;

@@ -1,5 +1,4 @@
-﻿using System;
-using CassandraTimeSeries.Interfaces;
+﻿using CassandraTimeSeries.Interfaces;
 using CassandraTimeSeries.Model;
 using CassandraTimeSeries.Utils;
 using NUnit.Framework;
