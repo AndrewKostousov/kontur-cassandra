@@ -1,2 +1,2 @@
 call reset.bat
-call run.bat 3
+call run-cassandra.bat 3
