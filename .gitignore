@@ -257,6 +257,7 @@ Cassandra/logs
 
 # Benchmarks logs
 log*
+Benchmarks
 
 # IPython
 .ipynb_checkpoints
