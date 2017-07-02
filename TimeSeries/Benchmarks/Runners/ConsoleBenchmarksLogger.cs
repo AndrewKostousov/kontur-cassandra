@@ -20,10 +20,7 @@ namespace Benchmarks.Runners
         public override void LogBenchmarkFinished(BenchmarksFixture fixture, IBenchmark benchmark, IBenchmarkingResult result) => 
             Console.Write($"Done!{NewLine}{NewLine}{result.CreateReport()}");
 
-        public override void LogAllFixturesFinished()
-        {
-            Console.WriteLine($"{Separator}All benchmarks finished, press any key to exit.");
-            Console.ReadKey();
-        }
+        public override void LogAllFixturesFinished() =>
+            Console.WriteLine($"{Separator}All benchmarks finished.");
     }
 }

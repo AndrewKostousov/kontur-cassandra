@@ -7,7 +7,7 @@ namespace Benchmarks.Runners
     {
         private static string FormatFileNameFor(BenchmarksFixture fixture)
         {
-            const string directoryName = "Results";
+            const string directoryName = "Benchmarks\\Results";
 
             Directory.CreateDirectory(directoryName);
 

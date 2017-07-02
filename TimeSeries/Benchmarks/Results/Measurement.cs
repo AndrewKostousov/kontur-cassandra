@@ -51,7 +51,7 @@ namespace Benchmarks.Results
 
         private static DateTimeOffset GetPreciseTime()
         {
-            return new DateTimeOffset(PreciseTimestampGenerator.Instance.NowTicks(), TimeSpan.Zero);
+            return DateTime.Now; //new DateTimeOffset(PreciseTimestampGenerator.Instance.NowTicks(), TimeSpan.Zero);
         }
     }
 }

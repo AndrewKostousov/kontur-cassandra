@@ -40,7 +40,7 @@ namespace Benchmarks.Results
 
             Throughput = workers
                 .SelectMany(x => x.Measurements)
-                .Select(x => new {Time = x.Stop.Ticks / TimeSpan.TicksPerMillisecond % 100, x.Throughput})
+                .Select(x => new {Time = x.Stop.Ticks / TimeSpan.TicksPerMillisecond, x.Throughput})
                 .GroupBy(x => x.Time)
                 .OrderBy(x => x.Key)
                 .Select(x => x.Sum(z => z.Throughput))

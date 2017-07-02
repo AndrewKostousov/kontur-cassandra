@@ -15,14 +15,14 @@ namespace Benchmarks.Benchmarks
     // ReSharper disable once UnusedMember.Global
     public class CasSeriesReadAndWriteBenchmark : BaseTimeSeriesBenchmark<CasTimeSeriesDatabaseController>
     {
-        public override string Name => $"{nameof(CasTimeSeries)} with single write";
+        public override string Name => $"{nameof(CasTimeSeries)}";
         protected override ITimeSeries TimeSeriesFactory(CasTimeSeriesDatabaseController c) => new CasTimeSeries(c, new TimeLinePartitioner());
     }
 
     // ReSharper disable once UnusedMember.Global
     public class EdiTimeSeriesBenchmark : BaseTimeSeriesBenchmark<EdiTimeSeriesDatabaseController>
     {
-        public override string Name => $"{nameof(EdiTimeSeriesWrapper)} with single write";
+        public override string Name => $"{nameof(EdiTimeSeriesWrapper)}";
         protected override ITimeSeries TimeSeriesFactory(EdiTimeSeriesDatabaseController c) => new EdiTimeSeriesWrapper(c, new TimeLinePartitioner());
     }
 
@@ -30,13 +30,6 @@ namespace Benchmarks.Benchmarks
     public class CasSeriesReadAndWriteBulkBenchmark : CasSeriesReadAndWriteBenchmark
     {
         public override string Name => $"{nameof(CasTimeSeries)} with bulk write";
-        protected override TimeSeriesBenchmarkSettings Settings => base.Settings.WithWriterSettings(new WriterSettings { BulkSize = 10 });
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    public class AllBoxEventSeriesBulkBenchmark : EdiTimeSeriesBenchmark
-    {
-        public override string Name => $"{nameof(EdiTimeSeriesWrapper)} with bulk write";
         protected override TimeSeriesBenchmarkSettings Settings => base.Settings.WithWriterSettings(new WriterSettings { BulkSize = 10 });
     }
 }

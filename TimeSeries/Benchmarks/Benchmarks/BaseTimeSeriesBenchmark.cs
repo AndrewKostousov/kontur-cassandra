@@ -16,7 +16,7 @@ namespace Benchmarks.Benchmarks
         private TDatabaseController[] readersControllersPool;
         private TDatabaseController[] writersControllersPool;
 
-        private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4, 8, 16, 32 };
+        private static readonly int[] DefaultReadersWritersCount = { 0, 1, 2, 4 };
 
         protected virtual int[] ReadersCountRange => DefaultReadersWritersCount;
         protected virtual int[] WritersCountRange => DefaultReadersWritersCount;

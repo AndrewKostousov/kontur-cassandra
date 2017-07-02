@@ -7,7 +7,7 @@ namespace Benchmarks.Runners
     {
         private static string FormatFileNameFor(BenchmarksFixture fixture, IBenchmark benchmark)
         {
-            var directoryName = $"Raw data\\{fixture.Name}";
+            var directoryName = $"Benchmarks\\Raw data\\{fixture.Name}";
 
             Directory.CreateDirectory(directoryName);
 
